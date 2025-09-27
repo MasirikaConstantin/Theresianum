@@ -1,0 +1,1 @@
+function a(t,i="USD",o="fr-CD"){const n=typeof t=="string"?parseFloat(t):t,m={style:"currency",currency:i,minimumFractionDigits:2,maximumFractionDigits:2};i==="CDF"&&(m.minimumFractionDigits=0,m.maximumFractionDigits=0);try{return new Intl.NumberFormat(o,m).format(n)}catch{return`${n.toFixed(2)} ${i}`}}export{a as f};

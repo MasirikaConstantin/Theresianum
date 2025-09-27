@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Reservation;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('occupations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignIdFor(Reservation::class)->constrained()->cascadeOnDelete();
+            //$table->foreignId('chambre_id')->constrained();
+            $table->date('date_occupation');
+            $table->enum('statut', ['occupee', 'liberee'])->default('occupee');
+            $table->uuid('ref')->unique();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('occupations');
+    }
+};

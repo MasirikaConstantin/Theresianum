@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Statistiques du vendeur</title>
+<style>
+        @page { margin: 0; padding: 0; size: 72mm auto; }
+
+body { font-family: DejaVu Sans; 
+font-size: 11px;
+margin: 0;
+padding: 2mm;
+}
+.header { text-align: center; margin-bottom: 20px; border-bottom: 2px dotted #000000; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { border: 1px solid #ddd; padding: 8px; }
+.badge { background-color: #f0f0f0; padding: 2px 5px; border-radius: 3px; }
+.donnee{padding-bottom: 2%; border-bottom: 2px dotted #000000;}
+.ref {
+display: flex;
+justify-content: center;
+gap: 1px;
+margin-top: 15px;
+width: 100%;
+}
+
+.ref > div {
+text-align: center;
+}
+.ref {
+text-align: center;
+margin-top: 20px;
+}
+.ref div {
+display: inline-block;
+margin: 0 0px;
+}
+
+
+.header { 
+text-align: center; 
+margin-bottom: 4px;
+padding-bottom: 4px;
+border-bottom: 1px dashed #ccc;
+}
+.header h1 {
+font-size: 12px;
+margin: 2px 0;
+}
+.header p {
+margin: 2px 0;
+}
+.header-logo {
+max-height: 30px;
+max-width: 100%;
+margin-bottom: 5px;
+}
+.info-block {
+margin: 6px 0;
+padding-bottom: 4px;
+border-bottom: 1px dashed #ccc;
+}
+.info-row {
+display: flex;
+justify-content: space-between;
+margin: 3px 0;
+}
+.bold { font-weight: bold; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.items-table {
+width: 100%;
+margin: 8px 0;
+border-collapse: collapse;
+}
+.items-table th {
+text-align: left;
+padding: 2px 0;
+border-bottom: 1px solid #ddd;
+}
+.items-table td {
+padding: 3px 0;
+vertical-align: top;
+}
+.items-table .qty {
+white-space: nowrap;
+}
+.total-table {
+width: 100%;
+margin: 1px 0;
+
+}
+.total-table td {
+padding: 1px 0;
+}
+.total-table tr:last-child td {
+
+padding-top: 1px;
+font-weight: bold;
+}
+.footer {
+text-align: center;
+margin-top: 10px;
+font-size: 11px;
+}
+.barcode {
+margin-top: 10px;
+text-align: center;
+}
+
+.table, th, .td {
+border: 1px solid;
+border-collapse: collapse;
+
+}
+td, tr, th{
+height: 20px!important;
+
+
+}
+th, td {
+padding-left: 4px;
+padding-right: 4px;
+}
+.align {
+text-align: center;
+align-items: center;
+align-content: center;
+}
+
+
+.table-container {
+width: 100%;
+margin: 0 auto;
+}
+
+.table {
+width: 100%;
+max-width: 88mm; /* Largeur maximale de 88mm */
+border-collapse: collapse;
+table-layout: fixed; /* Essentiel pour le contrôle précis */
+margin: 0 auto;
+}
+
+.table th, .table td {
+border: 2px dotted;
+padding: 2px;
+height: auto;
+word-wrap: break-word;
+}
+
+/* Répartition des colonnes */
+.table th:nth-child(1), 
+.table td:nth-child(1) {
+width: 12%; /* # */
+}
+
+.table th:nth-child(2), 
+.table td:nth-child(2) {
+width: 30%; /* Date */
+}
+
+.table th:nth-child(3), 
+.table td:nth-child(3) {
+width: 33%; /* Montant */
+}
+
+.table th:nth-child(4), 
+.table td:nth-child(4) {
+text-align: center;
+}
+
+.table th:nth-child(5), 
+.table td:nth-child(5) {
+text-align: center;
+}
+
+.align {
+text-align: center;
+}
+
+.text-right {
+text-align: right;
+}
+.ref-text {
+text-align: center;
+font-size: 12px;
+font-weight: bold;
+margin-bottom: 2px;
+margin-top: 2px;
+font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.header-text {
+text-align: center;
+font-size: 10px;
+font-weight: bold;
+margin: 0px 0px 0px 0px;
+}
+.table, th, .td {
+    border: 1px solid;
+    border-collapse: collapse;
+    
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <h5>Statistiques du vendeur</h5>
+        <p>Période du {{ $data['date_debut'] }} au {{ $data['date_fin'] }}</p>
+    </div>
+
+    <div class="info-vendeur">
+        <h5>Vendeur : {{ $data['selectedVendeur']->name }}</h5>
+        <p>Succursale: {{ $data['selectedVendeur']->succursale->nom ?? 'Aucune succursale' }}</p>
+    </div>
+
+    <ul class="stats-grid">
+        <li>
+            Total des ventes : {{ $data['stats']['total_ventes'] }}
+        </li>
+        <li>
+            Montant total : {{ number_format($data['stats']['montant_total'], 1) }} $
+        </li>
+        <li>
+            Moyenne par vente : {{ number_format($data['stats']['moyenne_vente'], 1) }} $</li>
+        <li>
+            Produits vendus : {{ $data['stats']['produits_vendus'] }}
+        </li>
+    </ul>
+
+    <div class="donnee">Dernières ventes</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Pr</th>
+                <th>Se</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['ventes'] as $vente)
+            <tr>
+                <td style="text-align: center; font-weight: bold;">{{ $loop->iteration }}</td>
+                <td>{{ \Carbon\Carbon::parse($vente->created_at)->format('d/m/Y') }}</td>
+                <td>{{ number_format($vente->montant_total, 1) }} $</td>
+                <td>{{ $vente->produits->sum('quantite') }}</td>
+                <td>{{ $vente->services->count() }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+@if ( !empty($data['pointages']) )
+    @if($data['pointages']->count() > 0)
+        <div class="donnee">Pointages</div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure d'arrivée</th>
+                        <th>Heure de départ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($data['pointages'] as $pointage)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($pointage->date)->format('d/m/Y') }}</td>
+                        <td>{{ $pointage->heure_arrivee }}</td>
+                        <td>{{ $pointage->heure_depart ?? 'Non enregistré' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+    @endif
+@endif
+@if ( !empty($data['conges']) )
+    @if($data['conges']->count() > 0)
+    <div class="donnee">Congés</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date début</th>
+                <th>Date fin</th>
+                <th>Type</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($data['conges'] as $conge)
+            <tr>
+                <td>{{ \Carbon\Carbon::parse($conge->date_debut)->format('d/m/Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($conge->date_fin)->format('d/m/Y') }}</td>
+                <td>{{ $conge->type }}</td>
+                <td>{{ $conge->statut }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+@endif
+    <div class="ref">
+        <div>
+            <p class="ref-text">Web</p>
+            <img src="{{ $qrWeb }}" alt="QR Code Web" width="60">
+        </div>
+        <div>
+            <p class="ref-text">Facebook</p>
+            <img src="{{ $qrFacebook }}" alt="QR Code Facebook" width="60">
+        </div>
+        <div>
+            <p class="ref-text">Instagram</p>
+            <img src="{{ $qrInstagram }}" alt="QR Code Instagram" width="60">
+        </div>
+    </div>
+    <div class="footer">
+        Généré le {{ now()->format('d/m/Y à H:i') }}
+    </div>
+</body>
+</html>

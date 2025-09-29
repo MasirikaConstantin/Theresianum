@@ -22,10 +22,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        //User::factory(5)->create();
-        //Produit::factory(120)->create();
+      /*  User::factory(5)->create();
+        Produit::factory(120)->create();
         $this->call([
             HotelSeeder::class,
+        ]);*/
+        //\App\Models\Client::factory()->count(50)->create();
+        //\App\Models\Client::factory()->count(50)->create();
+        $this->call([
+            //ClientSeeder::class,
+            //ChambreSeeder::class, 
+            //SalleSeeder::class,
+            ReservationSeeder::class,
         ]);
        /*/ Créer 5 succursales
 \App\Models\Succursale::factory()->count(3)->create();

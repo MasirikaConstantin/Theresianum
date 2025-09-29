@@ -55,7 +55,7 @@ export default function DepenseIndex({ depenses, auth }: Props) {
                     </Button>
                 </div>
 
-                <div className="bg-white rounded-lg shadow">
+                <div className="rounded-lg shadow">
                     <Table>
                         <TableCaption>Depenses de la branche {auth.user.succursale?.nom}</TableCaption>
                         <TableHeader>

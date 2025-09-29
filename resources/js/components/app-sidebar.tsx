@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { PageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlertCircle, BanknoteIcon, BookOpen, BookOpenCheck, BoxIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
+import { AlertCircle, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const filterItemsByRole = (items: NavItem[], userRole: string): NavItem[] => {
@@ -99,9 +99,15 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     roles: ['admin', 'gerant', 'caissier'],
                 },
                 {
-                    title: 'Réservations',
+                    title: 'Réserv. Salles',
                     href: '/reservations',
                     icon: HomeIcon,
+                    roles: ['admin', 'gerant', 'caissier'],
+                },
+                {
+                    title: 'Réserv. Chambres',
+                    href: '/chambres-reservations',
+                    icon: Bed,
                     roles: ['admin', 'gerant', 'caissier'],
                 },
             ],
@@ -118,13 +124,6 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     roles: ['admin', 'gerant'],
                 },
                
-                {
-                    title: 'Services',
-                    href: '/services',
-                    icon: Scissors,
-                    roles: ['admin','gerant'],
-                },
-                
                 {
                     title : 'Points et Fidelités',
                     href : '/points',

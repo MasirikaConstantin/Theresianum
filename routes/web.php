@@ -23,6 +23,8 @@ use App\Http\Controllers\VendeurController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReservationChambreController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalleController;
 use App\Http\Controllers\ServiceController;
@@ -237,11 +239,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/chambres/{chambre}/status', [ChambreController::class, 'updateStatus'])
         ->name('chambres.update-status');
 });
-Route::resource('reservations', ChambreController::class);
 
-// routes/web.php
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('salles', SalleController::class);
     Route::patch('/salles/{salle}/status', [SalleController::class, 'updateStatus'])
         ->name('salles.update-status');
+});
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('reservations', ReservationController::class);
+    Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
+        ->name('reservations.update-status');
+    Route::resource('chambres-reservations', ReservationChambreController::class);
 });

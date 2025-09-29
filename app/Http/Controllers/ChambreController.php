@@ -22,14 +22,20 @@ class ChambreController extends Controller
                       ->orWhere('equipements', 'like', '%'.$search.'%');
                 });
             })
-            ->when($filters['type'] ?? null, function ($query, $type) {
-                $query->where('type', $type);
-            })
-            ->when($filters['statut'] ?? null, function ($query, $statut) {
-                $query->where('statut', $statut);
-            })
+            ->when(
+                isset($filters['type']) && $filters['type'] !== 'all',
+                function ($query) use ($filters) {
+                    $query->where('type', $filters['type']);
+                }
+            )
+            ->when(
+                isset($filters['statut']) && $filters['statut'] !== 'all',
+                function ($query) use ($filters) {
+                    $query->where('statut', $filters['statut']);
+                }
+            )
             ->orderBy('numero')
-            ->paginate(10)
+            ->paginate(30)
             ->withQueryString();
 
         return Inertia::render('Chambres/Index', [

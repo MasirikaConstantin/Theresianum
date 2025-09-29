@@ -15,7 +15,6 @@ class ClientFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'notes' => $this->faker->paragraph(),
             'ref' => Str::uuid(),
-            'succursale_id' => null,
             'date_naissance' => $this->faker->date(),
             'enregistrer_par_id' => null,
         ];

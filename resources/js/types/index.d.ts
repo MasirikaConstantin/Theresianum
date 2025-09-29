@@ -502,6 +502,9 @@ interface Reservation {
     date_fin: string;
     statut: string;
     prix_total: number;
+    chambre_id: number;
+    chambre: Chambre;
+    client_id: number;
     ref: string;
     client: {
         id: number;
@@ -512,7 +515,19 @@ interface Reservation {
     };
     occupations: Occupation[];
 }
-
+interface Salle {
+    id: number;
+    ref: string;
+    nom: string;
+    capacite_max: number;
+    vocation: string;
+    prix_journee: number;
+    prix_nuit: number;
+    equipements: string;
+    disponible: boolean;
+    created_at: string;
+    updated_at: string;
+}
 interface Chambre {
     id: number;
     ref: string;

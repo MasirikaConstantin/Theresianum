@@ -54,7 +54,7 @@ export default function CaisseIndex({ caisses, auth }: Props) {
                     </h1>
                 </div>
 
-                <div className="bg-white rounded-lg shadow">
+                <div className="rounded-lg shadow">
                     <Table>
                         <TableCaption>{caisses.data.length > 0 ? `Affichage des caisses ${caisses.from} à ${caisses.to} sur ${caisses.total}` : 'Aucune caisse trouvée'}</TableCaption>
                         <TableHeader>

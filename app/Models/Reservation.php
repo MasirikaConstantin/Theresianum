@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
+    use HasFactory;
     protected $fillable = [
-        'client_id', 'chambre_id', 'salle_fete_id', 'date_debut', 'date_fin',
-        'type_reservation', 'statut', 'prix_total', 'specifications'
+        'client_id', 'chambre_id', 'salle_id', 'date_debut', 'date_fin',
+        'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','vocation'
     ];
 
     protected $casts = [
         'specifications' => 'array',
-        'date_debut' => 'date',
-        'date_fin' => 'date',
     ];
     protected static function boot()
     {
@@ -36,7 +36,7 @@ class Reservation extends Model
         return $this->belongsTo(Chambre::class);
     }
 
-    public function salleFete()
+    public function salle()
     {
         return $this->belongsTo(Salle::class);
     }

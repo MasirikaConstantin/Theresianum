@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
-use App\Models\Salle;
+use App\Models\Chambre;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,23 +11,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class ReservationController extends Controller
+class ReservationChambreController extends Controller
 {
     public function index(Request $request)
     {
         $filters = $request->only(['search', 'statut']);
         
-        $reservations = Reservation::with(['client', 'salle'])
-            ->where('type_reservation', 'salle') // Uniquement les salles
+        $reservations = Reservation::with(['client', 'chambre'])
+            ->where('type_reservation', 'chambre')
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('ref', 'like', '%'.$search.'%')
                       ->orWhereHas('client', function ($q) use ($search) {
-                          $q->where('nom', 'like', '%'.$search.'%')
-                            ->orWhere('prenom', 'like', '%'.$search.'%');
+                          $q->where('name', 'like', '%'.$search.'%');
                       })
-                      ->orWhereHas('salle', function ($q) use ($search) {
-                          $q->where('nom', 'like', '%'.$search.'%');
+                      ->orWhereHas('chambre', function ($q) use ($search) {
+                          $q->where('numero', 'like', '%'.$search.'%');
                       });
                 });
             })
@@ -41,7 +40,7 @@ class ReservationController extends Controller
             ->paginate(30)
             ->withQueryString();
 
-        return Inertia::render('Reservations/Index', [
+        return Inertia::render('ReservationsChambres/Index', [
             'reservations' => $reservations,
             'filters' => $filters,
             'statuts' => ['confirmee', 'en_attente', 'annulee', 'terminee']
@@ -50,16 +49,15 @@ class ReservationController extends Controller
 
     public function create(Request $request)
     {
-        $salleId = $request->get('salle_id');
+        $chambreId = $request->get('chambre_id');
 
-        $salles = Salle::where('disponible', true)->get();
+        $chambres = Chambre::where('statut', 'disponible')->get();
         $clients = Client::orderBy('name')->get();
 
-        return Inertia::render('Reservations/Create', [
-            'salles' => $salles,
+        return Inertia::render('ReservationsChambres/Create', [
+            'chambres' => $chambres,
             'clients' => $clients,
-            'prefilledSalleId' => $salleId,
-            'vocations' => ['journee', 'nuit']
+            'prefilledChambreId' => $chambreId
         ]);
     }
 
@@ -71,8 +69,7 @@ class ReservationController extends Controller
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'heure_debut' => 'required|date_format:H:i',
             'heure_fin' => 'required|date_format:H:i',
-            'salle_id' => 'required|exists:salles,id',
-            'vocation' => 'required|in:journee,nuit',
+            'chambre_id' => 'required|exists:chambres,id',
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
         ]);
 
@@ -80,7 +77,7 @@ class ReservationController extends Controller
         if ($validated['date_debut'] === $validated['date_fin'] && 
             $validated['heure_debut'] >= $validated['heure_fin']) {
             return redirect()->back()
-                ->withErrors(['heure_fin' => 'L\'heure de fin doit être postérieure à l\'heure de début pour une réservation sur la même journée.'])
+                ->withErrors(['heure_fin' => 'L\'heure de départ doit être postérieure à l\'heure d\'arrivée pour une réservation sur la même journée.'])
                 ->withInput();
         }
 
@@ -90,12 +87,13 @@ class ReservationController extends Controller
             // Combiner date et heure
             $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
             $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
-            $validated['type_reservation'] = 'salle'; // Toujours une salle
+            $validated['type_reservation'] = 'chambre';
+            $validated['vocation'] = 'mixte';
 
             // Vérifier la disponibilité
             if (!$this->verifierDisponibilite($validated)) {
                 return redirect()->back()
-                    ->with('error', 'La salle n\'est pas disponible pour cette période')
+                    ->with('error', 'La chambre n\'est pas disponible pour cette période')
                     ->withInput();
             }
 
@@ -108,9 +106,12 @@ class ReservationController extends Controller
                 'ref' => Str::uuid()
             ]));
 
+            // Mettre à jour le statut de la chambre
+            Chambre::find($validated['chambre_id'])->update(['statut' => 'occupee']);
+
             DB::commit();
 
-            return redirect()->route('reservations.index')
+            return redirect()->route('reservations-chambres.index')
                 ->with('success', 'Réservation créée avec succès');
 
         } catch (\Exception $e) {
@@ -120,55 +121,52 @@ class ReservationController extends Controller
         }
     }
 
-    public function show(string $reservation)
+    public function show(string $ref)
     {
-        $reservation = Reservation::where('ref', $reservation)->first();
-        /* S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
+        $reservations_chambre = Reservation::where('ref', $ref)->first();
+
+        /*if ($reservations_chambre->type_reservation !== 'chambre') {
             abort(404);
         }*/
 
-        $reservation->load(['client', 'salle']);
+        $reservations_chambre->load(['client', 'chambre']);
 
         return Inertia::render('ReservationsChambres/Show', [
-            'reservation' => $reservation
+            'reservation' => $reservations_chambre
         ]);
     }
 
-    public function edit(Reservation $reservation)
+    public function edit(Reservation $reservations_chambre)
     {
-        // S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
+        if ($reservations_chambre->type_reservation !== 'chambre') {
             abort(404);
         }
 
-        $salles = Salle::all();
-        $clients = Client::orderBy('nom')->get();
+        $chambres = Chambre::all();
+        $clients = Client::orderBy('name')->get();
 
-        $reservation->load(['client', 'salle']);
+        $reservations_chambre->load(['client', 'chambre']);
 
-        // Extraire les heures pour l'édition
-        $dateDebut = Carbon::parse($reservation->date_debut);
-        $dateFin = Carbon::parse($reservation->date_fin);
+        // Extraire les dates et heures pour l'édition
+        $dateDebut = Carbon::parse($reservations_chambre->date_debut);
+        $dateFin = Carbon::parse($reservations_chambre->date_fin);
 
-        $reservation->heure_debut = $dateDebut->format('H:i');
-        $reservation->heure_fin = $dateFin->format('H:i');
-        $reservation->date_debut_only = $dateDebut->format('Y-m-d');
-        $reservation->date_fin_only = $dateFin->format('Y-m-d');
+        $reservations_chambre->heure_debut = $dateDebut->format('H:i');
+        $reservations_chambre->heure_fin = $dateFin->format('H:i');
+        $reservations_chambre->date_debut_only = $dateDebut->format('Y-m-d');
+        $reservations_chambre->date_fin_only = $dateFin->format('Y-m-d');
 
-        return Inertia::render('Reservations/Edit', [
-            'reservation' => $reservation,
-            'salles' => $salles,
+        return Inertia::render('ReservationsChambres/Edit', [
+            'reservation' => $reservations_chambre,
+            'chambres' => $chambres,
             'clients' => $clients,
-            'statuts' => ['confirmee', 'en_attente', 'annulee', 'terminee'],
-            'vocations' => ['journee', 'nuit']
+            'statuts' => ['confirmee', 'en_attente', 'annulee', 'terminee']
         ]);
     }
 
-    public function update(Request $request, Reservation $reservation)
+    public function update(Request $request, Reservation $reservations_chambre)
     {
-        // S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
+        if ($reservations_chambre->type_reservation !== 'chambre') {
             abort(404);
         }
 
@@ -178,8 +176,7 @@ class ReservationController extends Controller
             'date_fin' => 'required|date|after_or_equal:date_debut',
             'heure_debut' => 'required|date_format:H:i',
             'heure_fin' => 'required|date_format:H:i',
-            'salle_id' => 'required|exists:salles,id',
-            'vocation' => 'required|in:journee,nuit',
+            'chambre_id' => 'required|exists:chambres,id',
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
         ]);
 
@@ -187,7 +184,7 @@ class ReservationController extends Controller
         if ($validated['date_debut'] === $validated['date_fin'] && 
             $validated['heure_debut'] >= $validated['heure_fin']) {
             return redirect()->back()
-                ->withErrors(['heure_fin' => 'L\'heure de fin doit être postérieure à l\'heure de début pour une réservation sur la même journée.'])
+                ->withErrors(['heure_fin' => 'L\'heure de départ doit être postérieure à l\'heure d\'arrivée pour une réservation sur la même journée.'])
                 ->withInput();
         }
 
@@ -199,9 +196,9 @@ class ReservationController extends Controller
             $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
 
             // Vérifier la disponibilité (exclure la réservation actuelle)
-            if (!$this->verifierDisponibilite($validated, $reservation->id)) {
+            if (!$this->verifierDisponibilite($validated, $reservations_chambre->id)) {
                 return redirect()->back()
-                    ->with('error', 'La salle n\'est pas disponible pour cette période')
+                    ->with('error', 'La chambre n\'est pas disponible pour cette période')
                     ->withInput();
             }
 
@@ -209,13 +206,13 @@ class ReservationController extends Controller
             $prixTotal = $this->calculerPrixTotal($validated);
 
             // Mise à jour de la réservation
-            $reservation->update(array_merge($validated, [
+            $reservations_chambre->update(array_merge($validated, [
                 'prix_total' => $prixTotal
             ]));
 
             DB::commit();
 
-            return redirect()->route('reservations.index')
+            return redirect()->route('reservations-chambres.index')
                 ->with('success', 'Réservation modifiée avec succès');
 
         } catch (\Exception $e) {
@@ -225,39 +222,53 @@ class ReservationController extends Controller
         }
     }
 
-    public function destroy(Reservation $reservation)
+    public function destroy(Reservation $reservations_chambre)
     {
-        // S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
+        if ($reservations_chambre->type_reservation !== 'chambre') {
             abort(404);
         }
 
+        DB::beginTransaction();
+
         try {
-            $reservation->delete();
+            // Libérer la chambre
+            if ($reservations_chambre->chambre_id) {
+                $reservations_chambre->chambre->update(['statut' => 'disponible']);
+            }
             
-            return redirect()->route('reservations.index')
+            // Supprimer la réservation
+            $reservations_chambre->delete();
+
+            DB::commit();
+
+            return redirect()->route('reservations-chambres.index')
                 ->with('success', 'Réservation supprimée avec succès');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Erreur lors de la suppression de la réservation');
         }
     }
-    public function updateStatus(Reservation $reservation, Request $request)
-    {
-        /*/ S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
-            abort(404);
-        }*/
 
+    public function updateStatus(Reservation $reservations_chambre, Request $request)
+    {
+        if ($reservations_chambre->type_reservation !== 'chambre') {
+            abort(404);
+        }
 
         $request->validate([
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
         ]);
 
         try {
-            $reservation->update(['statut' => $request->statut]);
-            
+            $reservations_chambre->update(['statut' => $request->statut]);
+
+            // Si le statut devient "annulee" ou "terminee", libérer la chambre
+            if (in_array($request->statut, ['annulee', 'terminee']) && $reservations_chambre->chambre_id) {
+                $reservations_chambre->chambre->update(['statut' => 'disponible']);
+            }
+
             return redirect()->back()
                 ->with('success', 'Statut de la réservation mis à jour');
 
@@ -269,7 +280,7 @@ class ReservationController extends Controller
 
     private function verifierDisponibilite(array $data, $excludeReservationId = null): bool
     {
-        $query = Reservation::where('salle_id', $data['salle_id'])
+        $query = Reservation::where('chambre_id', $data['chambre_id'])
             ->where('statut', '!=', 'annulee')
             ->where(function ($query) use ($data) {
                 $query->whereBetween('date_debut', [$data['date_debut'], $data['date_fin']])
@@ -288,24 +299,18 @@ class ReservationController extends Controller
     }
 
     private function calculerPrixTotal(array $data): float
-{
-    $salle = Salle::find($data['salle_id']);
-    $prixParJour = $data['vocation'] === 'journee' ? $salle->prix_journee : $salle->prix_nuit;
-    
-    $dateDebut = Carbon::parse($data['date_debut']);
-    $dateFin = Carbon::parse($data['date_fin']);
-    
-    // Correction du calcul des jours
-    $jours = $dateDebut->diffInDays($dateFin);
-    
-    // Si c'est la même journée ou si la fin est après le début, on compte au moins 1 jour
-    if ($jours === 0 || $dateFin->gt($dateDebut)) {
-        $jours = $jours + 1;
+    {
+        $chambre = Chambre::find($data['chambre_id']);
+        $dateDebut = Carbon::parse($data['date_debut']);
+        $dateFin = Carbon::parse($data['date_fin']);
+        
+        // Calcul précis en prenant en compte les heures
+        $diffTime = $dateFin->diffInSeconds($dateDebut);
+        $nuits = ceil($diffTime / (24 * 3600)); // Arrondi au supérieur
+        
+        // Au moins 1 nuit
+        $nuits = max(1, $nuits);
+        
+        return $nuits * $chambre->prix;
     }
-    
-    // Alternative plus simple :
-    // $jours = $dateDebut->diffInDays($dateFin) + 1;
-    
-    return $jours * $prixParJour;
-}
 }

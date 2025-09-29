@@ -12,32 +12,39 @@ use Illuminate\Support\Str;
 class SalleController extends Controller
 {
     public function index(Request $request)
-    {
-        $filters = $request->only(['search', 'vocation', 'disponible']);
-        
-        $salles = Salle::query()
-            ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('nom', 'like', '%'.$search.'%')
-                      ->orWhere('equipements', 'like', '%'.$search.'%');
-                });
-            })
-            ->when($filters['vocation'] ?? null, function ($query, $vocation) {
-                $query->where('vocation', $vocation);
-            })
-            ->when(isset($filters['disponible']), function ($query) use ($filters) {
+{
+    $filters = $request->only(['search', 'vocation', 'disponible']);
+    
+    $salles = Salle::query()
+        ->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', '%'.$search.'%')
+                  ->orWhere('equipements', 'like', '%'.$search.'%');
+            });
+        })
+        ->when(
+            isset($filters['vocation']) && $filters['vocation'] !== 'all',
+            function ($query) use ($filters) {
+                $query->where('vocation', $filters['vocation']);
+            }
+        )
+        ->when(
+            isset($filters['disponible']) && $filters['disponible'] !== 'all',
+            function ($query) use ($filters) {
                 $query->where('disponible', $filters['disponible']);
-            })
-            ->orderBy('nom')
-            ->paginate(10)
-            ->withQueryString();
+            }
+        )
+        ->orderBy('nom')
+        ->paginate(30)
+        ->withQueryString();
 
-        return Inertia::render('Salles/Index', [
-            'salles' => $salles,
-            'filters' => $filters,
-            'vocations' => ['journee', 'nuit', 'mixte']
-        ]);
-    }
+    return Inertia::render('Salles/Index', [
+        'salles'    => $salles,
+        'filters'   => $filters,
+        'vocations' => ['journee', 'nuit', 'mixte']
+    ]);
+}
+
 
     public function create()
     {
@@ -72,8 +79,9 @@ class SalleController extends Controller
         }
     }
 
-    public function show(Salle $salle)
+    public function show(string $salle)
     {
+        $salle = Salle::where("ref",$salle)->firstOrFail();
         // Charger les relations nécessaires
         $salle->load([
             'reservations' => function ($query) {
@@ -96,8 +104,10 @@ class SalleController extends Controller
         ]);
     }
 
-    public function edit(Salle $salle)
+    public function edit(string $salle)
     {
+        $salle = Salle::where("ref",$salle)->firstOrFail();
+
         return Inertia::render('Salles/Edit', [
             'salle' => $salle,
             'vocations' => ['journee', 'nuit', 'mixte']

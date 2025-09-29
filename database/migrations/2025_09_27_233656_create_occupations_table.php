@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('occupations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Reservation::class)->constrained()->cascadeOnDelete();
-            //$table->foreignId('chambre_id')->constrained();
             $table->date('date_occupation');
             $table->enum('statut', ['occupee', 'liberee'])->default('occupee');
             $table->uuid('ref')->unique();

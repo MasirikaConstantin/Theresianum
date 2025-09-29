@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignIdFor(Client::class)->constrained();
             $table->foreignIdFor(Chambre::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Salle::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->date('date_debut');
-            $table->date('date_fin');
+            $table->datetime('date_debut');
+            $table->datetime('date_fin');
             $table->enum('type_reservation', ['chambre', 'salle']);
             $table->enum('statut', ['confirmee', 'en_attente', 'annulee', 'terminee'])->default('en_attente');
             $table->decimal('prix_total', 10, 2);

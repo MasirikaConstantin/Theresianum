@@ -33,7 +33,8 @@ class DatabaseSeeder extends Seeder
             //ClientSeeder::class,
             //ChambreSeeder::class, 
             //SalleSeeder::class,
-            ReservationSeeder::class,
+            //ReservationSeeder::class,
+            Stock::factory(120)->create(),
         ]);
        /*/ Créer 5 succursales
 \App\Models\Succursale::factory()->count(3)->create();

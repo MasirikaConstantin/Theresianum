@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -93,7 +94,6 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                             <TableRow>
                                 <TableHead className="w-12">#</TableHead>
                                 <TableHead>Client</TableHead>
-                                <TableHead>Branche</TableHead>
                                 <TableHead>Montant</TableHead>
                                 <TableHead>Vendeur</TableHead>
                                 <TableHead>Date</TableHead>
@@ -101,18 +101,14 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {ventes.data.map((vente, index) => (
+                            {ventes.data.map((vente : any, index : any) => (
                                 <TableRow key={vente.id}>
                                     <TableCell className="font-medium">
                                         {ventes.from + index}
                                     </TableCell>
                                     <TableCell>{vente.client?.name || '-'}</TableCell>
-                                    <TableCell>{vente.succursale?.nom || '-'}</TableCell>
                                     <TableCell>
-                                        {new Intl.NumberFormat('fr-FR', {
-                                            style: 'currency',
-                                            currency: 'USD'
-                                        }).format(vente.montant_total).replace('$US', '$ ')}
+                                        {FrancCongolais(vente.montant_total)}
                                     </TableCell>
                                     <TableCell>{vente.vendeur?.name || '-'}</TableCell>
                                     <TableCell>

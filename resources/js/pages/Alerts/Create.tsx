@@ -14,11 +14,13 @@ const breadcrumbs = [
     { title: 'Nouvelle alerte', href: '#' },
 ];
 
-export default function AlertCreate({ produits, rendezvous, auth }: { produits: any[]; rendezvous: any[]; auth: Auth }) {
+export default function AlertCreate({ produits, rendezvous, auth, salles, chambres   }: { produits: any[]; rendezvous: any[]; auth: Auth; salles: any[]; chambres: any[] }) {
     const { data, setData, post, processing, errors } = useForm({
         notes: '',
         produit_id: '',
         rendezvou_id: '',
+        salle_id: '',
+        chambre_id: '',
     });
 
     const submit = (e: React.FormEvent) => {
@@ -55,7 +57,7 @@ export default function AlertCreate({ produits, rendezvous, auth }: { produits: 
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="grid gap-2">
                                 <Label>Associer à un produit</Label>
                                 <Select
@@ -76,18 +78,38 @@ export default function AlertCreate({ produits, rendezvous, auth }: { produits: 
                             </div>
 
                             <div className="grid gap-2">
-                                <Label>Associer à un rendez-vous</Label>
+                                <Label>Associer à une chambre</Label>
                                 <Select
-                                value={data.rendezvou_id || undefined} // Utilisez undefined au lieu de ""
-                                onValueChange={(value) => setData('rendezvou_id', value || null)} // Stockez null si vide
+                                value={data.chambre_id || undefined} // Utilisez undefined au lieu de ""
+                                onValueChange={(value) => setData('chambre_id', value || null)} // Stockez null si vide
                                 >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un rendez-vous" />
+                                    <SelectValue placeholder="Sélectionner une chambre" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {rendezvous.map((rendezvou) => (
-                                    <SelectItem key={rendezvou.id} value={rendezvou.id.toString()}>
-                                        {rendezvou.title} - {new Date(rendezvou.date).toLocaleDateString()}
+                                    {chambres.map((chambre) => (
+                                    <SelectItem key={chambre.id} value={chambre.id.toString()}>
+                                        {chambre.nom}
+                                    </SelectItem>
+                                    ))}
+                                </SelectContent>
+                                </Select>
+                            </div>
+
+
+                            <div className="grid gap-2">
+                                <Label>Associer à une salle</Label>
+                                <Select
+                                value={data.salle_id || undefined} // Utilisez undefined au lieu de ""
+                                onValueChange={(value) => setData('salle_id', value || null)} // Stockez null si vide
+                                >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner une salle" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {salles.map((salle) => (
+                                    <SelectItem key={salle.id} value={salle.id.toString()}>
+                                        {salle.nom}
                                     </SelectItem>
                                     ))}
                                 </SelectContent>

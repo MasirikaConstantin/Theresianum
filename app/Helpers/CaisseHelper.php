@@ -30,23 +30,18 @@ class CaisseHelper
     return $caisse->fresh();
 }
 
-    public static function getOrCreateDailyCaisse($succursaleId)
+    public static function getOrCreateDailyCaisse()
 {
     $today = now()->format('Y-m-d');
     
-    $caisse = Caisse::where('succursale_id', $succursaleId)
-        ->whereDate('date_ouverture', $today)
+    $caisse = Caisse::whereDate('date_ouverture', $today)
         ->first();
     
     if (!$caisse) {
-        // Fermer toutes les caisses précédentes de cette succursale
-        Caisse::where('succursale_id', $succursaleId)
-            ->where('statut', 'ouverte')
+        Caisse::where('statut', 'ouverte')
             ->update(['statut' => 'fermee', 'date_fermeture' => now()]);
             
-        // Créer une nouvelle caisse
         $caisse = Caisse::create([
-            'succursale_id' => $succursaleId,
             'date_ouverture' => now(),
             'solde' => 0,
             'statut' => 'ouverte'

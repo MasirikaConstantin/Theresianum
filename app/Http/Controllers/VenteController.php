@@ -10,8 +10,7 @@ use App\Models\Client;
 use App\Models\Configuration;
 use App\Models\Produit;
 use App\Models\Service;
-use App\Models\StockSuccursale;
-use App\Models\Succursale;
+use App\Models\Stock;
 use App\Models\Vente;
 use App\Models\VenteProduit;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
@@ -40,14 +39,10 @@ class VenteController extends Controller
     public function index(Request $request)
     {
         if($this->user->role === 'admin' || $this->user->role === 'gerant'){
-            $query = Vente::with(['client', 'succursale', 'vendeur', 'items.produit', 'items.service'])
+            $query = Vente::with(['client', 'vendeur', 'items.produit', 'items.service'])
             ->orderBy('created_at', 'desc');
-        }/*elseif($this->user->role === 'gerant'){
-            $query = Vente::with(['client', 'succursale', 'vendeur', 'items.produit', 'items.service'])
-            ->where('succursale_id', $this->user->succursale_id)
-            ->orderBy('created_at', 'desc');
-        }*/elseif($this->user->role === 'caissier' || $this->user->role === 'coiffeur'){
-            $query = Vente::with(['client', 'succursale', 'vendeur', 'items.produit', 'items.service'])
+        }elseif($this->user->role === 'vendeur'){
+            $query = Vente::with(['client', 'vendeur', 'items.produit', 'items.service'])
             ->where('vendeur_id', $this->user->id)
             ->orderBy('created_at', 'desc');
         }
@@ -79,25 +74,18 @@ class VenteController extends Controller
 
     public function create()
     {
-        $succursaleId = auth()->user()->succursale_id;
-        
         $produits = Produit::where('actif', true)
-            ->where('type', 'a_vendre')
-            ->whereHas('stock_succursales', function ($query) use ($succursaleId) {
-                $query->where('succursale_id', $succursaleId)
-                    ->where('actif', true)
+            ->whereHas('stock', function ($query) {
+                $query->where('actif', true)
                     ->where('quantite', '>', 0); // Seulement si le stock est > 0
             })
-            ->with(['stock_succursales' => function($query) use ($succursaleId) {
-                $query->where('succursale_id', $succursaleId);
-            }])
+            ->with(['stock' ])
             ->get();
             
         return Inertia::render('Ventes/Create', [
             'clients' => Client::with(['fidelite'=>function($query){
                 $query->select("id", 'ref', 'points', 'client_id');
             }])->select('id','name','telephone','email','ref')->get(),
-            'succursales' => Succursale::select('id', 'nom')->get(),
             'produits' => $produits,
             "configuration"=>Configuration::getActiveConfig(),
             'services' => Service::where('actif', true)->get(),
@@ -109,7 +97,6 @@ class VenteController extends Controller
 {
         $request->validate([
             'client_id' => 'nullable|exists:clients,id',
-            'succursale_id' => 'required|exists:succursales,id',
             'remise' => 'nullable|numeric|min:0',
             'montant_total' => 'required|numeric|min:0',
             'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
@@ -120,17 +107,13 @@ class VenteController extends Controller
             'items.*.prix_unitaire' => 'required|numeric|min:0',
             'items.*.remise' => 'required|numeric|min:0',
             'items.*.montant_total' => 'required|numeric|min:0',
-        ],[
-            'succursale_id.required' => 'Vous devez appartenir à une succursale pour effectuer une vente.'
         ]);
-        $vente = new Vente();
     DB::transaction(function () use ($request) {
-        // 1. Trouver ou créer la caisse ouverte pour cette succursale
-        $caisse = CaisseHelper::getOrCreateDailyCaisse($request->succursale_id);
+        // 1. Trouver ou créer la caisse ouverte 
+        $caisse = CaisseHelper::getOrCreateDailyCaisse();
         // Création de la vente
         $vente = Vente::create([
             'client_id' => $request->client_id,
-            'succursale_id' => $request->succursale_id,
             'remise' => $request->remise,
             'montant_total' => $request->montant_total,
             'mode_paiement' => $request->mode_paiement,
@@ -183,8 +166,7 @@ class VenteController extends Controller
 
             // Si c'est un produit, on décrémente le stock
             if (isset($item['produit_id'])) {
-                $stock = StockSuccursale::where('produit_id', $item['produit_id'])
-                    ->where('succursale_id', $request->succursale_id)
+                $stock = Stock::where('produit_id', $item['produit_id'])
                     ->first();
 
                 if ($stock) {
@@ -199,7 +181,7 @@ class VenteController extends Controller
                         $stock->update(['actif' => false]);
                     }
                 } else {
-                    throw new \Exception("Stock non trouvé pour le produit ID: {$item['produit_id']} et la succursale ID: {$request->succursale_id}");
+                    throw new \Exception("Stock non trouvé pour le produit ID: {$item['produit_id']}");
                 }
             }
         }
@@ -224,7 +206,7 @@ public function getRecentVente(Request $request)
     public function show(string $vente)
     {
         $vente = Vente::where('ref', $vente)->firstOrFail();
-        $vente->load(['client', 'succursale', 'vendeur', 'items.produit', 'items.service']);
+        $vente->load(['client', 'vendeur', 'items.produit', 'items.service']);
 
         $produits = $vente->items->filter(fn($item) => $item->produit_id);
         $services = $vente->items->filter(fn($item) => $item->service_id);
@@ -272,18 +254,16 @@ public function getRecentVente(Request $request)
         $heightInPoints = $totalHeight * 2.83;
 
         $vente->load(['client'=>function($query){
-            $query->select("id","name","ref", "telephone", 'succursale_id');
+            $query->select("id","name","ref", "telephone");
         }, 'vendeur'=>function($query){
-            $query->select("id", 'name', "ref", "telephone", "succursale_id");
+            $query->select("id", 'name', "ref", "telephone");
         },
         
         'client.fidelite'=>function($query){
             $query->select("id","client_id" ,"points");
 
         }, 'items.produit', 'items.service','VenduePar'=>function($query){
-            $query->select('id', 'name','succursale_id');
-        },'succursale'=>function($query){
-            $query->select('id', 'nom','adresse','telephone');
+            $query->select('id', 'name');
         }]);
         $renderer = new ImageRenderer(
             new RendererStyle(100),
@@ -300,8 +280,8 @@ public function getRecentVente(Request $request)
                 'nom' => 'BELLA HAIR MAKEUP',
                 'rccm'=>'23-A-07022',
                 'id_national'=>'01-G4701-N300623',
-                'adresse' => $vente->succursale->adresse,
-                'telephone' => $vente->succursale? $vente->succursale->telephone :  "+243970054889",
+                'adresse' => 'Kinshasa',
+                'telephone' => "+243970054889",
                 'email' => 'info@bellahairmakeup.com',
                 
             ],
@@ -322,23 +302,16 @@ public function getRecentVente(Request $request)
 public function edit(string $vente){
     $vente = Vente::where('ref', $vente)->firstOrFail();
 
-    $succursaleId = auth()->user()->succursale_id;
-    $vente->load(['client', 'succursale', 'vendeur', 'items.produit', 'items.service']);
+    $vente->load(['client', 'vendeur', 'items.produit', 'items.service']);
     $produits = Produit::where('actif', true)
-            ->where('type', 'a_vendre')
-            ->whereHas('stock_succursales', function ($query) use ($succursaleId) {
-                $query->where('succursale_id', $succursaleId)
-                    ->where('actif', true)
+            ->whereHas('stock', function ($query) {
+                $query->where('actif', true)
                     ->where('quantite', '>', 0); // Seulement si le stock est > 0
             })
-            ->with(['stock_succursales' => function($query) use ($succursaleId) {
-                $query->where('succursale_id', $succursaleId);
-            }])
             ->get();
             
         return Inertia::render('Ventes/Edit', [
             'clients' => Client::all(),
-            'succursales' => Succursale::select('id', 'nom')->get(),
             'produits' => $produits,
             'services' => Service::where('actif', true)->get(),
             'modes_paiement' => ['espèces', 'carte', 'chèque', 'autre'],
@@ -352,7 +325,6 @@ public function update(Request $request, $id)
 {
     $request->validate([
         'client_id' => 'nullable|exists:clients,id',
-        'succursale_id' => 'required|exists:succursales,id',
         'remise' => 'nullable|numeric|min:0',
         'montant_total' => 'required|numeric|min:0',
         'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
@@ -364,8 +336,6 @@ public function update(Request $request, $id)
         'items.*.prix_unitaire' => 'required|numeric|min:0',
         'items.*.remise' => 'required|numeric|min:0',
         'items.*.montant_total' => 'required|numeric|min:0',
-    ], [
-        'succursale_id.required' => 'Vous devez appartenir à une succursale pour effectuer une vente.'
     ]);
 
     $vente = Vente::findOrFail($id);
@@ -377,8 +347,7 @@ public function update(Request $request, $id)
         // 2. Restaurer les stocks pour les produits modifiés/supprimés
         foreach ($currentItems as $currentItem) {
             if ($currentItem->produit_id) {
-                $stock = StockSuccursale::where('produit_id', $currentItem->produit_id)
-                    ->where('succursale_id', $vente->succursale_id)
+                $stock = Stock::where('produit_id', $currentItem->produit_id)
                     ->first();
 
                 if ($stock) {
@@ -394,7 +363,6 @@ public function update(Request $request, $id)
         // 4. Mettre à jour les informations de base de la vente
         $vente->update([
             'client_id' => $request->client_id,
-            'succursale_id' => $request->succursale_id,
             'remise' => $request->remise,
             'montant_total' => $request->montant_total,
             'mode_paiement' => $request->mode_paiement,
@@ -427,8 +395,7 @@ public function update(Request $request, $id)
 
             // 7. Mettre à jour les stocks pour les nouveaux produits
             if (isset($item['produit_id'])) {
-                $stock = StockSuccursale::where('produit_id', $item['produit_id'])
-                    ->where('succursale_id', $request->succursale_id)
+                $stock = Stock::where('produit_id', $item['produit_id'])
                     ->first();
 
                 if ($stock) {
@@ -442,7 +409,7 @@ public function update(Request $request, $id)
                         $stock->update(['actif' => false]);
                     }
                 } else {
-                    throw new \Exception("Stock non trouvé pour le produit ID: {$item['produit_id']} et la succursale ID: {$request->succursale_id}");
+                    throw new \Exception("Stock non trouvé pour le produit ID: {$item['produit_id']}");
                 }
             }
         }

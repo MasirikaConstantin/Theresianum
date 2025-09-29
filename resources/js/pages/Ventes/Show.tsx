@@ -8,6 +8,7 @@ import { ChevronLeft, Eye, Printer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 const breadcrumbs = (venteRef: string): BreadcrumbItem[] => [
     {
@@ -62,15 +63,7 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                     </Link>
                                     
                                 </div>
-                                <div className="grid gap-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Branche</p>
-                                    <Link href={route('succursales.show', vente.succursale.ref)}>   
-                                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                                        <Eye className="h-4 w-4" /> {vente.succursale?.nom || 'Aucune branche'}
-                                    </Button>
-                                    </Link>
-                                    
-                                </div>
+                                
                                 <div className="grid gap-1">
                                     <p className="text-sm font-medium text-muted-foreground">Vendeur</p>
                                     <Link href={route('utilisateurs.show', vente.vendeur.ref)}>   
@@ -89,18 +82,9 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                 <div className="grid gap-1">
                                     <p className="text-sm font-medium text-muted-foreground">Mode de paiement</p>
                                     <Badge variant="outline">
-                                        {vente.mode_paiement}
+                                        {vente.mode_paiement==='espèces' ? 'Espece' : vente.mode_paiement==='carte' ? 'Carte' : vente.mode_paiement==='chèque' ? 'Cheque' : 'Autre'}
                                     </Badge>
                                 </div>
-                                {/*<div className="grid gap-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Remise globale</p>
-                                    <p>
-                                        {new Intl.NumberFormat('fr-FR', {
-                                            style: 'currency',
-                                            currency: 'USD'
-                                        }).format(vente.remise).replace('$US', '$ ')}
-                                    </p>
-                                </div>*/}
                             </div>
                         </CardContent>
                     </Card>
@@ -117,7 +101,6 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                         <TableHead>Nom</TableHead>
                                         <TableHead>Quantité</TableHead>
                                         <TableHead>Prix unitaire</TableHead>
-                                        {/*<TableHead>Remise</TableHead>*/}
                                         <TableHead>Total</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -134,22 +117,11 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                             </TableCell>
                                             <TableCell>{item.quantite}</TableCell>
                                             <TableCell>
-                                                {new Intl.NumberFormat('fr-FR', {
-                                                    style: 'currency',
-                                                    currency: 'USD'
-                                                }).format(item.prix_unitaire).replace('$US', '$ ')}
+                                                {FrancCongolais(item.prix_unitaire)}
                                             </TableCell>
-                                            {/*<TableCell>
-                                                {new Intl.NumberFormat('fr-FR', {
-                                                    style: 'currency',
-                                                    currency: 'USD'
-                                                }).format(item.remise).replace('$US', '$ ')}
-                                            </TableCell>*/}
+                                           
                                             <TableCell>
-                                                {new Intl.NumberFormat('fr-FR', {
-                                                    style: 'currency',
-                                                    currency: 'USD'
-                                                }).format(item.montant_total).replace('$US', '$ ')}
+                                                {FrancCongolais(item.montant_total)}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -166,35 +138,14 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                             <div className="flex justify-between items-center">
                                 <p className="text-sm font-medium">Total articles</p>
                                 <p className="font-medium">
-                                    {new Intl.NumberFormat('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(vente.items.reduce((sum: number, item: any) => sum + (item.prix_unitaire * item.quantite), 0)).replace('$US', '$ ')}
+                                    {FrancCongolais(vente.items.reduce((sum: number, item: any) => sum + (item.prix_unitaire * item.quantite), 0))}
                                 </p>
                             </div>
-                            <div className="flex justify-between items-center">
-                            {/*<p className="text-sm font-medium">TVA 16 % sur les produits</p>
-                                <p className="font-medium text-amber-500">
-                                     {new Intl.NumberFormat('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(tva).replace('$US', '$ ')}
-                                </p>
-                                <p className="text-sm font-medium">Remise globale</p>
-                                <p className="font-medium text-red-500">
-                                    - {new Intl.NumberFormat('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(vente.remise).replace('$US', '$ ')}
-                                </p>*/}
-                            </div>
+                           
                             <div className="flex justify-between items-center border-t pt-2 mt-2">
                                 <p className="text-lg font-bold">Montant total</p>
                                 <p className="text-lg font-bold">
-                                    {new Intl.NumberFormat('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(vente.montant_total).replace('$US', '$ ')}
+                                   {FrancCongolais(vente.montant_total)}
                                 </p>
                             </div>
                         </CardContent>

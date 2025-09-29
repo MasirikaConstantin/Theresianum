@@ -1,7 +1,8 @@
 <?php
 
+use App\Models\Chambre;
 use App\Models\Produit;
-use App\Models\Rendezvou;
+use App\Models\Salle;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,7 +21,8 @@ return new class extends Migration
             $table->uuid('ref')->unique();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Produit::class)->nullable()->constrained()->nullOnDelete();
-            $table->foreignIdFor(Rendezvou::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Salle::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Chambre::class)->nullable()->constrained()->nullOnDelete();
             $table->boolean('is_read')->default(false);
             $table->softDeletesTz();
             $table->timestamps();

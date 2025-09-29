@@ -3,9 +3,10 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Calendar, Package } from 'lucide-react';
+import { AlertCircle, Bed, Calendar, Home, Package } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Auth } from '@/types';
+import { DateHeure } from '@/hooks/Currencies';
 
 const breadcrumbs = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -54,10 +55,22 @@ export default function AlertIndex({ alerts, auth }: { alerts: any, auth: Auth }
                                                 Rendez-vous
                                             </Badge>
                                         )}
+                                        {alert.salle_id && (
+                                            <Badge variant="secondary">
+                                                <Home className="mr-2 h-4 w-4" />
+                                                Salle
+                                            </Badge>
+                                        )}
+                                        {alert.chambre_id && (
+                                            <Badge variant="secondary">
+                                                <Bed className="mr-2 h-4 w-4" />
+                                                Chambre
+                                            </Badge>
+                                        )}
                                     </TableCell>
                                     <TableCell className="max-w-xs truncate">{alert.notes}</TableCell>
                                     <TableCell>{alert.user.name}</TableCell>
-                                    <TableCell>{new Date(alert.created_at).toLocaleDateString()}</TableCell>
+                                    <TableCell>{DateHeure(alert.created_at)}</TableCell>
                                     <TableCell className="flex gap-2">
                                         <Link href={route('alerts.show', alert.ref)}>
                                             <Button variant="outline" size="sm">

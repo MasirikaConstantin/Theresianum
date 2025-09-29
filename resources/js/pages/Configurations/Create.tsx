@@ -10,6 +10,7 @@ import { FormEvent, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PopcornIcon } from "lucide-react";
 import { toast } from "sonner";
+import { FrancCongolais } from "@/hooks/Currencies";
 
 interface Configurations extends PageProps {
     auth: Auth;
@@ -29,9 +30,9 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
     ];
     const { data, setData, post, processing, errors } = useForm({
         actif: activeConfig?.actif ?? false,
-        ratio_achat: activeConfig?.ratio_achat ?? 7,
-        valeur_point: activeConfig?.valeur_point ?? 0.5,
-        seuil_utilisation: activeConfig?.seuil_utilisation ?? 5,
+        ratio_achat: activeConfig?.ratio_achat ?? 10000,
+        valeur_point: activeConfig?.valeur_point ?? 500,
+        seuil_utilisation: activeConfig?.seuil_utilisation ?? 20,
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -84,9 +85,9 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
                                         type="number"
                                         step="0.01"
                                         min="0.01"
-                                        value={data.ratio_achat}
+                                        value={(data.ratio_achat)}
                                         onChange={(e) => setData('ratio_achat', parseFloat(e.target.value))}
-                                        placeholder="7 (1 point pour chaque 7$ dépensés)"
+                                        placeholder="10000 (1 point pour chaque 10000FC dépensés)"
                                     />
                                     {errors.ratio_achat && (
                                         <p className="text-sm text-red-500">{errors.ratio_achat}</p>
@@ -95,7 +96,7 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="valeur_point">Valeur d'un point ($)</Label>
+                                    <Label htmlFor="valeur_point">Valeur d'un point (FC)</Label>
                                     <Input
                                         id="valeur_point"
                                         type="number"
@@ -103,7 +104,7 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
                                         min="0.01"
                                         value={data.valeur_point}
                                         onChange={(e) => setData('valeur_point', parseFloat(e.target.value))}
-                                        placeholder="0.5 (1 point = 0.5$)"
+                                        placeholder="1 (1 point = 1FC)"
                                     />
                                     {errors.valeur_point && (
                                         <p className="text-sm text-red-500">{errors.valeur_point}</p>
@@ -132,10 +133,10 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
                                         </AlertTitle>
                                         <AlertDescription>
                                             <ul className="list-inside list-disc text-sm">
-                                                <li>Pour un achat de {data.ratio_achat}$ le client gagne {data.ratio_achat / data.ratio_achat} points</li>
+                                                <li>Pour un achat de {FrancCongolais(data.ratio_achat)} le client gagne {data.ratio_achat / data.ratio_achat} points</li>
                                                 <li>Pour utiliser le point le client doit avoir minimum {data.seuil_utilisation} points</li>
-                                                <li>Si un client veut utiliser ses points  :  1 point vaudra {data.valeur_point}$ de réduction</li>
-                                                <li>Donc s'il a {data.seuil_utilisation} points il pourra utiliser {data.seuil_utilisation * data.valeur_point}$ de réduction</li>
+                                                <li>Si un client veut utiliser ses points  :  1 point vaudra {data.valeur_point} FC de réduction</li>
+                                                <li>Donc s'il a {data.seuil_utilisation} points il pourra utiliser {FrancCongolais(data.seuil_utilisation * data.valeur_point)}  de réduction</li>
                                             </ul>
                                         </AlertDescription>
                                     </Alert>
@@ -154,8 +155,8 @@ export default function Configurations({ auth, activeConfig }: Configurations) {
                                     Avec la configuration actuelle:
                                 </p>
                                 <ul className="list-disc pl-5 text-sm text-gray-600 mt-2 space-y-1">
-                                    <li>Pour chaque {activeConfig.ratio_achat}$ dépensés, le client gagne 1 point</li>
-                                    <li>1 point = {activeConfig.valeur_point}$ de réduction</li>
+                                    <li>Pour chaque {FrancCongolais(activeConfig.ratio_achat)} FC dépensés, le client gagne 1 point</li>
+                                    <li>1 point = {FrancCongolais(activeConfig.valeur_point)} FC de réduction</li>
                                     <li>Le client doit avoir minimum {activeConfig.seuil_utilisation} points pour les utiliser</li>
                                 </ul>
                             </div>

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alert;
+use App\Models\Chambre;
 use App\Models\Produit;
 use App\Models\Rendezvou;
+use App\Models\Salle;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,6 +28,8 @@ class AlertController extends Controller
         return Inertia::render('Alerts/Create', [
             'produits' => Produit::select('id', 'name','ref')->get(),
             'rendezvous' => Rendezvou::select('id','ref')->get(),
+            'salles' => Salle::select('id','nom','ref')->get(),
+            'chambres' => Chambre::select('id','nom','ref')->get(),
         ]);
     }
 
@@ -35,6 +39,8 @@ class AlertController extends Controller
             'notes' => 'nullable|string',
             'produit_id' => 'nullable|exists:produits,id',
             'rendezvou_id' => 'nullable|exists:rendezvous,id',
+            'salle_id' => 'nullable|exists:salles,id',
+            'chambre_id' => 'nullable|exists:chambres,id',
         ]);
 
         Alert::create([
@@ -42,6 +48,8 @@ class AlertController extends Controller
             'user_id' => auth()->id(),
             'produit_id' => $request->produit_id,
             'rendezvou_id' => $request->rendezvou_id,
+            'salle_id' => $request->salle_id,
+            'chambre_id' => $request->chambre_id,
         ]);
 
         return redirect()->route('alerts.index')
@@ -72,9 +80,11 @@ class AlertController extends Controller
             'notes' => 'nullable|string',
             'produit_id' => 'nullable|exists:produits,id',
             'rendezvou_id' => 'nullable|exists:rendezvous,id',
+            'salle_id' => 'nullable|exists:salles,id',
+            'chambre_id' => 'nullable|exists:chambres,id',
         ]);
 
-        $alert->update($request->only(['notes', 'produit_id', 'rendezvou_id']));
+        $alert->update($request->only(['notes', 'produit_id', 'rendezvou_id', 'salle_id', 'chambre_id']));
 
         return redirect()->route('alerts.index')
             ->with('success', 'Alerte mise à jour avec succès');

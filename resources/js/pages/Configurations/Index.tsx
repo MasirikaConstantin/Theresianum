@@ -3,14 +3,12 @@ import AppLayout from "@/layouts/app-layout";
 import { Auth, BreadcrumbItem, PageProps } from "@/types";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PopcornIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { FrancCongolais } from "@/hooks/Currencies";
 
 interface Configurations extends PageProps {
     auth: Auth;
@@ -71,7 +69,7 @@ export default function Configurations({ auth, activeConfig, configurations }: C
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Ratio d'acquisition</TableHead>
-                                        <TableHead>Valeur d'un point ($)</TableHead>
+                                        <TableHead>Valeur d'un point (FC)</TableHead>
                                         <TableHead>Seuil d'utilisation (points)</TableHead>
                                         <TableHead>Actif</TableHead>
                                     </TableRow>
@@ -79,8 +77,8 @@ export default function Configurations({ auth, activeConfig, configurations }: C
                                 <TableBody>
                                     {configurations.map((config) => (
                                         <TableRow key={config.id}>
-                                            <TableCell>{config.ratio_achat}</TableCell>
-                                            <TableCell>{config.valeur_point}</TableCell>
+                                            <TableCell>{FrancCongolais(config.ratio_achat)}</TableCell>
+                                            <TableCell>{FrancCongolais(config.valeur_point)}</TableCell>
                                             <TableCell>{config.seuil_utilisation}</TableCell>
                                             <TableCell><Badge variant={config.actif ? 'default' : 'destructive'}>{config.actif ? 'Actif' : 'Inactif'}</Badge></TableCell>
                                         </TableRow>
@@ -91,20 +89,24 @@ export default function Configurations({ auth, activeConfig, configurations }: C
 
                         <CardFooter>
                             {activeConfig && (
-                                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-                                    <h3 className="font-medium">Explications</h3>
-                                    <p className="text-sm text-gray-600 mt-2">
+                                <Alert>
+                                    <PopcornIcon />
+                                    <AlertTitle>
+                                        Explications :
+                                    </AlertTitle>
+                                    <AlertDescription>
                                         Avec la configuration actuelle:
-                                    </p>
-                                    <ul className="list-disc pl-5 text-sm text-gray-600 mt-2 space-y-1">
-                                        <li>Pour chaque {activeConfig.ratio_achat}$ dépensés, le client gagne 1 point</li>
-                                        <li>1 point = {activeConfig.valeur_point}$ de réduction</li>
+                                    <ul className="list-inside list-disc text-sm">
+                                        <li>Pour chaque {FrancCongolais(activeConfig.ratio_achat)} FC dépensés, le client gagne 1 point</li>
+                                        <li>1 point = {FrancCongolais(activeConfig.valeur_point)} FC de réduction</li>
                                         <li>Le client doit avoir minimum {activeConfig.seuil_utilisation} points pour les utiliser</li>
                                         <li>
-                                            Exemple: Si un client dépense 10$ et que la configuration est de 7$ par point, il gagne 1 point et peut utiliser 1 point pour une réduction de 0.5$.
+                                            Exemple: Si un client dépense {FrancCongolais(10)} FC et que la configuration est de {FrancCongolais(activeConfig.ratio_achat)} FC par point, il gagne 1 point et peut utiliser 1 point pour une réduction de {FrancCongolais(activeConfig.valeur_point)} FC.
                                         </li>
                                     </ul>
-                                </div>
+                                    </AlertDescription>
+
+                                </Alert>
                             )}
                         </CardFooter>
                 </Card>

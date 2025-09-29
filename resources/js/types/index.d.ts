@@ -475,4 +475,60 @@ interface PaieShowProps extends PageProps {
         email: string;
         cnss_number: string;
     };
+
+
+
+
+
+
+
+
+
+    
+}
+
+interface Occupation {
+    id: number;
+    ref: string;
+    date_occupation: string;
+    statut: string;
+    reservation_id: number;
+    created_at: string;
+}
+
+interface Reservation {
+    id: number;
+    date_debut: string;
+    date_fin: string;
+    statut: string;
+    prix_total: number;
+    ref: string;
+    client: {
+        id: number;
+        nom: string;
+        prenom: string;
+        email: string;
+        telephone: string;
+    };
+    occupations: Occupation[];
+}
+
+interface Chambre {
+    id: number;
+    ref: string;
+    numero: string;
+    type: string;
+    nom: string;
+    prix: number;
+    capacite: number;
+    equipements: string;
+    statut: string;
+    created_at: string;
+    updated_at: string;
+    reservations: Reservation[];
+    data: {
+        from: number;
+        to: number;
+        total: number;
+    }
 }

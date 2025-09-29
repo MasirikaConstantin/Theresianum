@@ -69,6 +69,25 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             ],
         },
         {
+            title : 'Chambres et Salles',
+            icon : HomeIcon,
+            roles : ['admin', 'gerant'],
+            items : [
+                {
+                    title : 'Chambres',
+                    href : '/chambres',
+                    icon : HomeIcon,
+                    roles : ['admin', 'gerant'],
+                },
+                {
+                    title : 'Salles',
+                    href : '/salles',
+                    icon : HomeIcon,
+                    roles : ['admin', 'gerant'],
+                },
+            ]
+        },
+        {
             title: 'Ventes et Réservations',
             icon: ShoppingBasket,
             roles: ['admin', 'gerant', 'caissier'],

@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\AccessoiresController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\ChambreController;
 use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientFideliteController;
@@ -24,6 +24,7 @@ use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SalleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockSuccursaleController;
 use App\Models\Currencie;
@@ -55,12 +56,6 @@ Route::middleware(['auth', 'verified', 'role:admin,gerant,coiffeur,caissier'])->
     })->name('dashboard');
 });
 
-//Route::resource('utilisateurs', UtilisateurController::class)->middleware('role:admin');
-Route::middleware('auth', 'actif', 'role:admin,gerant')->group(function () {
-    Route::resource('succursales', \App\Http\Controllers\SuccursaleController::class);
-    Route::resource('services', \App\Http\Controllers\ServiceController::class);
-    Route::patch('services/{service}/update-status', [\App\Http\Controllers\ServiceController::class, 'updateStatus'])->name('services.update-status');
-});
 
 Route::middleware('auth', 'actif', 'role:admin,gerant,caissier')->group(function () {
     Route::resource('utilisateurs', \App\Http\Controllers\UserController::class);
@@ -72,10 +67,7 @@ Route::middleware('auth', 'actif', 'role:admin,gerant,caissier')->group(function
     Route::patch('/stocks/{stock}/toggle-status', [\App\Http\Controllers\StockController::class, 'toggleStatus'])
         ->name('stocks.toggle-status');
 
-    Route::resource('transferts', \App\Http\Controllers\TransfertController::class);
-
-    Route::post('/transferts/{transfert}/validate', [\App\Http\Controllers\TransfertController::class, 'validateTransfert'])
-        ->name('transferts.validate');
+   
 });
 Route::middleware('auth', 'actif', 'role:admin,gerant,coiffeur,caissier')->group(function () {
     Route::resource('clients', \App\Http\Controllers\ClientController::class);
@@ -88,18 +80,8 @@ Route::resource('alerts', AlertController::class)
 Route::patch('alerts/{alert}/mark-as-read', [AlertController::class, 'markAsRead'])
     ->name('alerts.mark-as-read');
 
-Route::prefix('rendezvous')->group(function () {
-    Route::get('/', [RendezvouController::class, 'index'])->name('rendezvous.index')->middleware('auth');;
-    Route::get('/create', [RendezvouController::class, 'create'])->name('rendezvous.create');
-    Route::post('/', [RendezvouController::class, 'store'])->name('rendezvous.store');
-    Route::get('/{rendezvou}', [RendezvouController::class, 'show'])->name('rendezvous.show')->middleware('auth');;
-    Route::get('/{rendezvou}/edit', [RendezvouController::class, 'edit'])->name('rendezvous.edit');
-    Route::put('/{rendezvou}', [RendezvouController::class, 'update'])->name('rendezvous.update');
-    Route::delete('/{rendezvou}', [RendezvouController::class, 'destroy'])->name('rendezvous.destroy')->middleware('auth');;
-});
 
-Route::patch('utilisateurs/{utilisateur}/update-succursale', [UtilisateurController::class, 'updateSuccursale'])
-    ->name('utilisateurs.update-succursale');
+
 Route::patch('utilisateurs/{utilisateur}/update-status', [UtilisateurController::class, 'updateStatus'])
     ->name('utilisateurs.update-status');
 
@@ -160,15 +142,6 @@ Route::get('/statistiques-ventes', [StatistiqueController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('statistiques.index');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/transferts-central', [TransfertControllerStock::class, 'index'])->name('transferts-central.index');
-    Route::get('/transferts-central/create', [TransfertControllerStock::class, 'create'])->name('transferts-central.create');
-    Route::post('/transferts-central', [TransfertControllerStock::class, 'store'])->name('transferts-central.store');
-    Route::get('/transferts-central/{transfert}', [TransfertControllerStock::class, 'show'])->name('transferts-central.show');
-    Route::post('/transferts-central/{transfert}/validate', [TransfertControllerStock::class, 'validateTransfert'])->name('transferts-central.validate');
-    Route::post('/transferts-central/{transfert}/reject', [TransfertControllerStock::class, 'rejectTransfert'])->name('transferts-central.reject');
-});
-
 Route::get('/statistiques-vendeurs', [VendeurController::class, 'index'])
     ->name('statistiques.vendeurs')
     ->middleware(['auth', 'role:admin,gerant']);
@@ -179,8 +152,6 @@ Route::get('/statistiques-stats', [ProduitController::class, 'stats'])->name('pr
 Route::get('/statistiques-services-stats', [ServiceController::class, 'stats'])->name('services.stats');
 Route::get('/api/sales-stats', [SalesController::class, 'index'])->middleware('auth');
 Route::resource('utilitaires', \App\Http\Controllers\UtilitaireController::class)->middleware(['auth']);
-Route::resource('accessoires', AccessoiresController::class)->middleware(['auth']);
-Route::get('/succursales-accessoire', [AccessoiresController::class, 'accessoire'])->name('succursales.accessoire');
 Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/fidelite', [\App\Http\Controllers\FideliteController::class, 'index'])->name('fidelite.index');
     Route::get('/fidelite/{client}', [\App\Http\Controllers\FideliteController::class, 'show'])->name('fidelite.show');
@@ -212,11 +183,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:admin,gerant,caissier'])->group(function () {
     Route::get('/api/ventes/stats-journalieres', [VenteController::class, 'statsJournalieres']);
 });
-Route::get('services/{service}/update-image', [ServiceController::class, 'getUpdateImage'])->name('services.get-update-image');
-Route::post('services/{service}/update-set-image', [ServiceController::class, 'updateImage'])->name('services.update-image');
-
-Route::get('/documentations', [DocumentationController::class, 'index'])->name('documentations.index');
-Route::resource('promotions', PromotionController::class);
 
 Route::resource('personnels', \App\Http\Controllers\AgentController::class)->middleware('role:admin,gerant');
 Route::resource('presences', \App\Http\Controllers\PresenceController::class)->middleware('role:admin,gerant,caissier');
@@ -263,3 +229,19 @@ Route::get('print-grille/{ref}/{date}',[PointageController::class, 'printGrille'
 Route::resource('categories', CategorieController::class)->middleware(['auth', 'verified', 'role:admin']);
 Route::get('statistiques-categories', [StatistiqueController::class, 'produitsParCategorie'])
     ->name('statistiques.produits-par-categorie');
+
+
+    // routes/web.php
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('chambres', ChambreController::class);
+    Route::patch('/chambres/{chambre}/status', [ChambreController::class, 'updateStatus'])
+        ->name('chambres.update-status');
+});
+Route::resource('reservations', ChambreController::class);
+
+// routes/web.php
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('salles', SalleController::class);
+    Route::patch('/salles/{salle}/status', [SalleController::class, 'updateStatus'])
+        ->name('salles.update-status');
+});

@@ -23,8 +23,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         //User::factory(5)->create();
-        Produit::factory(120)->create();
-
+        //Produit::factory(120)->create();
+        $this->call([
+            HotelSeeder::class,
+        ]);
        /*/ Créer 5 succursales
 \App\Models\Succursale::factory()->count(3)->create();
 

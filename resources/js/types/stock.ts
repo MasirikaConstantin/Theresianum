@@ -3,7 +3,7 @@ export interface StockSuccursale {
     produit_id: number;
     succursale_id: number;
     quantite: number;
-    seuil_alerte: number;
+    quantite_alerte: number;
     actif: boolean;
     ref: string;
     user_id: number;

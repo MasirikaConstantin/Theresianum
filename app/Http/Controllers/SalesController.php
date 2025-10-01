@@ -47,7 +47,7 @@ class SalesController extends Controller
         }
 
         if (!$this->user->hasRole('admin')) {
-            if($this->user->hasRole('coiffeur') || $this->user->hasRole('caissier')) {
+            if($this->user->hasRole('coiffeur') || $this->user->hasRole('vendeur')) {
                 $query->where('ventes.vendeur_id', $this->user->id);
             }else{
                 $query->where('ventes.succursale_id', $this->user->succursale_id);
@@ -68,38 +68,22 @@ class SalesController extends Controller
                 $query = VenteProduit::select(
                     DB::raw('DATE(vente_produits.created_at) as date'),
                     DB::raw('SUM(CASE WHEN produit_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as produits'),
-                    DB::raw('SUM(CASE WHEN service_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as services'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN produit_id IS NOT NULL THEN vente_id END) as transactions_produits'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN service_id IS NOT NULL THEN vente_id END) as transactions_services')
+                    DB::raw('COUNT(DISTINCT vente_id) as transactions_produits')
                 )
                 ->join('ventes', 'ventes.id', '=', 'vente_produits.vente_id')
                 ->groupBy('date')
                 ->orderBy('date'); 
-            }elseif($user->hasRole('coiffeur') || $user->hasRole('caissier')) {
+            }elseif($user->hasRole('coiffeur') || $user->hasRole('vendeur')) {
                     $query = VenteProduit::select(
                         DB::raw('DATE(vente_produits.created_at) as date'),
                         DB::raw('SUM(CASE WHEN produit_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as produits'),
-                        DB::raw('SUM(CASE WHEN service_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as services'),
-                        DB::raw('COUNT(DISTINCT CASE WHEN produit_id IS NOT NULL THEN vente_id END) as transactions_produits'),
-                        DB::raw('COUNT(DISTINCT CASE WHEN service_id IS NOT NULL THEN vente_id END) as transactions_services')
+                        DB::raw('COUNT(DISTINCT CASE WHEN produit_id IS NOT NULL THEN vente_id END) as transactions_produits')
                     )
                     ->join('ventes', 'ventes.id', '=', 'vente_produits.vente_id')
                     ->where('ventes.vendeur_id', $user->id)
                     ->groupBy('date')
                     ->orderBy('date');  
-            }/*elseif($user->hasRole('gerant')){
-                    $query = VenteProduit::select(
-                        DB::raw('DATE(vente_produits.created_at) as date'),
-                        DB::raw('SUM(CASE WHEN produit_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as produits'),
-                        DB::raw('SUM(CASE WHEN service_id IS NOT NULL THEN vente_produits.montant_total ELSE 0 END) as services'),
-                        DB::raw('COUNT(DISTINCT CASE WHEN produit_id IS NOT NULL THEN vente_id END) as transactions_produits'),
-                        DB::raw('COUNT(DISTINCT CASE WHEN service_id IS NOT NULL THEN vente_id END) as transactions_services')
-                    )
-                    ->join('ventes', 'ventes.id', '=', 'vente_produits.vente_id')
-                    ->where('ventes.succursale_id',  $user->succursale_id)
-                    ->groupBy('date')
-                    ->orderBy('date');
-            }*/
+            }
         
         switch ($range) {
             case 'week':
@@ -137,25 +121,11 @@ class SalesController extends Controller
             ->limit(15)
             ->get();
 
-        // Services les plus vendus
-        $topServices = DB::table('vente_produits')
-            ->select(
-                'service_id',
-                'services.name',
-                DB::raw('SUM(quantite) as total_quantity'),
-                DB::raw('SUM(montant_total) as total_amount')
-            )
-            ->join('services', 'vente_produits.service_id', '=', 'services.id')
-            ->whereNotNull('service_id')
-            ->groupBy('service_id', 'services.name')
-            ->orderByDesc('total_amount')
-            ->limit(15)
-            ->get();
-
+       
        
 
         
-    }elseif($this->user->hasRole('coiffeur') || $this->user->hasRole('caissier')){
+    }elseif($this->user->hasRole('coiffeur') || $this->user->hasRole('vendeur')){
         // Produits les plus vendus PAR CE VENDEUR
         $topProducts = DB::table('vente_produits')
         ->select(
@@ -173,58 +143,9 @@ class SalesController extends Controller
         ->limit(15)
         ->get();
 
-    // Services les plus vendus PAR CE VENDEUR
-    $topServices = DB::table('vente_produits')
-        ->select(
-            'service_id',
-            'services.name',
-            DB::raw('SUM(vente_produits.quantite) as total_quantity'),
-            DB::raw('SUM(vente_produits.montant_total) as total_amount')
-        )
-        ->join('services', 'vente_produits.service_id', '=', 'services.id')
-        ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id') // Jointure avec la table ventes
-        ->whereNotNull('service_id')
-        ->where('ventes.vendeur_id', $this->user->id) // Filtre par vendeur
-        ->groupBy('service_id', 'services.name')
-        ->orderByDesc('total_amount')
-        ->limit(15)
-        ->get();
+   
         
-    }/*elseif($this->user->hasRole('gerant')){
-        // Produits les plus vendus dans cette succursale
-        $topProducts = DB::table('vente_produits')
-        ->select(
-            'produit_id',
-            'produits.name',
-            DB::raw('SUM(vente_produits.quantite) as total_quantity'),
-            DB::raw('SUM(vente_produits.montant_total) as total_amount')
-        )
-        ->join('produits', 'vente_produits.produit_id', '=', 'produits.id')
-        ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id') // Jointure avec la table ventes
-        ->whereNotNull('produit_id')
-        ->where('ventes.succursale_id', $this->user->succursale_id) // Filtre par succursale
-        ->groupBy('produit_id', 'produits.name')
-        ->orderByDesc('total_amount')
-        ->limit(15)
-        ->get();
-
-    // Services les plus vendus dans cette succursale
-    $topServices = DB::table('vente_produits')
-        ->select(
-            'service_id',
-            'services.name',
-            DB::raw('SUM(vente_produits.quantite) as total_quantity'),
-            DB::raw('SUM(vente_produits.montant_total) as total_amount')
-        )
-        ->join('services', 'vente_produits.service_id', '=', 'services.id')
-        ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id') // Jointure avec la table ventes
-        ->whereNotNull('service_id')
-        ->where('ventes.succursale_id', $this->user->succursale_id) // Filtre par succursale
-        ->groupBy('service_id', 'services.name')
-        ->orderByDesc('total_amount')
-        ->limit(15)
-        ->get();
-    }*/
+    }
 
     // Transformer les données pour le frontend
     $result = [];
@@ -239,16 +160,7 @@ class SalesController extends Controller
             'total_amount' => $product->total_amount,
         ];
     }
-    // Ajouter les services
-    foreach ($topServices as $service) {
-        $result[] = [
-            'id' => $service->service_id,
-            'name' => $service->name,
-            'type' => 'service',
-            'total_quantity' => $service->total_quantity,
-            'total_amount' => $service->total_amount,
-                    ];
-    }
+    
         return response()->json($result);
     }
 }

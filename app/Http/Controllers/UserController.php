@@ -15,7 +15,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->role === 'caissier') {
+        if (Auth::user()->role === 'vendeur') {
             $users = User::where('user_id', Auth::user()->user_id)->with(['creator', 'updater'])
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -102,7 +102,7 @@ class UserController extends Controller
         $user = User::where('ref', $user)->first();
         return Inertia::render('Users/Edit', [
             'user' => $user,
-            'roles' => ['admin', 'gerant', 'coiffeur', 'caissier', 'aucun'],
+            'roles' => ['admin', 'gerant', 'coiffeur', 'vendeur', 'aucun'],
             'is_admin' => Auth::user()->role === 'admin' || Auth::user()->role === 'gerant',
         ]);
     }

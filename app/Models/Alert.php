@@ -10,8 +10,9 @@ class Alert extends Model
     protected $fillable = [
         'notes',
         'produit_id',
-        'rendezvou_id',
         'is_read',
+        'salle_id',
+        'chambre_id',
     ];
     protected static function boot()
     {
@@ -30,8 +31,12 @@ class Alert extends Model
     {
         return $this->belongsTo(Produit::class);
     }
-    public function rendezvou()
+    public function salle()
     {
-        return $this->belongsTo(Rendezvou::class);
+        return $this->belongsTo(Salle::class);
+    }
+    public function chambre()
+    {
+        return $this->belongsTo(Chambre::class);
     }
 }

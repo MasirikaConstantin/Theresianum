@@ -1,3 +1,4 @@
+import { FrancCongolais } from '@/hooks/Currencies';
 import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -22,13 +23,7 @@ interface ProduitStatsProps extends PageProps {
             total_quantite: number;
             total_ca: number;
         }>;
-        ventes_par_succursale: Array<{
-            id: number;
-            nom: string;
-            total_quantite: number;
-            total_ca: number;
-            marge: number;
-        }>;
+       
         date_debut: string;
         date_fin: string;
     };
@@ -52,13 +47,7 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
         return new Intl.NumberFormat('fr-FR').format(number);
     };
 
-    // Formatage des montants en dollars
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount).replace('$US', '$');
-    };
+    
 
     // Auto-impression au chargement
     useEffect(() => {
@@ -70,7 +59,7 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
     }, []);
 
     return (
-        <div className="p-4 max-w-4xl mx-auto bg-white">
+        <div className="p-4 max-w-4xl mx-auto bg-white text-black">
             <Head title={`Statistiques Produit - ${data.produit.name}`} />
 
             {/* En-tête de l'entreprise */}
@@ -108,7 +97,7 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
                     </div>
                     <div className="flex">
                         <span className="w-32 font-medium">Prix d'achat:</span>
-                        <span>{formatCurrency(data.produit.prix_vente)}</span>
+                        <span>{FrancCongolais(data.produit.prix_vente)}</span>
                     </div>
                 </div>
             </div>
@@ -122,39 +111,13 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
                 </div>
                 <div className="border p-3 text-center rounded bg-gray-50">
                     <h4 className="font-bold text-sm">Total</h4>
-                    <p className="text-xl font-bold text-green-600">{formatCurrency(data.stats.chiffre_affaires)}</p>
+                    <p className="text-xl font-bold text-green-600">{FrancCongolais(data.stats.chiffre_affaires)}</p>
                 </div>
                 <div className="border p-3 text-center rounded bg-gray-50">
                     <h4 className="font-bold text-sm">Marge Bénéficiaire</h4>
-                    <p className="text-xl font-bold text-purple-600">{formatCurrency(data.stats.marge)}</p>
+                    <p className="text-xl font-bold text-purple-600">{FrancCongolais(data.stats.marge)}</p>
                 </div>
             </div>
-
-            {/* Ventes par succursale */}
-            <div className="mb-6">
-                <h4 className="font-bold text-lg border-b pb-1">VENTES PAR BRANCHE</h4>
-                <table className="w-full text-sm mt-2">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="text-left p-2 border">Branche</th>
-                            <th className="text-right p-2 border">Quantité</th>
-                            <th className="text-right p-2 border">Total</th>
-                            <th className="text-right p-2 border">Marge</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.ventes_par_succursale.map((succursale, index) => (
-                            <tr key={succursale.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                <td className="p-2 border">{succursale.nom}</td>
-                                <td className="p-2 border text-right">{formatNumber(succursale.total_quantite)}</td>
-                                <td className="p-2 border text-right">{formatCurrency(succursale.total_ca)}</td>
-                                <td className="p-2 border text-right">{formatCurrency(succursale.marge)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
             {/* Ventes par période */}
             <div className="mb-6">
                 <h4 className="font-bold text-lg border-b pb-1">VENTES PAR PÉRIODE</h4>
@@ -171,7 +134,7 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
                             <tr key={vente.date} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                 <td className="p-2 border">{format(new Date(vente.date), 'PPP', { locale: fr })}</td>
                                 <td className="p-2 border text-right">{formatNumber(vente.total_quantite)}</td>
-                                <td className="p-2 border text-right">{formatCurrency(vente.total_ca)}</td>
+                                <td className="p-2 border text-right">{FrancCongolais(vente.total_ca)}</td>
                             </tr>
                         ))}
                     </tbody>

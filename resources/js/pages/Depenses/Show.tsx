@@ -7,6 +7,7 @@ import { ArrowLeft, Wallet, User, FileText, Calendar } from 'lucide-react';
 import { Auth, BreadcrumbItem } from '@/types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface Depense {
     id: number;
@@ -17,9 +18,6 @@ interface Depense {
     created_at: string;
     caisse: {
         ref: string;
-        succursale?: {
-            nom: string;
-        };
     };
     user: {
         name: string;
@@ -52,35 +50,19 @@ export default function DepenseShow({ depense, auth }: Props) {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium">Montant</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-red-200">
-                                -{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(parseFloat(depense.montant)).replace('$US', '$')}
+                                -{FrancCongolais(parseFloat(depense.montant))}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm font-medium">Caisse</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2">
-                                <Wallet className="h-5 w-5" />
-                                <div>
-                                    {depense.caisse.succursale && (
-                                        <p className="text-sm text-muted-foreground">
-                                            {depense.caisse.succursale.nom}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    
 
                     <Card>
                         <CardHeader>

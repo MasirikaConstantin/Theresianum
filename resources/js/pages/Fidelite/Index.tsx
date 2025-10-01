@@ -15,6 +15,7 @@ import * as Spinners from 'react-spinners';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Vente } from '@/types';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 type Client = {
     id: number;
@@ -146,7 +147,7 @@ export default function FideliteIndex({ auth, flash }: { auth: any, flash: any }
                             {stats.meilleur_client ? (
                                 <div>
                                     <div className="font-bold">{stats.meilleur_client.client.name}</div>
-                                    <div>{stats.meilleur_client.montant_total_achats} $ dépensés</div>
+                                    <div>{FrancCongolais(stats.meilleur_client.montant_total_achats)}  dépensés</div>
                                 </div>
                             ) : (
                                 <div>Aucun client</div>
@@ -208,7 +209,7 @@ export default function FideliteIndex({ auth, flash }: { auth: any, flash: any }
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
-                                                {client.fidelite?.montant_total_achats || 0} $
+                                                {client.fidelite?.montant_total_achats  ?FrancCongolais(client.fidelite?.montant_total_achats) : 0 } 
                                             </TableCell>
                                             <TableCell>
                                                 <>

@@ -9,7 +9,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Client;
 use App\Models\Configuration;
 use App\Models\Produit;
-use App\Models\Service;
 use App\Models\Stock;
 use App\Models\Vente;
 use App\Models\VenteProduit;
@@ -39,10 +38,10 @@ class VenteController extends Controller
     public function index(Request $request)
     {
         if($this->user->role === 'admin' || $this->user->role === 'gerant'){
-            $query = Vente::with(['client', 'vendeur', 'items.produit', 'items.service'])
+            $query = Vente::with(['client', 'vendeur', 'items.produit'])
             ->orderBy('created_at', 'desc');
         }elseif($this->user->role === 'vendeur'){
-            $query = Vente::with(['client', 'vendeur', 'items.produit', 'items.service'])
+            $query = Vente::with(['client', 'vendeur', 'items.produit'])
             ->where('vendeur_id', $this->user->id)
             ->orderBy('created_at', 'desc');
         }
@@ -88,7 +87,6 @@ class VenteController extends Controller
             }])->select('id','name','telephone','email','ref')->get(),
             'produits' => $produits,
             "configuration"=>Configuration::getActiveConfig(),
-            'services' => Service::where('actif', true)->get(),
             'modes_paiement' => ['espèces', 'carte', 'chèque', 'autre'],
         ]);
     }
@@ -102,7 +100,6 @@ class VenteController extends Controller
             'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
             'items' => 'required|array|min:1',
             'items.*.produit_id' => 'nullable|required_without:items.*.service_id|exists:produits,id',
-            'items.*.service_id' => 'nullable|required_without:items.*.produit_id|exists:services,id',
             'items.*.quantite' => 'required|integer|min:1',
             'items.*.prix_unitaire' => 'required|numeric|min:0',
             'items.*.remise' => 'required|numeric|min:0',
@@ -137,7 +134,7 @@ class VenteController extends Controller
         }
         
         foreach ($request->items as $item) {
-            // Enregistrement des produits/services de la vente
+            // Enregistrement des produits de la vente
             $quantite = $item['quantite'];
             $prixUnitaire = $item['prix_unitaire'];
             $montantTotal = $item['montant_total'];
@@ -154,11 +151,10 @@ class VenteController extends Controller
 
             VenteProduit::create([
                 'vente_id' => $vente->id,
-                'produit_id' => $item['produit_id'] ?? null,
-                'service_id' => $item['service_id'] ?? null,
+                'produit_id' => $item['produit_id'],
                 'quantite' => $quantite,
                 'prix_unitaire' => $prixUnitaire,
-                'remise' => round($remise, 2), // par exemple 15.00
+                'remise' => round($remise, 2),
                 'montant_total' => $montantTotal,
             ]);
 
@@ -206,10 +202,9 @@ public function getRecentVente(Request $request)
     public function show(string $vente)
     {
         $vente = Vente::where('ref', $vente)->firstOrFail();
-        $vente->load(['client', 'vendeur', 'items.produit', 'items.service']);
+        $vente->load(['client', 'vendeur', 'items.produit']);
 
         $produits = $vente->items->filter(fn($item) => $item->produit_id);
-        $services = $vente->items->filter(fn($item) => $item->service_id);
 
         // Calculer le montant HT des produits
         $montant_produits_ht = $produits->sum('montant_total');
@@ -220,11 +215,9 @@ public function getRecentVente(Request $request)
         // Montant TTC des produits
         $montant_produits_ttc = $montant_produits_ht + $tva;
 
-        // Montant des services (pas de TVA)
-        $montant_services = $services->sum('montant_total');
 
-        // Montant brut total AVEC TVA (produits TTC + services)
-        $montant_brut_total = $montant_produits_ttc + $montant_services;
+        // Montant brut total AVEC TVA (produits TTC )
+        $montant_brut_total = $montant_produits_ttc;
         return Inertia::render('Ventes/Show', [
             'vente' => $vente,
             'montant_brut_total' => $montant_brut_total,
@@ -262,7 +255,7 @@ public function getRecentVente(Request $request)
         'client.fidelite'=>function($query){
             $query->select("id","client_id" ,"points");
 
-        }, 'items.produit', 'items.service','VenduePar'=>function($query){
+        }, 'items.produit', 'VenduePar'=>function($query){
             $query->select('id', 'name');
         }]);
         $renderer = new ImageRenderer(
@@ -302,7 +295,7 @@ public function getRecentVente(Request $request)
 public function edit(string $vente){
     $vente = Vente::where('ref', $vente)->firstOrFail();
 
-    $vente->load(['client', 'vendeur', 'items.produit', 'items.service']);
+    $vente->load(['client', 'vendeur', 'items.produit']);
     $produits = Produit::where('actif', true)
             ->whereHas('stock', function ($query) {
                 $query->where('actif', true)
@@ -313,7 +306,6 @@ public function edit(string $vente){
         return Inertia::render('Ventes/Edit', [
             'clients' => Client::all(),
             'produits' => $produits,
-            'services' => Service::where('actif', true)->get(),
             'modes_paiement' => ['espèces', 'carte', 'chèque', 'autre'],
             'vente' => $vente,
         ]);
@@ -329,9 +321,8 @@ public function update(Request $request, $id)
         'montant_total' => 'required|numeric|min:0',
         'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
         'items' => 'required|array|min:1',
-        'items.*.id' => 'nullable|exists:vente_produits,id', // Pour les items existants
+        'items.*.id' => 'nullable|exists:vente_produits,id', 
         'items.*.produit_id' => 'nullable|required_without:items.*.service_id|exists:produits,id',
-        'items.*.service_id' => 'nullable|required_without:items.*.produit_id|exists:services,id',
         'items.*.quantite' => 'required|integer|min:1',
         'items.*.prix_unitaire' => 'required|numeric|min:0',
         'items.*.remise' => 'required|numeric|min:0',
@@ -385,8 +376,7 @@ public function update(Request $request, $id)
 
             VenteProduit::create([
                 'vente_id' => $vente->id,
-                'produit_id' => $item['produit_id'] ?? null,
-                'service_id' => $item['service_id'] ?? null,
+                'produit_id' => $item['produit_id'] ,
                 'quantite' => $quantite,
                 'prix_unitaire' => $prixUnitaire,
                 'remise' => round($remise, 2),
@@ -424,7 +414,7 @@ public function statsJournalieres(Request $request)
     $date = now()->toDateString();
     $user = $this->user;
     
-    if ($user->role === 'caissier' || $user->role === 'coiffeur') {
+    if ($user->role === 'vendeur' || $user->role === 'coiffeur') {
         // Récupérer les IDs des ventes du vendeur pour la date
         $venteIds = Vente::where('vendeur_id', $user->id)
             ->whereDate('created_at', $date)
@@ -435,17 +425,12 @@ public function statsJournalieres(Request $request)
             ->pluck('id');
     } else {
         return response()->json([
-            'services' => 0,
             'produits' => 0,
             'total' => 0,
             'date' => $date
         ]);
     }
 
-    // Calculer le total des services (uniquement le montant des items de service)
-    $totalServices = VenteProduit::whereIn('vente_id', $venteIds)
-        ->whereNotNull('service_id')
-        ->sum('montant_total');
 
     // Calculer le total des produits (uniquement le montant des items de produit)
     $totalProduits = VenteProduit::whereIn('vente_id', $venteIds)
@@ -453,9 +438,8 @@ public function statsJournalieres(Request $request)
         ->sum('montant_total');
 
     return response()->json([
-        'services' => $totalServices,
         'produits' => $totalProduits,
-        'total' => $totalServices + $totalProduits,
+        'total' => $totalProduits,
         'date' => $date
     ]);
 }

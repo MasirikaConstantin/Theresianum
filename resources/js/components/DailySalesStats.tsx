@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FrancCongolais } from "@/hooks/Currencies";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
@@ -41,25 +42,16 @@ export default function DailySalesStats() {
                 <h3 className="text-lg">Ventes Journalières</h3>
             </div>
             <div>
-                <div className="grid grid-cols-2 gap-4 text-center mb-3">
-                    <div className="space-y-2">
-                        <p className="text-sm font-bold">Services</p>
-                        <p className="text-2xl font-bold">
-                            {parseFloat(data?.services).toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
-                        </p>
-                    </div>
+                <div className="grid grid-cols gap-4 text-center mb-3">
+                    
                     <div className="space-y-2">
                         <p className="text-sm font-bold">Produits</p>
                         <p className="text-2xl font-bold">
-                            {parseFloat(data?.produits).toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
+                            {FrancCongolais(parseFloat(data?.produits))}
                         </p>
                     </div>
                 </div>
-                <div className="flex justify-center">
-                        <h3 className="text-2xl font-bold text-primary">
-                            Total : {data?.total.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
-                        </h3>
-                    </div>
+                
             </div>
         </div>
         </div>

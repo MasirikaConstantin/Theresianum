@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dollar } from '@/hooks/Currencies';
+import { DateHeure, Dollar, HeureSimple } from '@/hooks/Currencies';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { PaginationComponent } from '@/components/Pagination';
@@ -23,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Réservations Chambres',
-        href: '/reservations-chambres',
+        href: '/chambres-reservations',
     },
 ];
 
@@ -175,7 +175,7 @@ export default function ReservationChambreIndex({ auth, reservations, statuts }:
                                         <TableCell>
                                             <div>
                                                 <p className="font-medium">
-                                                    {reservation.client.prenom} {reservation.client.nom}
+                                                    {reservation.client.name} 
                                                 </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {reservation.client.telephone}
@@ -195,10 +195,10 @@ export default function ReservationChambreIndex({ auth, reservations, statuts }:
                                         <TableCell>
                                             <div className="space-y-1">
                                                 <div className="text-sm">
-                                                    <strong>Arrivée:</strong> {dateDebut} (14:00)
+                                                    <strong>Arrivée:</strong> {dateDebut} {HeureSimple(reservation.date_debut)}
                                                 </div>
                                                 <div className="text-sm">
-                                                    <strong>Départ:</strong> {dateFin} (12:00)
+                                                    <strong>Départ:</strong> {dateFin} {HeureSimple(reservation.date_fin)}
                                                 </div>
                                             </div>
                                         </TableCell>

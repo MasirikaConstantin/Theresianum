@@ -66,7 +66,7 @@ class TransfertController extends Controller
     {
         $user = $this->user;
 
-        if ($user->role === 'caissier' || $user->role === 'coiffeur' || $user->role === 'aucun') {
+        if ($user->role === 'vendeur' || $user->role === 'coiffeur' || $user->role === 'aucun') {
             // Produits actifs avec stock > 0 dans la succursale de l'utilisateur
             $produits = Produit::where('actif', true)
             ->whereHas('stockSuccursales', function ($query) use ($user) {

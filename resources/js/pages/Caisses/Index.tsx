@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Auth, BreadcrumbItem } from '@/types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface Caisse {
     id: number;
@@ -15,10 +16,7 @@ interface Caisse {
     statut: string;
     date_ouverture: string;
     date_fermeture?: string;
-    succursale?: {
-        id: number;
-        nom: string;
-    };
+   
 }
 
 interface Props {
@@ -71,15 +69,8 @@ export default function CaisseIndex({ caisses, auth }: Props) {
                             {caisses.data.map((caisse, index) => (
                                 <TableRow key={caisse.id}>
                                     <TableCell>{caisses.from + index}</TableCell>
-                                    <TableCell>
-                                        {caisse.succursale ? (
-                                            <div className="flex items-center gap-2">
-                                                <Building className="h-4 w-4" />
-                                                {caisse.succursale.nom}
-                                            </div>
-                                        ) : '-'}
-                                    </TableCell>
-                                    <TableCell>{parseFloat(caisse.solde).toFixed(2)} $</TableCell>
+                                    
+                                    <TableCell>{FrancCongolais(parseFloat(caisse.solde))} </TableCell>
                                     <TableCell>
                                         <Badge variant={caisse.statut === 'ouverte' ? 'default' : 'secondary'}>
                                             {caisse.statut}

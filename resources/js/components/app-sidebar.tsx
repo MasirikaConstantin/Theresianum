@@ -27,43 +27,43 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             title: 'Dashboard',
             href: '/dashboard',
             icon: LayoutGrid,
-            roles: ['admin', 'gerant', 'coiffeur', "caissier"],
+            roles: ['admin', 'gerant', 'coiffeur', "vendeur"],
         },
         {
             title: 'Gestion Clients',
             icon: UserSquare,
-            roles: ['admin', 'gerant', 'coiffeur', "caissier"],
+            roles: ['admin', 'gerant', 'coiffeur', "vendeur"],
             items: [
                 {
                     title: 'Clients',
                     href: '/clients',
                     icon: UserSquare,
-                    roles: ['admin', 'gerant', 'coiffeur', "caissier"],
+                    roles: ['admin', 'gerant', 'coiffeur', "vendeur"],
                 },
             ],
         },
         {
             title: 'Les Produits',
             icon: Package,
-            roles: ['admin', 'gerant', 'coiffeur', "caissier"],
+            roles: ['admin', 'gerant', "vendeur"],
             items: [
                 {
                     title: 'Produits',
                     href: '/produits',
                     icon: ShoppingBasket,
-                    roles: ['admin'],
+                    roles: ['admin', 'gerant', "vendeur"],
                 },
                 {
                     title: 'Categories',
                     href: '/categories',
                     icon: BoxIcon,
-                    roles: ['admin'],
+                    roles: ['admin',"gerant"],
                 },
                 {
                     title: 'Stock',
                     href: '/stocks',
                     icon: Warehouse,
-                    roles: ['admin', 'gerant'],
+                    roles: ['admin', 'gerant', "vendeur"],
                 },
                 
             ],
@@ -90,25 +90,25 @@ const getMainNavItems = (userRole: string): NavItem[] => {
         {
             title: 'Ventes et Réservations',
             icon: ShoppingBasket,
-            roles: ['admin', 'gerant', 'caissier'],
+            roles: ['admin', 'gerant', 'vendeur'],
             items: [
                 {
                     title: 'Ventes',
                     href: '/ventes',
                     icon: ShoppingBasket,
-                    roles: ['admin', 'gerant', 'caissier'],
+                    roles: ['admin', 'gerant', 'vendeur'],
                 },
                 {
                     title: 'Réserv. Salles',
                     href: '/reservations',
                     icon: HomeIcon,
-                    roles: ['admin', 'gerant', 'caissier'],
+                    roles: ['admin', 'gerant', 'vendeur'],
                 },
                 {
                     title: 'Réserv. Chambres',
                     href: '/chambres-reservations',
                     icon: Bed,
-                    roles: ['admin', 'gerant', 'caissier'],
+                    roles: ['admin', 'gerant', 'vendeur'],
                 },
             ],
         },
@@ -204,25 +204,13 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     icon: UserCog,
                     roles: ['admin','gerant'],
                 },
-                {
-                    title: 'Services',
-                    href: '/statistiques-services',
-                    icon: Scissors,
-                    roles: ['admin' ],
-                },
+               
                 {
                     title: 'Produits',
                     href: '/statistiques-produits',
                     icon: Package,
                     roles: ['admin' ],
-                },
-                {
-                    title: 'Ventes',
-                    href: '/statistiques-ventes',
-                    icon: ShoppingBasket,
-                    roles: ['admin' , 'gerant'],
-                },
-               
+                }
             ],
 
         },
@@ -230,13 +218,13 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             title : 'Programme de Fidelité',
             icon : Gift,
             href : '/fidelite',
-            roles : ['admin', 'gerant','caissier'],
+            roles : ['admin', 'gerant','vendeur'],
         },
         {
             title: 'Alertes',
             icon: AlertCircle,
             href: '/alerts',
-            roles: ['admin', 'gerant', 'caissier'],
+            roles: ['admin', 'gerant', 'vendeur'],
         },
         {
             title: 'Caisse',
@@ -248,13 +236,13 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             title: 'Depenses',
             icon: FileOutput,
             href: '/depenses',
-            roles: ['admin', 'gerant', 'caissier', 'coiffeur'],
+            roles: ['admin', 'gerant', 'vendeur', 'coiffeur'],
         },
         {
             title: 'Rapport de Vente',
             icon: FileText,
             href: '/mon-reports',
-            roles: ['caissier'],
+            roles: ['vendeur'],
         },
        
     ];

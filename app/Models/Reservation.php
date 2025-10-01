@@ -11,7 +11,7 @@ class Reservation extends Model
     use HasFactory;
     protected $fillable = [
         'client_id', 'chambre_id', 'salle_id', 'date_debut', 'date_fin',
-        'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','vocation'
+        'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','vocation','type_paiement','statut_paiement'
     ];
 
     protected $casts = [

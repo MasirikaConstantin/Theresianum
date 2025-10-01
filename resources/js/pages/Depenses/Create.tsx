@@ -11,14 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface Caisse {
     id: number;
     ref: string;
     solde: string;
-    succursale: {
-        nom: string;
-    };
 }
 
 interface Props {
@@ -103,7 +101,7 @@ export default function DepenseCreate({ caisses, auth }: Props) {
                                     <AlertTitle>Attention</AlertTitle>
                                     <AlertDescription>
                                         Le montant saisi dépasse le solde disponible de cette caisse.
-                                        Solde actuel: {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(parseFloat(selectedCaisse?.solde)).replace('$US', '$')}
+                                        Solde actuel: {FrancCongolais(parseFloat(selectedCaisse?.solde || '0'))}
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -127,7 +125,7 @@ export default function DepenseCreate({ caisses, auth }: Props) {
                                                         value={caisse.id.toString()}
                                                         disabled={parseFloat(caisse.solde) <= 0}
                                                     >
-                                                        {caisse.succursale?.nom} - Solde: {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(parseFloat(caisse.solde)).replace('$US', '$')}
+                                                        Ventes Journalières - Solde: {FrancCongolais(parseFloat(caisse.solde))}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -147,7 +145,7 @@ export default function DepenseCreate({ caisses, auth }: Props) {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="montant">Montant ($)</Label>
+                                        <Label htmlFor="montant">Montant (FC)</Label>
                                         <Input
                                             id="montant"
                                             type="number"
@@ -166,7 +164,7 @@ export default function DepenseCreate({ caisses, auth }: Props) {
                                         {errors.montant && <p className="text-sm text-red-500">{errors.montant}</p>}
                                         {selectedCaisse && (
                                             <p className="text-sm text-muted-foreground mt-1">
-                                                Solde disponible: {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(parseFloat(selectedCaisse.solde)).replace('$US', '$')}
+                                                Solde disponible: {FrancCongolais(parseFloat(selectedCaisse.solde))}
                                             </p>
                                         )}
                                     </div>

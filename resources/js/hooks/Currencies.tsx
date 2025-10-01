@@ -16,5 +16,14 @@ export const Dollar = (montant: number) => {
 };
 
 export const DateHeure = (date: string) => {
+    return format(new Date(date), 'PPPp', { locale: fr });
+};
+
+
+export const DateSimple = (date: string) => {
     return format(new Date(date), 'PPP', { locale: fr });
 };
+export const HeureSimple = (heure: string) => {
+    return format(new Date(heure), 'p', { locale: fr });
+};
+    

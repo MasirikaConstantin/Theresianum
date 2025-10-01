@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { FrancCongolais } from '@/hooks/Currencies';
 interface SaleItem {
   id: string;
   name: string;
@@ -58,7 +59,7 @@ export default function SalesStats() {
                 .map((item, index) => (
                   <div key={item.id + item.total_quantity + index + 1} className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      {index + 1}. <div className={`h-3 w-3 rounded-full ${item.type === 'produit' ? 'bg-indigo-500' : 'bg-cyan-500'}`} />
+                      <span className='text-sm'>{index + 1}. </span>
                       <div>
                         <p className="font-medium">{item.name}</p>
                         <p className="text-sm text-muted-foreground capitalize">
@@ -66,7 +67,7 @@ export default function SalesStats() {
                         </p>
                       </div>
                     </div>
-                    <p className="font-medium">{item.total_amount.toLocaleString()} $</p>
+                    <p className="font-medium">{FrancCongolais(item.total_amount)} </p>
                   </div>
                 ))}
                 </ScrollArea>

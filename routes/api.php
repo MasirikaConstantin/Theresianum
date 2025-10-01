@@ -19,6 +19,7 @@ use App\Models\Succursale;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\Pointage;
+use App\Models\Stock;
 use App\Models\StockSuccursale;
 
 Route::get('/user', function (Request $request) {
@@ -59,25 +60,19 @@ Route::get('/get-pointages',function(string $ref){
  Route::get('/get-agent',[PaieController::class,'getAgent'])->name('get-agent');
 Route::get('/get-one-agent/{ref}',[PaieController::class,'getOneAgent'])->name('agents.fiche-identification');
 
-
-
- Route::post('/akibapay-test', [Akiba::class,'Akiba']);
-Route::post('twilio',[Twilo::class, 'twilio']);
-
 Route::get('/sales-reports', [ReportController::class, 'salesReport'])->name('api.sales.reports');
 
 Route::get('/stock-succursales', function () {
-    $stocks = StockSuccursale::with(['produit', 'succursale'])
+    $stocks = Stock::with(['produit'])
         ->where('actif', true)
         // Stocks en rupture (quantité = 0)
         ->where(function($query) {
             $query->where('quantite', 0)
                   // Stocks en alerte (quantité <= seuil_alerte)
-                  ->orWhereRaw('quantite <= seuil_alerte')
+                  ->orWhereRaw('quantite <= quantite_alerte')
                   // Stocks proches de l'alerte (dans une marge de 20% au-dessus du seuil)
-                  ->orWhereRaw('quantite <= seuil_alerte * 1.2');
+                  ->orWhereRaw('quantite <= quantite_alerte * 1.2');
         })
-        ->orderBy('succursale_id')
         ->orderBy('produit_id')
         ->get();
 

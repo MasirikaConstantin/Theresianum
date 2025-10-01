@@ -3,19 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { SalesStatss } from '@/types/report';
 import { Euro, TrendingUp, Package } from 'lucide-react';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface SalesChartProps {
   stats: SalesStatss;
 }
 
 const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-    }).format(value).replace('$US', '$');
-  };
+  
 
   // Données pour le graphique
   const chartData = [
@@ -40,9 +35,9 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded shadow-md">
           <p className="font-semibold">{label}</p>
-          <p className="text-blue-500">Total: {formatCurrency(payload[0].value)}</p>
-          <p className="text-green-500">Net: {formatCurrency(payload[1].value)}</p>
-          <p className="text-red-500">Remise: {formatCurrency(payload[2].value)}</p>
+          <p className="text-blue-500">Total: {FrancCongolais(payload[0].value)}</p>
+          <p className="text-green-500">Net: {FrancCongolais(payload[1].value)}</p>
+          <p className="text-red-500">Remise: {FrancCongolais(payload[2].value)}</p>
         </div>
       );
     }
@@ -66,7 +61,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis tickFormatter={formatCurrency} />
+                <YAxis tickFormatter={FrancCongolais} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 <Bar 
@@ -93,12 +88,12 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
         </CardContent>
       </Card>
 
-      {/* Top Items (Produits ET Services) */}
+      {/* Top Items (Produits ) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Top des Produits & Services
+            Top des Produits
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -114,24 +109,20 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
                       <div>
                         <p className="font-medium">
                           {item.item?.name || 'Item inconnu'}
-                          {item.type === 'service' && (
-                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              Service
-                            </span>
-                          )}
+                         
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {item.total_quantite} {item.type === 'service' ? 'fois' : 'unités'}
+                          {item.total_quantite} unités
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-green-600">
-                        {formatCurrency(Number(item.total_montant))}
+                        {FrancCongolais(Number(item.total_montant))}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {Number(item.total_quantite) > 0 
-                          ? `${formatCurrency(Number(item.total_montant) / Number(item.total_quantite))}/${item.type === 'service' ? 'fois' : 'unité'}`
+                          ? `${FrancCongolais(Number(item.total_montant) / Number(item.total_quantite))}/unité`
                           : 'Prix indisponible'
                         }
                       </p>
@@ -146,7 +137,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
                       {nullItems.length} item(s) sans information détaillée
                     </p>
                     <p className="text-yellow-700 text-xs">
-                      Total: {formatCurrency(nullItems.reduce((sum, i) => sum + Number(i.total_montant), 0))}
+                      Total: {FrancCongolais(nullItems.reduce((sum, i) => sum + Number(i.total_montant), 0))}
                     </p>
                   </div>
                 )}
@@ -165,25 +156,25 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Total : </span>
-                <span className="font-semibold">{formatCurrency(stats.montant_total)}</span>
+                <span className="font-semibold">{FrancCongolais(stats.montant_total)}</span>
               </div>
               
               {stats.montant_remise > 0 && (
                 <div className="flex justify-between text-red-500">
                   <span>Remises:</span>
-                  <span className="font-semibold">-{formatCurrency(stats.montant_remise)}</span>
+                  <span className="font-semibold">-{FrancCongolais(stats.montant_remise)}</span>
                 </div>
               )}
               
               <div className="flex justify-between text-green-600">
                 <span>Montant Net:</span>
-                <span className="font-semibold">{formatCurrency(stats.montant_net)}</span>
+                <span className="font-semibold">{FrancCongolais(stats.montant_net)}</span>
               </div>
               
               {stats.total_depenses > 0 && (
                 <div className="flex justify-between text-orange-500">
                   <span>Dépenses:</span>
-                  <span className="font-semibold">-{formatCurrency(stats.total_depenses)}</span>
+                  <span className="font-semibold">-{FrancCongolais(stats.total_depenses)}</span>
                 </div>
               )}
               
@@ -191,7 +182,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ stats }) => {
                 <div className="flex justify-between font-bold text-lg">
                   <span>Bénéfice Net:</span>
                   <span className={stats.benefice_net >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    {formatCurrency(stats.benefice_net)}
+                    {FrancCongolais(stats.benefice_net)}
                   </span>
                 </div>
               </div>

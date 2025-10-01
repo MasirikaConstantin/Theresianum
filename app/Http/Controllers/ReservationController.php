@@ -49,19 +49,27 @@ class ReservationController extends Controller
     }
 
     public function create(Request $request)
-    {
-        $salleId = $request->get('salle_id');
+{
+    $salleId = $request->get('salle_id');
 
-        $salles = Salle::where('disponible', true)->get();
-        $clients = Client::orderBy('name')->get();
+    $salles = Salle::where('disponible', true)->get();
+    $clients = Client::orderBy('name')->get();
+    $reservations = Reservation::whereNotNull('salle_id')
+        ->where(function ($q) {
+            $q->where('date_debut', '>=', now());
+        })->select('id', 'client_id', 'salle_id', 'date_debut', 'date_fin', 'statut', 'prix_total', 'ref')
+        ->get();
 
-        return Inertia::render('Reservations/Create', [
-            'salles' => $salles,
-            'clients' => $clients,
-            'prefilledSalleId' => $salleId,
-            'vocations' => ['journee', 'nuit']
-        ]);
-    }
+    return Inertia::render('Reservations/Create', [
+        'salles' => $salles,
+        'clients' => $clients,
+        'prefilledSalleId' => $salleId,
+        'vocations' => ['journee', 'nuit'],
+        'reservations' => $reservations->load(['salle' => function($query) {
+            $query->select('id', 'nom');
+        }])
+    ]);
+}
 
     public function store(Request $request)
     {
@@ -135,43 +143,33 @@ class ReservationController extends Controller
         ]);
     }
 
-    public function edit(Reservation $reservation)
+
+    public function edit(string $reservation)
     {
-        // S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
-            abort(404);
-        }
-
-        $salles = Salle::all();
-        $clients = Client::orderBy('nom')->get();
-
-        $reservation->load(['client', 'salle']);
-
-        // Extraire les heures pour l'édition
-        $dateDebut = Carbon::parse($reservation->date_debut);
-        $dateFin = Carbon::parse($reservation->date_fin);
-
-        $reservation->heure_debut = $dateDebut->format('H:i');
-        $reservation->heure_fin = $dateFin->format('H:i');
-        $reservation->date_debut_only = $dateDebut->format('Y-m-d');
-        $reservation->date_fin_only = $dateFin->format('Y-m-d');
+        $reservation = Reservation::where('ref', $reservation)->first();
+        $salles = Salle::where('disponible', true)->get();
+        $clients = Client::orderBy('name')->get();
+        
+        // Récupérer toutes les réservations à venir (y compris celle en cours d'édition)
+        $reservations = Reservation::whereNotNull('salle_id')
+            ->where(function ($q) {
+                $q->where('date_debut', '>=', now());
+            })->select('id', 'client_id', 'salle_id', 'date_debut', 'date_fin', 'statut', 'prix_total', 'ref', 'vocation')
+            ->get();
 
         return Inertia::render('Reservations/Edit', [
-            'reservation' => $reservation,
             'salles' => $salles,
             'clients' => $clients,
-            'statuts' => ['confirmee', 'en_attente', 'annulee', 'terminee'],
-            'vocations' => ['journee', 'nuit']
+            'vocations' => ['journee', 'nuit'],
+            'reservations' => $reservations->load(['salle' => function($query) {
+                $query->select('id', 'nom');
+            }]),
+            'reservation' => $reservation->load(['salle', 'client'])
         ]);
     }
 
     public function update(Request $request, Reservation $reservation)
     {
-        // S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
-            abort(404);
-        }
-
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'date_debut' => 'required|date',
@@ -183,30 +181,21 @@ class ReservationController extends Controller
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
         ]);
 
-        // Validation manuelle pour les heures sur la même journée
-        if ($validated['date_debut'] === $validated['date_fin'] && 
-            $validated['heure_debut'] >= $validated['heure_fin']) {
-            return redirect()->back()
-                ->withErrors(['heure_fin' => 'L\'heure de fin doit être postérieure à l\'heure de début pour une réservation sur la même journée.'])
-                ->withInput();
-        }
-
         DB::beginTransaction();
-
         try {
             // Combiner date et heure
             $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
             $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
-
-            // Vérifier la disponibilité (exclure la réservation actuelle)
-            if (!$this->verifierDisponibilite($validated, $reservation->id)) {
+            
+            // Vérifier la disponibilité (en excluant la réservation actuelle)
+            if (!$this->verifierDisponibiliteSalle($validated, $reservation->id)) {
                 return redirect()->back()
                     ->with('error', 'La salle n\'est pas disponible pour cette période')
                     ->withInput();
             }
 
             // Calcul du prix total
-            $prixTotal = $this->calculerPrixTotal($validated);
+            $prixTotal = $this->calculerPrixTotalSalle($validated);
 
             // Mise à jour de la réservation
             $reservation->update(array_merge($validated, [
@@ -216,13 +205,52 @@ class ReservationController extends Controller
             DB::commit();
 
             return redirect()->route('reservations.index')
-                ->with('success', 'Réservation modifiée avec succès');
+                ->with('success', 'Réservation mise à jour avec succès');
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Erreur lors de la modification de la réservation: ' . $e->getMessage());
+                ->with('error', 'Erreur lors de la mise à jour de la réservation: ' . $e->getMessage())
+                ->withInput();
         }
+    }
+
+    private function verifierDisponibiliteSalle(array $data, $excludeReservationId = null): bool
+    {
+        $query = Reservation::where('salle_id', $data['salle_id'])
+            ->where('statut', '!=', 'annulee')
+            ->where(function ($query) use ($data) {
+                $query->whereBetween('date_debut', [$data['date_debut'], $data['date_fin']])
+                    ->orWhereBetween('date_fin', [$data['date_debut'], $data['date_fin']])
+                    ->orWhere(function ($q) use ($data) {
+                        $q->where('date_debut', '<=', $data['date_debut'])
+                            ->where('date_fin', '>=', $data['date_fin']);
+                    });
+            });
+
+        if ($excludeReservationId) {
+            $query->where('id', '!=', $excludeReservationId);
+        }
+
+        return !$query->exists();
+    }
+
+    private function calculerPrixTotalSalle(array $data): float
+    {
+        $salle = Salle::find($data['salle_id']);
+        $dateDebut = Carbon::parse($data['date_debut']);
+        $dateFin = Carbon::parse($data['date_fin']);
+        
+        // Calcul précis en prenant en compte les heures
+        $diffTime = $dateFin->diffInSeconds($dateDebut);
+        $jours = ceil($diffTime / (24 * 3600)); // Arrondi au supérieur
+        
+        // Au moins 1 jour
+        $jours = max(1, $jours);
+        
+        $prixParJour = $data['vocation'] === 'journee' ? $salle->prix_journee : $salle->prix_nuit;
+        
+        return $jours * $prixParJour;
     }
 
     public function destroy(Reservation $reservation)

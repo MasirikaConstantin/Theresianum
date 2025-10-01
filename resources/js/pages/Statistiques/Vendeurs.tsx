@@ -1,3 +1,4 @@
+
 import { Head } from '@inertiajs/react';
 import { BreadcrumbItem, PageProps } from '@/types';
 import { useState, useEffect } from 'react';
@@ -14,6 +15,7 @@ import { DatePicker } from '@/components/DatePicker';
 import DateRangePicker from '@/components/date-range-picker';
 import { UserCheck } from 'lucide-react';
 import { fr } from 'date-fns/locale';
+import { FrancCongolais } from '@/hooks/Currencies';
 export default function VendeursIndex({
   vendeurs,
   filters,
@@ -87,7 +89,6 @@ export default function VendeursIndex({
       }),
       montant: parseFloat(vente.montant_total),
       produits: vente.produits?.reduce((sum: number, p: any) => sum + p.quantite, 0) || 0,
-      services: vente.services?.length || 0
     }));
   };
 
@@ -152,12 +153,9 @@ export default function VendeursIndex({
                           </div>
                         )}
 
-
                         <div>
                           <p>{vendeur.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {vendeur.succursale?.nom || 'Aucune branche'}
-                          </p>
+                         
                         </div>
                       </div>
                     </Button>
@@ -217,36 +215,30 @@ export default function VendeursIndex({
 
                         <div>
                           <CardTitle>{statsData.selectedVendeur.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {statsData.selectedVendeur.succursale?.nom || 'Aucune branche'}
-                          </p>
+                          
                         </div>
                       </div>
                     </CardHeader>
                   </Card>
 
                   {/* Statistiques */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <StatCard
                       title="Total des ventes"
-                      value={statsData.stats?.total_ventes}
+                      value={statsData.stats?.total_ventes ? statsData.stats?.total_ventes :0}
                       icon="💰"
                     />
                     <StatCard
                       title="Montant total"
-                      value={`${statsData.stats?.montant_total?.toLocaleString()} $`}
+                      value={`${FrancCongolais(statsData.stats?.montant_total)}`}
                       icon="💵"
                     />
                     <StatCard
                       title="Moyenne par vente"
-                      value={`${parseFloat(statsData.stats?.moyenne_vente)?.toFixed(2)} $`}
+                      value={`${statsData.stats?.moyenne_vente ?FrancCongolais(parseFloat(statsData.stats?.moyenne_vente) ) : 0}`}
                       icon="📊"
                     />
-                    <StatCard
-                      title="Produits vendus"
-                      value={statsData.stats?.produits_vendus}
-                      icon="🛍️"
-                    />
+                   
                   </div>
 
                   {/* Graphique des ventes */}
@@ -274,9 +266,8 @@ export default function VendeursIndex({
                           />
                           <Tooltip />
                           <Legend />
-                          <Bar dataKey="montant" name="Montant ($)" fill="#3b82f6" />
+                          <Bar dataKey="montant" name="Montant (FC)" fill="#3b82f6" />
                           <Bar dataKey="produits" name="Produits vendus" fill="#10b981" />
-                          <Bar dataKey="services" name="Services" fill="#000" />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -295,7 +286,6 @@ export default function VendeursIndex({
                             <TableHead>Montant</TableHead>
                             <TableHead>Mode de paiement</TableHead>
                             <TableHead>Produits</TableHead>
-                            <TableHead>Services</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -305,10 +295,9 @@ export default function VendeursIndex({
                                 <TableCell>
                                   {format(new Date(vente.created_at), 'PPPp', { locale: fr })}
                                 </TableCell>
-                                <TableCell>{vente.montant_total} $</TableCell>
+                                <TableCell>{FrancCongolais(vente.montant_total)}</TableCell>
                                 <TableCell>{vente.mode_paiement}</TableCell>
                                 <TableCell>{vente.produits.reduce((sum, p) => sum + p.quantite, 0)}</TableCell>
-                                <TableCell>{vente.services.length}</TableCell>
                               </TableRow>
                             ))
                           ) : (
@@ -349,3 +338,4 @@ function StatCard({ title, value, icon }: { title: string; value: any; icon: str
     </Card>
   );
 }
+

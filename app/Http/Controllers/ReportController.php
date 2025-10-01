@@ -4,17 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Vente;
 use App\Models\Depense;
-use App\Models\Succursale;
 use App\Models\User;
 use App\Models\VenteProduit;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Dompdf\Options;
-use FPDF;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ReportController extends Controller
@@ -27,7 +23,6 @@ class ReportController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'user_id' => 'nullable|integer|exists:users,id',
-            'succursale_id' => 'nullable|integer|exists:succursales,id',
             'type' => 'nullable|in:summary,detailed',
             'export' => 'nullable',
         ]);
@@ -35,7 +30,7 @@ class ReportController extends Controller
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date)->endOfDay();
         
-        // Inclure à la fois les produits et les services dans les relations
+        // Inclure à la fois les produits dans les relations
         $query = Vente::with([
             'vendeur' => function($q) {
                 $q->select('id', 'name', 'avatar'); 
@@ -43,11 +38,7 @@ class ReportController extends Controller
             'client' => function($q) {
                 $q->select('id', 'name'); 
             }, 
-            'succursale' => function($q) {
-                $q->select('id', 'nom'); 
-            }, 
             'venteProduits.produit',
-            'venteProduits.service'
         ])->whereBetween('created_at', [$startDate, $endDate]);
 
         // Filtrage par vendeur
@@ -55,29 +46,19 @@ class ReportController extends Controller
             $query->where('vendeur_id', $request->user_id);
         }
 
-        // Filtrage par succursale
-        if ($request->has('succursale_id') && $request->succursale_id) {
-            $query->where('succursale_id', $request->succursale_id);
-        }
-
         $ventes = $query->get();
         $type = $request->get('type', 'summary');
         $export = $request->get('export');
         
         // Calcul des statistiques avec les mêmes filtres
-        $stats = $this->calculateStats($ventes, $startDate, $endDate, $request->user_id, $request->succursale_id);
+        $stats = $this->calculateStats($ventes, $startDate, $endDate, $request->user_id);
         
         if ($type === 'detailed') {
             // Récupération des informations supplémentaires pour l'export PDF
             $vendeur = null;
-            $succursale = null;
             
             if ($request->has('user_id') && $request->user_id) {
                 $vendeur = User::where('id', $request->user_id)->select('id', 'name', 'avatar')->first();
-            }
-            
-            if ($request->has('succursale_id') && $request->succursale_id) {
-                $succursale = Succursale::where('id', $request->succursale_id)->select('id', 'nom')->first();
             }
             
             // Récupération des dépenses filtrées pour l'export PDF
@@ -86,12 +67,7 @@ class ReportController extends Controller
             if ($request->has('user_id') && $request->user_id) {
                 $depensesQuery->where('user_id', $request->user_id);
             }
-            
-            // Si vous avez une relation entre dépenses et succursales, ajoutez ce filtre
-            // if ($request->has('succursale_id') && $request->succursale_id && method_exists(Depense::class, 'succursale')) {
-            //     $depensesQuery->where('succursale_id', $request->succursale_id);
-            // }
-            
+          
             $depenses = $depensesQuery->get();
             
             if ($export === 'pdf') {
@@ -100,21 +76,14 @@ class ReportController extends Controller
                     'ventes' => $ventes,
                     'depenses' => $depenses, 
                     'vendeur' => $vendeur,
-                    'succursale' => $succursale,
                     'filters' => $request->all(),
                     'entreprise' => [
                         'nom' => 'BELLA HAIR MAKEUP',
                         'rccm' => '23-A-07022',
                         'id_national' => '01-G4701-N300623',
-                        'address' => $succursale && $succursale->adresse 
-                            ? $succursale->adresse 
-                            : "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
-                        'phone' => $succursale && $succursale->telephone 
-                            ? $succursale->telephone 
-                            : "+243897456311",
-                        'email' => $succursale && $succursale->email 
-                            ? $succursale->email 
-                            : "info@bellahairmakeup.com",
+                        'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
+                        'phone' => "+243897456311",
+                        'email' => "info@bellahairmakeup.com",
                         'logo' => asset('images/logo.png'), 
                     ]
                 ]);
@@ -140,39 +109,34 @@ class ReportController extends Controller
     }
 }
 
-private function calculateStats($ventes, $startDate, $endDate, $userId = null, $succursaleId = null)
+private function calculateStats($ventes, $startDate, $endDate, $userId = null)
 {
     $totalVentes = $ventes->count();
     $montantTotal = $ventes->sum('montant_total');
     $montantRemise = $ventes->sum('remise');
     
     // Construction de la requête pour les items les plus vendus avec les mêmes filtres
-    $topItemsQuery = VenteProduit::whereHas('vente', function($q) use ($startDate, $endDate, $userId, $succursaleId) {
+    $topItemsQuery = VenteProduit::whereHas('vente', function($q) use ($startDate, $endDate, $userId) {
         $q->whereBetween('created_at', [$startDate, $endDate]);
         
         if ($userId) {
             $q->where('vendeur_id', $userId);
-        }
-        
-        if ($succursaleId) {
-            $q->where('succursale_id', $succursaleId);
         }
     });
     
     $topItems = $topItemsQuery
         ->select(
             'produit_id',
-            'service_id',
             DB::raw('SUM(quantite) as total_quantite'),
             DB::raw('SUM(montant_total) as total_montant')
         )
-        ->with(['produit', 'service'])
-        ->groupBy('produit_id', 'service_id')
+        ->with(['produit'])
+        ->groupBy('produit_id')
         ->orderByDesc('total_quantite')
         ->take(5)
         ->get();
     
-    // Transformer les résultats pour inclure produits et services
+    
     $topItemsFormatted = $topItems->map(function ($item) {
         if ($item->produit_id && $item->produit) {
             return [
@@ -188,27 +152,6 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
                     'prix_vente' => $item->produit->prix_vente,
                 ]
             ];
-        } elseif ($item->service_id && $item->service) {
-            return [
-                'type' => 'service',
-                'item_id' => $item->service_id,
-                'total_quantite' => $item->total_quantite,
-                'total_montant' => $item->total_montant,
-                'item' => [
-                    'id' => $item->service->id,
-                    'name' => $item->service->name,
-                    'description' => $item->service->description,
-                    'prix' => $item->service->prix,
-                ]
-            ];
-        } else {
-            return [
-                'type' => 'inconnu',
-                'item_id' => null,
-                'total_quantite' => $item->total_quantite,
-                'total_montant' => $item->total_montant,
-                'item' => null
-            ];
         }
     });
 
@@ -218,11 +161,6 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
     if ($userId) {
         $depensesQuery->where('user_id', $userId);
     }
-    
-    // Si vous avez une relation entre dépenses et succursales, ajoutez ce filtre
-    // if ($succursaleId && method_exists(Depense::class, 'succursale')) {
-    //     $depensesQuery->where('succursale_id', $succursaleId);
-    // }
     
     $totalDepenses = $depensesQuery->sum('montant');
 
@@ -240,7 +178,6 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
         ],
         'filters_applied' => [
             'user_id' => $userId,
-            'succursale_id' => $succursaleId
         ]
     ];
 }
@@ -250,7 +187,7 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $userId = $request->input('user_id');
 
-        $query = Vente::with(['vendeur', 'venteProduits.produit', 'venteProduits.service'])
+        $query = Vente::with(['vendeur', 'venteProduits.produit'])
             ->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]);
 
         if ($userId) {
@@ -263,7 +200,7 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->get();
 
-        $vendeurs = User::whereIn('role', ['gerant', 'coiffeur', 'caissier', 'admin'])->get();
+        $vendeurs = User::whereIn('role', ['gerant', 'coiffeur', 'vendeur', 'admin'])->get();
 
         return inertia('Reports/Index', [
             'ventes' => $ventes,
@@ -279,23 +216,16 @@ private function calculateStats($ventes, $startDate, $endDate, $userId = null, $
 
     public function salesReportIndex()
 {
-    // Récupérer les vendeurs et succursales pour les filtres
+    // Récupérer les vendeurs pour les filtres
     $vendeurs = User::select('id', 'name')
     ->orderBy('name')
     ->get();
-
-$succursales = Succursale::select('id', 'nom')
-    ->orderBy('nom')
-    ->get();
-
     return inertia('Reports/SalesReport', [
         'vendeurs' => $vendeurs,
-        'succursales' => $succursales,
         'filters' => [
             'start_date' => now()->startOfMonth()->format('Y-m-d'),
             'end_date' => now()->format('Y-m-d'),
             'user_id' => null,
-            'succursale_id' => null,
         ]
     ]);
 }
@@ -313,7 +243,7 @@ public function print(Request $request)
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $userId = $request->input('user_id');
 
-        $query = Vente::with(['vendeur', 'venteProduits.produit', 'venteProduits.service'])
+        $query = Vente::with(['vendeur', 'venteProduits.produit'])
             ->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]);
 
         if ($userId) {
@@ -342,8 +272,7 @@ public function print(Request $request)
             'nom' => 'BELLA HAIR MAKEUP',
             'rccm'=>'23-A-07022',
             'id_national'=>'01-G4701-N300623',
-            'adresse' => $vendeur->succursale->adresse,
-            'nom_sucursale' => $vendeur->succursale->nom,
+            'adresse' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
             'telephone' => "+243970054889",
             'email' => 'info@bellahairmakeup.com',
             
@@ -373,7 +302,7 @@ public function print(Request $request)
     $userId = $request->user_id ?: Auth::user()->id;
 
     // Récupération des ventes
-    $query = Vente::with(['vendeur','client','succursale','venteProduits.produit','venteProduits.service'])
+    $query = Vente::with(['vendeur','client','venteProduits.produit'])
         ->whereBetween('created_at', [$startDate, $endDate]);
 
     if ($userId) {
@@ -392,7 +321,7 @@ public function print(Request $request)
 
     $depenses = $depensesQuery->get();
 
-    $vendeur = User::with('succursale')->find($userId);
+    $vendeur = User::find($userId);
     
     // CALCUL DES STATS CORRIGÉ
     $stats = $this->calculateStatsForPdf($ventes, $depenses, $startDate, $endDate, $userId);
@@ -401,10 +330,7 @@ public function print(Request $request)
         'nom' => 'BELLA HAIR MAKEUP',
         'rccm' => '23-A-07022',
         'id_national' => '01-G4701-N300623',
-        'address' => $vendeur && $vendeur->succursale 
-            ? $vendeur->succursale->adresse 
-            : "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
-        'nom_sucursale' => $vendeur && $vendeur->succursale ? $vendeur->succursale->nom : null,
+        'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
         'phone' => "+243970054889",
         'logo' => asset('images/logo.png'),
         'email' => 'info@bellahairmakeup.com',
@@ -421,7 +347,6 @@ public function print(Request $request)
             'user_id' => $userId,
         ],
         'stats' => $stats,
-        'succursale' => $vendeur ? $vendeur->succursale : null,
     ]);
 }
 
@@ -433,16 +358,7 @@ private function calculateStatsForPdf($ventes, $depenses, $startDate, $endDate, 
     $montantRemise = $ventes->sum('remise');
     $totalDepenses = $depenses->sum('montant');
 
-    /*/ DEBUG : Log pour vérifier
-    \Log::info('Stats PDF calculées', [
-        'start_date' => $startDate,
-        'end_date' => $endDate,
-        'user_id' => $userId,
-        'nb_ventes' => $totalVentes,
-        'montant_total' => $montantTotal,
-        'total_depenses' => $totalDepenses,
-        'nb_depenses' => $depenses->count()
-    ]);*/
+   
 
     return [
         'total_ventes' => $totalVentes,
@@ -493,26 +409,11 @@ public function generatePdfsynthese(Request $request)
         'end_date' => $endDate->format('Y-m-d'),
         'entreprise' => [
                         'nom' => 'BELLA HAIR MAKEUP',
-                        'rccm'=>'23-A-07022',
+                        'rccm'=>'23-A-07022',   
                         'id_national'=>'01-G4701-N300623',
-                        'address' => (function() use ($vendeur) {
-                            if ($vendeur && $vendeur->succursale) {
-                                return $vendeur->succursale->adresse;
-                            }
-                            return "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema";
-                        })(),
-                        'phone' => (function() use ($vendeur) {
-                            if ($vendeur && $vendeur->succursale) {
-                                return $vendeur->succursale->telephone;
-                            }
-                            return "+243897456311";
-                        })(),
-                        'email' => (function() use ($vendeur) {
-                            if ($vendeur && $vendeur->succursale) {
-                                return $vendeur->succursale->email;
-                            }
-                            return "info@bellahairmakeup.com";
-                        })(),
+                        'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
+                        'phone' => "+243897456311",
+                        'email' => "info@bellahairmakeup.com",
                         'logo' => asset('images/logo.png'), 
                     ]
     ]);
@@ -534,23 +435,22 @@ private function calculateStatsSynthese($ventes, $startDate, $endDate)
     $montantTotal = $ventes->sum('montant_total');
     $montantRemise = $ventes->sum('remise');
 
-    // Produits ET services les plus vendus
+    // Produits les plus vendus
     $topItems = VenteProduit::whereHas('vente', function($q) use ($startDate, $endDate) {
             $q->whereBetween('created_at', [$startDate, $endDate]);
         })
         ->select(
             'produit_id',
-            'service_id',
             DB::raw('SUM(quantite) as total_quantite'),
             DB::raw('SUM(montant_total) as total_montant')
         )
-        ->with(['produit', 'service'])
-        ->groupBy('produit_id', 'service_id')
+        ->with(['produit'])
+        ->groupBy('produit_id')
         ->orderByDesc('total_quantite')
         ->take(5)
         ->get();
 
-    // Transformer les résultats pour inclure produits et services
+   
     
 
     // Dépenses sur la période
@@ -609,29 +509,4 @@ private function calculateStatsSynthese($ventes, $startDate, $endDate)
         
     ];
 }
-}
-
-class PDF extends FPDF
-{
-
-// Pied de page
-function Footer()
-{
-    // Positionnement à 1,5 cm du bas
-    $this->SetY(-15);
-    // Police Arial italique 8
-    $this->AddFont('Comfortaa'); // Important : sans extension .php
-    $this->AddFont('comfortaa', 'B'); 
-    $this->SetFont('Comfortaa','B',8);
-    // Numéro de page
-    $this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
-}
-
-
-
-
-
-
-
-
 }

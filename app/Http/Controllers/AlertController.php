@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Alert;
 use App\Models\Chambre;
 use App\Models\Produit;
-use App\Models\Rendezvou;
 use App\Models\Salle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class AlertController extends Controller
 {
     public function index()
     {
-        $alerts = Alert::with(['user', 'produit', 'rendezvou'])
+        $alerts = Alert::with(['user', 'produit'])
             ->latest()
             ->paginate(15);
 
@@ -27,7 +27,6 @@ class AlertController extends Controller
     {
         return Inertia::render('Alerts/Create', [
             'produits' => Produit::select('id', 'name','ref')->get(),
-            'rendezvous' => Rendezvou::select('id','ref')->get(),
             'salles' => Salle::select('id','nom','ref')->get(),
             'chambres' => Chambre::select('id','nom','ref')->get(),
         ]);
@@ -38,16 +37,14 @@ class AlertController extends Controller
         $request->validate([
             'notes' => 'nullable|string',
             'produit_id' => 'nullable|exists:produits,id',
-            'rendezvou_id' => 'nullable|exists:rendezvous,id',
             'salle_id' => 'nullable|exists:salles,id',
             'chambre_id' => 'nullable|exists:chambres,id',
         ]);
 
         Alert::create([
             'notes' => $request->notes,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()->id,
             'produit_id' => $request->produit_id,
-            'rendezvou_id' => $request->rendezvou_id,
             'salle_id' => $request->salle_id,
             'chambre_id' => $request->chambre_id,
         ]);
@@ -60,7 +57,7 @@ class AlertController extends Controller
     {
         $alert = Alert::where('ref', $alert)->firstOrFail();
         return Inertia::render('Alerts/Show', [
-            'alert' => $alert->load(['user', 'produit', 'rendezvou']),
+            'alert' => $alert->load(['user', 'produit']),
         ]);
     }
 
@@ -70,21 +67,22 @@ class AlertController extends Controller
         return Inertia::render('Alerts/Edit', [
             'alert' => $alert,
             'produits' => Produit::all(),
-            'rendezvous' => Rendezvou::all(),
+            'salles' => Salle::all(),
+            'chambres' => Chambre::all(),
         ]);
     }
 
-    public function update(Request $request, Alert $alert)
+    public function update(Request $request, string $alert)
     {
+        $alert = Alert::where('ref', $alert)->firstOrFail();
         $request->validate([
             'notes' => 'nullable|string',
             'produit_id' => 'nullable|exists:produits,id',
-            'rendezvou_id' => 'nullable|exists:rendezvous,id',
             'salle_id' => 'nullable|exists:salles,id',
             'chambre_id' => 'nullable|exists:chambres,id',
         ]);
 
-        $alert->update($request->only(['notes', 'produit_id', 'rendezvou_id', 'salle_id', 'chambre_id']));
+        $alert->update($request->only(['notes', 'produit_id', 'salle_id', 'chambre_id']));
 
         return redirect()->route('alerts.index')
             ->with('success', 'Alerte mise à jour avec succès');

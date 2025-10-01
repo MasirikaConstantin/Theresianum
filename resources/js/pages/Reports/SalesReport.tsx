@@ -5,11 +5,9 @@ import { z } from 'zod';
 import { useSalesReport } from '@/hooks/useSalesReport';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Loader2, Printer } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SalesStats from './SalesStats';
 import SalesChart from './SalesChart';
@@ -27,10 +25,9 @@ const reportSchema = z.object({
 
 type ReportFormData = z.infer<typeof reportSchema>;
 
-const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, succursales, filters: initialFilters, auth }) => {
+const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, filters: initialFilters, auth }) => {
   const { stats, loading, error, generateReport, printReport } = useSalesReport();
   const [selectedVendeur, setSelectedVendeur] = useState<string>(initialFilters?.user_id?.toString() || '');
-  const [selectedSuccursale, setSelectedSuccursale] = useState<string>(initialFilters?.succursale_id?.toString() || '');
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ReportFormData>({
     resolver: zodResolver(reportSchema),
@@ -38,19 +35,18 @@ const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, succursales, fi
       start_date: initialFilters?.start_date,
       end_date: initialFilters?.end_date,
       user_id: initialFilters?.user_id?.toString() || null,
-      succursale_id: initialFilters?.succursale_id?.toString() || null,
     }
   });
-
+  
   const onSubmit = (data: ReportFormData) => {
     // Convertir les valeurs en nombres si elles existent
     const filters = {
       ...data,
       user_id: data.user_id ? parseInt(data.user_id) : '',
-      succursale_id: data.succursale_id ? parseInt(data.succursale_id) : '',
     };
     
     generateReport(filters as any);
+  
   };
 
   const handlePrint = () => {
@@ -58,7 +54,6 @@ const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, succursales, fi
     const printFilters = {
       ...formData,
       user_id: formData.user_id ? parseInt(formData.user_id) : '',
-      succursale_id: formData.succursale_id ? parseInt(formData.succursale_id) : '',
       type: 'detailed' as const,
       export: 'pdf' as const
     };
@@ -71,12 +66,7 @@ const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, succursales, fi
     setSelectedVendeur(value);
     setValue('user_id', value === 'all' ? null : value);
   };
-
-  const handleSuccursaleChange = (value: string) => {
-    setSelectedSuccursale(value);
-    setValue('succursale_id', value === 'all' ? null : value);
-  };
-
+  
   return (
     <AppLayout auth={auth} breadcrumbs={[
       { title: 'Rapports', href: '/reports' },
@@ -137,23 +127,6 @@ const SalesReport: React.FC<SalesReportPageProps> = ({ vendeurs, succursales, fi
                     {vendeurs.map((vendeur) => (
                       <SelectItem key={vendeur.id} value={vendeur.id.toString()}>
                         {vendeur.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Succursale</Label>
-                <Select value={selectedSuccursale} onValueChange={handleSuccursaleChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une succursale" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toutes les succursales</SelectItem>
-                    {succursales.map((succursale) => (
-                      <SelectItem key={succursale.id} value={succursale.id.toString()}>
-                        {succursale.nom}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -704,7 +704,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                                 }
                                             >
                                                 Points : {selectedClient.fidelite.points} vaut{" "}
-                                                {selectedClient.fidelite.points * configuration.valeur_point} $
+                                                {FrancCongolais(selectedClient.fidelite.points * configuration.valeur_point)} 
                                             </Badge>
                                             )}
                                         </div>

@@ -25,14 +25,13 @@ class DepenseController extends Controller
     $user = $this->user;
     
     $query = Depense::with([
-        'caisse:id,ref,succursale_id', 
-        'caisse.succursale:id,nom', 
+        'caisse:id,ref', 
         'user:id,name'
     ]);
     
     // Si l'utilisateur n'est PAS admin, on applique les filtres
     if ($user->role === 'admin' || $user->role === 'gerant') { 
-    }elseif($user->role === 'caissier' || $user->role === 'coiffeur'){
+    }elseif($user->role === 'vendeur' || $user->role === 'coiffeur'){
         $query->where('user_id', $user->id);
     }
     
@@ -48,15 +47,12 @@ class DepenseController extends Controller
     {
         $user = $this->user;
         
-        if($user->role === 'caissier' || $user->role === 'coiffeur' || $user->role === 'aucun'){
-            $caisses = Caisse::where('succursale_id', $user->succursale_id)->where('statut', 'ouverte')->get();
+        if($user->role === 'vendeur' || $user->role === 'coiffeur' || $user->role === 'aucun'){
+            $caisses = Caisse::where('statut', 'ouverte')->get();
         }else{
             $caisses = Caisse::where('statut', 'ouverte')->get();
         }
 
-        $caisses->load(['succursale'=>function($query){
-            $query->select('id', 'nom');
-        }]);
         return Inertia::render('Depenses/Create', [
             'caisses' => $caisses
         ]);
@@ -73,7 +69,7 @@ class DepenseController extends Controller
 
         $depense = Depense::create([
             ...$validated,
-            'user_id' => auth()->id(),
+            'user_id' => $this->user->id,
             'ref' => \Illuminate\Support\Str::uuid()
         ]);
 
@@ -88,7 +84,7 @@ class DepenseController extends Controller
     public function show(string $depense)
     {   
         $depense = Depense::where('ref', $depense)->first();
-        $depense->load(['caisse.succursale', 'user']);
+        $depense->load(['caisse', 'user']);
 
         return Inertia::render('Depenses/Show', [
             'depense' => $depense

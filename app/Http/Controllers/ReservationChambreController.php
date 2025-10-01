@@ -53,73 +53,81 @@ class ReservationChambreController extends Controller
 
         $chambres = Chambre::where('statut', 'disponible')->get();
         $clients = Client::orderBy('name')->get();
-
+        $reservations = Reservation::whereNotNull('chambre_id')
+        ->where(function ($q) {
+            $q->where('date_debut', '>=', now());
+        })->select('id', 'client_id', 'chambre_id', 'date_debut', 'date_fin', 'statut', 'prix_total', 'ref')
+        ->get();
+    
         return Inertia::render('ReservationsChambres/Create', [
             'chambres' => $chambres,
             'clients' => $clients,
-            'prefilledChambreId' => $chambreId
+            'prefilledChambreId' => $chambreId,
+            'reservations' => $reservations->load(['chambre'=>function($query){
+                $query->select('id', 'numero',"nom", 'ref');
+            }])
         ]);
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
-            'heure_debut' => 'required|date_format:H:i',
-            'heure_fin' => 'required|date_format:H:i',
-            'chambre_id' => 'required|exists:chambres,id',
-            'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
-        ]);
+{
+    $validated = $request->validate([
+        'client_id' => 'required|exists:clients,id',
+        'date_debut' => 'required|date',
+        'date_fin' => 'required|date|after_or_equal:date_debut',
+        'heure_debut' => 'required|date_format:H:i',
+        'heure_fin' => 'required|date_format:H:i',
+        'chambre_id' => 'required|exists:chambres,id',
+        'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
+    ]);
+   
+    // Validation manuelle pour les heures
+    if ($validated['date_debut'] === $validated['date_fin'] && 
+        $validated['heure_debut'] >= $validated['heure_fin']) {
+        return redirect()->back()
+            ->withErrors(['heure_fin' => 'L\'heure de départ doit être postérieure à l\'heure d\'arrivée pour une réservation sur la même journée.'])
+            ->withInput();
+    }
 
-        // Validation manuelle pour les heures sur la même journée
-        if ($validated['date_debut'] === $validated['date_fin'] && 
-            $validated['heure_debut'] >= $validated['heure_fin']) {
+    DB::beginTransaction();
+    try {
+        // Combiner date et heure
+        $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
+        $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
+        $validated['type_reservation'] = 'chambre';
+        $validated['vocation'] = 'mixte';
+        
+        // Vérifier la disponibilité
+        if (!$this->verifierDisponibilite($validated)) {
             return redirect()->back()
-                ->withErrors(['heure_fin' => 'L\'heure de départ doit être postérieure à l\'heure d\'arrivée pour une réservation sur la même journée.'])
+                ->with('error', 'La chambre n\'est pas disponible pour cette période')
                 ->withInput();
         }
+        
+        // Calcul du prix total
+        $prixTotal = $this->calculerPrixTotal($validated);
 
-        DB::beginTransaction();
+        // Création de la réservation
+        $reservation = Reservation::create(array_merge($validated, [
+            'prix_total' => $prixTotal,
+            'ref' => Str::uuid()
+        ]));
 
-        try {
-            // Combiner date et heure
-            $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
-            $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
-            $validated['type_reservation'] = 'chambre';
-            $validated['vocation'] = 'mixte';
+        // Mettre à jour le statut de la chambre
+        //Chambre::find($validated['chambre_id'])->update(['statut' => 'occupee']);
 
-            // Vérifier la disponibilité
-            if (!$this->verifierDisponibilite($validated)) {
-                return redirect()->back()
-                    ->with('error', 'La chambre n\'est pas disponible pour cette période')
-                    ->withInput();
-            }
+        DB::commit();
 
-            // Calcul du prix total
-            $prixTotal = $this->calculerPrixTotal($validated);
+        return redirect()->route('chambres-reservations.index')
+            ->with('success', 'Réservation créée avec succès');
 
-            // Création de la réservation
-            $reservation = Reservation::create(array_merge($validated, [
-                'prix_total' => $prixTotal,
-                'ref' => Str::uuid()
-            ]));
-
-            // Mettre à jour le statut de la chambre
-            Chambre::find($validated['chambre_id'])->update(['statut' => 'occupee']);
-
-            DB::commit();
-
-            return redirect()->route('reservations-chambres.index')
-                ->with('success', 'Réservation créée avec succès');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la création de la réservation: ' . $e->getMessage());
-        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la création de la réservation: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     public function show(string $ref)
     {
@@ -136,91 +144,105 @@ class ReservationChambreController extends Controller
         ]);
     }
 
-    public function edit(Reservation $reservations_chambre)
-    {
-        if ($reservations_chambre->type_reservation !== 'chambre') {
-            abort(404);
-        }
 
-        $chambres = Chambre::all();
-        $clients = Client::orderBy('name')->get();
+public function edit(string $ref)
+{
+    $reservation = Reservation::where('ref', $ref)->first();
+    $chambres = Chambre::where('statut', 'disponible')->get();
+    $clients = Client::orderBy('name')->get();
+    
+    // Récupérer toutes les réservations à venir (y compris celle en cours d'édition)
+    $reservations = Reservation::whereNotNull('chambre_id')
+        ->where(function ($q) {
+            $q->where('date_debut', '>=', now());
+        })->select('id', 'client_id', 'chambre_id', 'date_debut', 'date_fin', 'statut', 'prix_total', 'ref')
+        ->get();
 
-        $reservations_chambre->load(['client', 'chambre']);
+    return Inertia::render('ReservationsChambres/Edit', [
+        'chambres' => $chambres,
+        'clients' => $clients,
+        'reservations' => $reservations->load(['chambre' => function($query) {
+            $query->select('id', 'numero', 'nom', 'ref');
+        }]),
+        'reservation' => $reservation->load(['chambre', 'client'])
+    ]);
+}
 
-        // Extraire les dates et heures pour l'édition
-        $dateDebut = Carbon::parse($reservations_chambre->date_debut);
-        $dateFin = Carbon::parse($reservations_chambre->date_fin);
+public function update(Request $request, Reservation $reservation)
+{
+    $validated = $request->validate([
+        'client_id' => 'required|exists:clients,id',
+        'date_debut' => 'required|date',
+        'date_fin' => 'required|date|after_or_equal:date_debut',
+        'heure_debut' => 'required|date_format:H:i',
+        'heure_fin' => 'required|date_format:H:i',
+        'chambre_id' => 'required|exists:chambres,id',
+        'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
+    ]);
 
-        $reservations_chambre->heure_debut = $dateDebut->format('H:i');
-        $reservations_chambre->heure_fin = $dateFin->format('H:i');
-        $reservations_chambre->date_debut_only = $dateDebut->format('Y-m-d');
-        $reservations_chambre->date_fin_only = $dateFin->format('Y-m-d');
-
-        return Inertia::render('ReservationsChambres/Edit', [
-            'reservation' => $reservations_chambre,
-            'chambres' => $chambres,
-            'clients' => $clients,
-            'statuts' => ['confirmee', 'en_attente', 'annulee', 'terminee']
-        ]);
-    }
-
-    public function update(Request $request, Reservation $reservations_chambre)
-    {
-        if ($reservations_chambre->type_reservation !== 'chambre') {
-            abort(404);
-        }
-
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
-            'heure_debut' => 'required|date_format:H:i',
-            'heure_fin' => 'required|date_format:H:i',
-            'chambre_id' => 'required|exists:chambres,id',
-            'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
-        ]);
-
-        // Validation manuelle pour les heures sur la même journée
-        if ($validated['date_debut'] === $validated['date_fin'] && 
-            $validated['heure_debut'] >= $validated['heure_fin']) {
+    DB::beginTransaction();
+    try {
+        // Combiner date et heure
+        $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
+        $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
+        
+        // Vérifier la disponibilité (en excluant la réservation actuelle)
+        if (!$this->verifierDisponibilite($validated, $reservation->id)) {
             return redirect()->back()
-                ->withErrors(['heure_fin' => 'L\'heure de départ doit être postérieure à l\'heure d\'arrivée pour une réservation sur la même journée.'])
+                ->with('error', 'La chambre n\'est pas disponible pour cette période')
                 ->withInput();
         }
 
-        DB::beginTransaction();
+        // Calcul du prix total
+        $prixTotal = $this->calculerPrixTotal($validated);
 
-        try {
-            // Combiner date et heure
-            $validated['date_debut'] = $validated['date_debut'] . ' ' . $validated['heure_debut'];
-            $validated['date_fin'] = $validated['date_fin'] . ' ' . $validated['heure_fin'];
+        // Mise à jour de la réservation
+        $reservation->update(array_merge($validated, [
+            'prix_total' => $prixTotal
+        ]));
 
-            // Vérifier la disponibilité (exclure la réservation actuelle)
-            if (!$this->verifierDisponibilite($validated, $reservations_chambre->id)) {
-                return redirect()->back()
-                    ->with('error', 'La chambre n\'est pas disponible pour cette période')
-                    ->withInput();
-            }
-
-            // Calcul du prix total
-            $prixTotal = $this->calculerPrixTotal($validated);
-
-            // Mise à jour de la réservation
-            $reservations_chambre->update(array_merge($validated, [
-                'prix_total' => $prixTotal
-            ]));
-
-            DB::commit();
-
-            return redirect()->route('reservations-chambres.index')
-                ->with('success', 'Réservation modifiée avec succès');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la modification de la réservation: ' . $e->getMessage());
+        // Mettre à jour le statut de la chambre si nécessaire
+        if ($reservation->chambre_id != $validated['chambre_id']) {
+            // Remettre l'ancienne chambre en disponible
+            Chambre::find($reservation->chambre_id)->update(['statut' => 'disponible']);
+            // Marquer la nouvelle chambre comme occupée
+            Chambre::find($validated['chambre_id'])->update(['statut' => 'occupee']);
         }
+
+        DB::commit();
+
+        return redirect()->route('chambres-reservations.index')
+            ->with('success', 'Réservation mise à jour avec succès');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la mise à jour de la réservation: ' . $e->getMessage())
+            ->withInput();
     }
+}
+
+private function verifierDisponibilite(array $data, $excludeReservationId = null): bool
+{
+    $query = Reservation::where('chambre_id', $data['chambre_id'])
+        ->where('statut', '!=', 'annulee')
+        ->where(function ($query) use ($data) {
+            $query->whereBetween('date_debut', [$data['date_debut'], $data['date_fin']])
+                  ->orWhereBetween('date_fin', [$data['date_debut'], $data['date_fin']])
+                  ->orWhere(function ($q) use ($data) {
+                      $q->where('date_debut', '<=', $data['date_debut'])
+                        ->where('date_fin', '>=', $data['date_fin']);
+                  });
+        });
+
+    if ($excludeReservationId) {
+        $query->where('id', '!=', $excludeReservationId);
+    }
+
+    return !$query->exists();
+}
+
+    
 
     public function destroy(Reservation $reservations_chambre)
     {
@@ -241,7 +263,7 @@ class ReservationChambreController extends Controller
 
             DB::commit();
 
-            return redirect()->route('reservations-chambres.index')
+            return redirect()->route('chambres-reservations.index')
                 ->with('success', 'Réservation supprimée avec succès');
 
         } catch (\Exception $e) {
@@ -278,25 +300,7 @@ class ReservationChambreController extends Controller
         }
     }
 
-    private function verifierDisponibilite(array $data, $excludeReservationId = null): bool
-    {
-        $query = Reservation::where('chambre_id', $data['chambre_id'])
-            ->where('statut', '!=', 'annulee')
-            ->where(function ($query) use ($data) {
-                $query->whereBetween('date_debut', [$data['date_debut'], $data['date_fin']])
-                      ->orWhereBetween('date_fin', [$data['date_debut'], $data['date_fin']])
-                      ->orWhere(function ($q) use ($data) {
-                          $q->where('date_debut', '<=', $data['date_debut'])
-                            ->where('date_fin', '>=', $data['date_fin']);
-                      });
-            });
-
-        if ($excludeReservationId) {
-            $query->where('id', '!=', $excludeReservationId);
-        }
-
-        return !$query->exists();
-    }
+    
 
     private function calculerPrixTotal(array $data): float
     {
@@ -313,4 +317,6 @@ class ReservationChambreController extends Controller
         
         return $nuits * $chambre->prix;
     }
+
+    
 }

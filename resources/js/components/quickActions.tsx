@@ -13,7 +13,7 @@ export const QuickActions = () => {
         title: 'Présence',
         description: 'Générer une liste de présence',
         icon: Calendar,
-        roles : [ 'admin', 'gerant', 'caissier'],
+        roles : [ 'admin', 'gerant'],
         color: 'bg-green-500/90 hover:bg-green-600 text-white',
         action: () => router.visit('/pointages')
       },
@@ -29,31 +29,23 @@ export const QuickActions = () => {
       {
         title: 'Nouvelle vente',
         description: 'Nouvelle vente',
-        roles : [ 'admin', 'gerant', 'caissier'],
+        roles : [ 'admin', 'gerant', 'vendeur'],
         icon: ShoppingBasket,
         color: 'bg-red-500/90 hover:bg-red-600 text-white',
         action: () => router.visit('/ventes/create')
       },
       {
         title: 'Stock',
-        roles : [ 'admin', 'gerant', 'caissier'],
+        roles : [ 'admin', 'gerant', 'vendeur'],
         description: 'Compter les stocks',
         icon: Package,
         color: 'bg-blue-500/90 hover:bg-blue-600 text-white',
         action: () => auth.user.role === 'admin' || auth.user.role === 'gerant' ? router.visit('/stocks') : router.visit('/stock-succursales')
       },
       {
-        title: 'Transfert',
-        roles : [ 'admin', 'gerant', 'caissier'],
-        description: 'Transfert',
-        icon: Car,
-        color: 'bg-blue-500/90 hover:bg-blue-600 text-white',
-        action: () => router.visit('/transferts/')
-      },
-      {
         title: 'Rapport',
         description: 'Générer un rapport',
-        roles : [ 'admin', 'gerant', 'caissier'],
+        roles : [ 'admin', 'gerant', 'vendeur'],
         icon: FileText,
         color: 'bg-purple-500/90 hover:bg-purple-600 text-white',
         action: () => auth.user.role === 'admin' || auth.user.role === 'gerant' ? router.visit('/reports') : router.visit('/mon-reports')
@@ -62,7 +54,7 @@ export const QuickActions = () => {
         title: 'Alertes',
         description: 'Gérer les alertes',
         icon: AlertTriangle,
-        roles : [ 'admin', 'gerant', 'coiffeur', "caissier"],
+        roles : [ 'admin', 'gerant', 'coiffeur', "vendeur"],
         color: 'bg-orange-500/90 hover:bg-orange-600 text-white',
         action: () => router.visit('/alerts/')
       }

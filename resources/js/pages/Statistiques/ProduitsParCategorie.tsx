@@ -28,6 +28,7 @@ import {
   Box,
   Layers
 } from 'lucide-react';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Tableau de bord', href: route('dashboard') },
@@ -60,15 +61,12 @@ export default function ProduitStatsParCategorie({
   const statsCategorie = categorieSelectionnee 
     ? statsParCategorie.find(stat => stat.categorie_id === categorieSelectionnee.id)
     : null;
-    const  currency = (value: number) => new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(value).replace('$US', '$ ')
+    
   // Données pour le graphique à barres (ventes par catégorie)
   const dataVentes = statsParCategorie.map(stat => ({
     name: stat.categorie_nom,
     ventes: stat.total_ventes,
-    chiffre_affaire: currency(stat.chiffre_affaire)
+    chiffre_affaire: FrancCongolais(stat.chiffre_affaire)
   }));
 
   // Données pour le graphique circulaire (répartition des produits)
@@ -116,7 +114,7 @@ export default function ProduitStatsParCategorie({
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currency(parseFloat(statsGlobales.chiffreAffaire))} </div>
+              <div className="text-2xl font-bold">{FrancCongolais(parseFloat(statsGlobales.chiffreAffaire))} </div>
               <p className="text-xs text-muted-foreground">Total généré</p>
             </CardContent>
           </Card>
@@ -212,7 +210,7 @@ export default function ProduitStatsParCategorie({
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{currency(statsCategorie.chiffre_affaire)} </div>
+                        <div className="text-2xl font-bold">{FrancCongolais(statsCategorie.chiffre_affaire)} </div>
                         <p className="text-xs text-muted-foreground">Total généré</p>
                       </CardContent>
                     </Card>
@@ -258,7 +256,7 @@ export default function ProduitStatsParCategorie({
                           <div className="flex justify-between text-sm">
                             <span>Marge moyenne</span>
                             <span className="font-medium text-green-600">
-                              {currency(statsCategorie.marge_moyenne)}
+                              {FrancCongolais(statsCategorie.marge_moyenne)}
                             </span>
                           </div>
                         </div>
@@ -332,7 +330,7 @@ export default function ProduitStatsParCategorie({
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="ventes" fill="#8884d8" name="Nombre de ventes" />
-                    <Bar dataKey="chiffre_affaire" fill="#82ca9d" name="Montant vendue ($)" />
+                    <Bar dataKey="chiffre_affaire" fill="#82ca9d" name="Montant vendue (FC)" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

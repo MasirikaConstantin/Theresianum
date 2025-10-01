@@ -219,10 +219,10 @@ margin: 0px 0px 0px 0px;
             Total des ventes : {{ $data['stats']['total_ventes'] }}
         </li>
         <li>
-            Montant total : {{ number_format($data['stats']['montant_total'], 1) }} $
+            Montant total : {{ number_format($data['stats']['montant_total'], 1) }} FC
         </li>
         <li>
-            Moyenne par vente : {{ number_format($data['stats']['moyenne_vente'], 1) }} $</li>
+            Moyenne par vente : {{ number_format($data['stats']['moyenne_vente'], 1) }} FC</li>
         <li>
             Produits vendus : {{ $data['stats']['produits_vendus'] }}
         </li>
@@ -236,7 +236,6 @@ margin: 0px 0px 0px 0px;
                 <th>Date</th>
                 <th>Montant</th>
                 <th>Pr</th>
-                <th>Se</th>
             </tr>
         </thead>
         <tbody>
@@ -244,9 +243,8 @@ margin: 0px 0px 0px 0px;
             <tr>
                 <td style="text-align: center; font-weight: bold;">{{ $loop->iteration }}</td>
                 <td>{{ \Carbon\Carbon::parse($vente->created_at)->format('d/m/Y') }}</td>
-                <td>{{ number_format($vente->montant_total, 1) }} $</td>
+                <td>{{ number_format($vente->montant_total, 1) }} FC</td>
                 <td>{{ $vente->produits->sum('quantite') }}</td>
-                <td>{{ $vente->services->count() }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -299,20 +297,7 @@ margin: 0px 0px 0px 0px;
     </table>
     @endif
 @endif
-    <div class="ref">
-        <div>
-            <p class="ref-text">Web</p>
-            <img src="{{ $qrWeb }}" alt="QR Code Web" width="60">
-        </div>
-        <div>
-            <p class="ref-text">Facebook</p>
-            <img src="{{ $qrFacebook }}" alt="QR Code Facebook" width="60">
-        </div>
-        <div>
-            <p class="ref-text">Instagram</p>
-            <img src="{{ $qrInstagram }}" alt="QR Code Instagram" width="60">
-        </div>
-    </div>
+   
     <div class="footer">
         Généré le {{ now()->format('d/m/Y à H:i') }}
     </div>

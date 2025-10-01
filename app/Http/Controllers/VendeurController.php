@@ -18,8 +18,7 @@ class VendeurController extends Controller
 {
     public function index()
 {
-    $vendeurs = User::with('succursale')
-        ->orderBy('name')
+    $vendeurs = User::orderBy('name')
         ->get();
 
     return Inertia::render('Statistiques/Vendeurs', [
@@ -27,72 +26,7 @@ class VendeurController extends Controller
         'filters' => request()->only(['vendeur_id', 'date_debut', 'date_fin'])
     ]);
 }
-    /*public function index(Request $request)
-    {
-        $vendeurs = User::with('succursale')
-            ->orderBy('name')
-            ->get();
-
-        $selectedVendeur = $request->vendeur_id 
-            ? User::with(['succursale'])->find($request->vendeur_id)
-            : null;
-
-        // Statistiques
-        $stats = null;
-        $ventes = [];
-        $pointages = [];
-        $conges = [];
-
-        if ($selectedVendeur) {
-            // Filtres
-            $dateDebut = $request->date_debut ? Carbon::parse($request->date_debut) : now()->startOfMonth();
-            $dateFin = $request->date_fin ? Carbon::parse($request->date_fin) : now()->endOfMonth();
-
-            // Requêtes optimisées
-            $stats = [
-                'total_ventes' => Vente::where('vendeur_id', $selectedVendeur->id)
-                    ->whereBetween('created_at', [$dateDebut, $dateFin])
-                    ->count(),
-                'montant_total' => Vente::where('vendeur_id', $selectedVendeur->id)
-                    ->whereBetween('created_at', [$dateDebut, $dateFin])
-                    ->sum('montant_total'),
-                'moyenne_vente' => Vente::where('vendeur_id', $selectedVendeur->id)
-                    ->whereBetween('created_at', [$dateDebut, $dateFin])
-                    ->avg('montant_total'),
-                'produits_vendus' => DB::table('vente_produits')
-                    ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
-                    ->where('ventes.vendeur_id', $selectedVendeur->id)
-                    ->whereBetween('ventes.created_at', [$dateDebut, $dateFin])
-                    ->sum('quantite'),
-            ];
-
-            $ventes = Vente::where('vendeur_id', $selectedVendeur->id)
-                ->with(['client', 'produits', 'services'])
-                ->whereBetween('created_at', [$dateDebut, $dateFin])
-                ->orderBy('created_at', 'desc')
-                ->take(10)
-                ->get();
-
-            $pointages = $selectedVendeur->pointages()
-                ->whereBetween('date', [$dateDebut, $dateFin])
-                ->get();
-
-            $conges = $selectedVendeur->conges()
-                ->whereBetween('date_debut', [$dateDebut, $dateFin])
-                ->orWhereBetween('date_fin', [$dateDebut, $dateFin])
-                ->get();
-        }
-
-        return Inertia::render('Statistiques/Vendeurs', [
-            'vendeurs' => $vendeurs,
-            'selectedVendeur' => $selectedVendeur,
-            'stats' => $stats,
-            'ventes' => $ventes,
-            'pointages' => $pointages,
-            'conges' => $conges,
-            'filters' => $request->only(['vendeur_id', 'date_debut', 'date_fin'])
-        ]);
-    }*/
+    
 
     public function stats(Request $request)
 {
@@ -103,7 +37,7 @@ class VendeurController extends Controller
         'date_fin' => 'nullable|date|after_or_equal:date_debut'
     ]);
 
-    $vendeur = User::with(['succursale'])->find($request->vendeur_id);
+    $vendeur = User::find($request->vendeur_id);
 
     // Filtres
     $dateDebut = $request->date_debut ? Carbon::parse($request->date_debut) : now()->startOfMonth();
@@ -128,7 +62,7 @@ class VendeurController extends Controller
                     ->sum('quantite'),
         ],
         'ventes' => Vente::where('vendeur_id', $vendeur->id)
-            ->with(['client', 'produits', 'services'])
+            ->with(['client', 'produits'])
             ->whereBetween('created_at', [$dateDebut, $dateFin])
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -140,7 +74,7 @@ class VendeurController extends Controller
 
     if ($request->has('export') && $request->export === 'pdf') {
         $data['ventes']= Vente::where('vendeur_id', $vendeur->id)
-        ->with(['client', 'produits', 'services'])
+        ->with(['client', 'produits'])
         ->whereBetween('created_at', [$dateDebut, $dateFin])
         ->orderBy('created_at', 'desc')
         ->get();
@@ -168,7 +102,7 @@ class VendeurController extends Controller
             'nom' => 'BELLA HAIR MAKEUP',
             'rccm'=>'23-A-07022',
             'id_national'=>'01-G4701-N300623',
-            'adresse' => optional($vendeur->succursale)->adresse ?? 'Aucune adresse',
+            'adresse' =>  'Aucune adresse',
             'telephone' => "+243970054889",
             'email' => 'info@bellahairmakeup.com',
             
@@ -210,9 +144,9 @@ public function getSixHoursStats(Request $request)
     $query = Vente::where('created_at', '>=', $endHour->copy()->subHours(6))
                 ->where('created_at', '<', $endHour);
 
-    // Filtrer par succursale si l'utilisateur n'est pas admin
+    // Filtrer  si l'utilisateur n'est pas admin
     if (!$user->hasRole('admin')) {
-        if($user->hasRole('coiffeur') || $user->hasRole('caissier')) {
+        if($user->hasRole('coiffeur') || $user->hasRole('vendeur')) {
             $query->where('vendeur_id', $user->id);
         } elseif($user->hasRole('gerant')) {
             $query = Vente::where('created_at', '>=', $endHour->copy()->subHours(6))

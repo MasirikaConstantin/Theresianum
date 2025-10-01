@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import * as Spinners from 'react-spinners';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 export default function FideliteShow({ auth, client: initialClient }: { auth: any, client: any }) {
     const [client, setClient] = useState(initialClient);
@@ -93,7 +94,7 @@ export default function FideliteShow({ auth, client: initialClient }: { auth: an
                             <CardTitle>Total achats</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{stats.total_depense || 0}  $</div>
+                            <div className="text-3xl font-bold">{stats.total_depense ?FrancCongolais(stats.total_depense): 0} </div>
                             <div className="text-sm text-muted-foreground">{stats.total_ventes || 0} commandes</div>
                         </CardContent>
                     </Card>
@@ -102,7 +103,7 @@ export default function FideliteShow({ auth, client: initialClient }: { auth: an
                             <CardTitle>Moyenne par achat</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{stats.moyenne_achat ? parseFloat(stats.moyenne_achat).toFixed(2) : 0}  $</div>
+                            <div className="text-3xl font-bold">{stats.moyenne_achat ? FrancCongolais(parseFloat(stats.moyenne_achat)) : 0}</div>
                         </CardContent>
                     </Card>
                 </div>
@@ -135,7 +136,7 @@ export default function FideliteShow({ auth, client: initialClient }: { auth: an
                                                 {format(new Date(vente.created_at), 'PPP', { locale: fr })}
                                             </TableCell>
                                             <TableCell>{vente.code}</TableCell>
-                                            <TableCell>{vente.montant_total}  $</TableCell>
+                                            <TableCell>{FrancCongolais(vente.montant_total)}</TableCell>
                                             <TableCell>
                                                 <Badge variant="outline">{vente.mode_paiement}</Badge>
                                             </TableCell>

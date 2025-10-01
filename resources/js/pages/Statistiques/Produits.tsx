@@ -9,8 +9,8 @@ import { Head } from '@inertiajs/react';
 import { Package } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from '@/components/ui/button';
+import { FrancCongolais } from '@/hooks/Currencies';
 
-// Définir le type Produit
 interface Produit {
   id: string;
   name: string;
@@ -108,7 +108,7 @@ export default function ProductStats({ auth, produits: initialProduits = [] }: {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Les Produits',
-      href: route('statistiques.index')
+      href: route('produits.index')
     },
     {
       title: 'Produits',
@@ -237,8 +237,8 @@ export default function ProductStats({ auth, produits: initialProduits = [] }: {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
                   <StatCard title="Quantité vendue" value={stats.stats.total_vendu} icon="📦" />
-                  <StatCard title="Chiffre d'affaires" value={`${parseFloat(stats.stats.chiffre_affaires).toFixed(2)} $`} icon="💰" />
-                  <StatCard title="Marge bénéficiaire" value={`${parseFloat(stats.stats.marge).toFixed(2)} $`} icon="📈" />
+                  <StatCard title="Chiffre d'affaires" value={`${FrancCongolais(parseFloat(stats.stats.chiffre_affaires))}`} icon="💰" />
+                  <StatCard title="Marge bénéficiaire" value={`${FrancCongolais(parseFloat(stats.stats.marge))} `} icon="📈" />
                 </div>
 
                 {/* Graphique */}
@@ -261,9 +261,7 @@ export default function ProductStats({ auth, produits: initialProduits = [] }: {
                 </Card>
               </>
             )}
-            {stats && (
-              <SuccursaleChart ventesParSuccursale={stats.ventes_par_succursale} />
-            )}
+            
           </div>
 
         </div>
@@ -318,7 +316,7 @@ function SuccursaleChart({ ventesParSuccursale }: { ventesParSuccursale: any[] }
             <Tooltip
               formatter={(value, name) => {
                 if (name === 'ca' || name === 'marge') {
-                  return [`${parseFloat(value as string).toFixed(2)}$`, name];
+                  return [`${FrancCongolais(parseFloat(value as string))}`, name];
                 }
                 return [value, name];
               }}
@@ -332,13 +330,13 @@ function SuccursaleChart({ ventesParSuccursale }: { ventesParSuccursale: any[] }
             />
             <Bar
               dataKey="ca"
-              name="Chiffre d'affaires ($)"
+              name="Chiffre d'affaires (FC)"
               fill="#10b981"
               radius={[0, 4, 4, 0]}
             />
             <Bar
               dataKey="marge"
-              name="Marge bénéficiaire ($)"
+              name="Marge bénéficiaire (FC)"
               fill="#8b5cf6"
               radius={[0, 4, 4, 0]}
             />

@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Pencil, Trash2, Plus } from 'lucide-react';
-import { Dollar, FrancCongolais } from '@/hooks/Currencies';
+import { DateHeure, Dollar, FrancCongolais } from '@/hooks/Currencies';
 import AppLayout from '@/layouts/app-layout';
 
 interface PageProps {
@@ -284,7 +284,6 @@ export default function ChambreShow({ auth, chambre, occupations }: PageProps) {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Référence</TableHead>
                                                 <TableHead>Client</TableHead>
                                                 <TableHead>Période</TableHead>
                                                 <TableHead>Durée</TableHead>
@@ -300,13 +299,10 @@ export default function ChambreShow({ auth, chambre, occupations }: PageProps) {
                                                 
                                                 return (
                                                     <TableRow key={reservation.id}>
-                                                        <TableCell className="font-mono text-sm">
-                                                            {reservation.ref}
-                                                        </TableCell>
                                                         <TableCell>
                                                             <div>
                                                                 <p className="font-medium">
-                                                                    {reservation.client.prenom} {reservation.client.nom}
+                                                                    {reservation.client.name}
                                                                 </p>
                                                                 <p className="text-sm text-muted-foreground">
                                                                     {reservation.client.telephone}
@@ -317,11 +313,11 @@ export default function ChambreShow({ auth, chambre, occupations }: PageProps) {
                                                             <div className="space-y-1">
                                                                 <div className="flex items-center gap-1">
                                                                     <Calendar className="h-3 w-3" />
-                                                                    {format(dateDebut, 'dd/MM/yyyy')}
+                                                                    {DateHeure(reservation.date_debut)}
                                                                 </div>
                                                                 <div className="flex items-center gap-1">
                                                                     <Clock className="h-3 w-3" />
-                                                                    {format(dateFin, 'dd/MM/yyyy')}
+                                                                    {DateHeure(reservation.date_fin)}
                                                                 </div>
                                                             </div>
                                                         </TableCell>
@@ -331,11 +327,11 @@ export default function ChambreShow({ auth, chambre, occupations }: PageProps) {
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell className="font-semibold">
-                                                            {FrancCongolais(reservation.prix_total)}
+                                                            {Dollar(reservation.prix_total)}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge variant={getReservationStatutBadge(reservation.statut)}>
-                                                                {reservation.statut}
+                                                                {reservation.statut==="confirmee" ? "Confirmée" : reservation.statut==="en_attente" ? "En attente" : reservation.statut==="annulee" ? "Annulée" : "Terminée"}
                                                             </Badge>
                                                         </TableCell>
                                                     </TableRow>

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart, Cell, XAxis, YAxis } from 'recharts';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 const breadcrumbs = (clientName: string): BreadcrumbItem[] => [
     {
@@ -163,7 +164,7 @@ export default function ClientShow({
                    
                 </div>
                 {/* Cartes de statistiques générales */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total des achats</CardTitle>
@@ -171,9 +172,7 @@ export default function ClientShow({
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{statistiquesGenerales?.total_achats || 0}</div>
-                            <p className="text-xs text-muted-foreground">
-                                {statistiquesGenerales?.montant_total_format || '0 FC'}
-                            </p>
+                           
                         </CardContent>
                     </Card>
                     
@@ -190,7 +189,7 @@ export default function ClientShow({
                         </CardContent>
                     </Card>
                     
-                    <Card>
+                    {/*<Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Remises obtenues</CardTitle>
                             <Gift className="h-4 w-4 text-muted-foreground" />
@@ -201,7 +200,7 @@ export default function ClientShow({
                                 Économies totales
                             </p>
                         </CardContent>
-                    </Card>
+                    </Card>*/}
                     
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

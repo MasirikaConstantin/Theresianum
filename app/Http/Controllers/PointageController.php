@@ -26,7 +26,7 @@ class PointageController extends Controller
 {
 
     $user = $this->user;
-    if($user->role === "caissier"){
+    if($user->role === "vendeur"){
         $query = Pointage::with([
             'agent' => function ($query) {
                 $query->orderBy('nom')

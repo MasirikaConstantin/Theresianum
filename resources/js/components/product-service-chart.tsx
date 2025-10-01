@@ -26,15 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Auth, auth } from "@/types"
+import { FrancCongolais } from "@/hooks/Currencies"
 
 const chartConfig = {
   produits: {
     label: "Produits",
     color: "var(--chart-1)",
-  },
-  services: {
-    label: "Services",
-    color: "var(--chart-2)",
   },
 } satisfies ChartConfig
 
@@ -71,8 +68,7 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
         let max = 0;
         data.forEach(item => {
         const produits = parseFloat(item.produits) || 0;
-        const services = parseFloat(item.services) || 0;
-        const currentMax = Math.max(produits, services);
+        const currentMax = Math.max(produits);
         if (currentMax > max) max = currentMax;
         });
         
@@ -85,7 +81,7 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
       <Card className="pt-0">
         <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
           <div className="grid flex-1 gap-1">
-            <CardTitle>Produits vs Services</CardTitle>
+            <CardTitle>Produits</CardTitle>
             <CardDescription>Chargement des données...</CardDescription>
           </div>
         </CardHeader>
@@ -102,9 +98,9 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
     <Card className="pt-0">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Comparaison Produits/Services</CardTitle>
+          <CardTitle>Produits</CardTitle>
           <CardDescription>
-            Evolution des ventes de produits et services
+            Evolution des ventes de produits
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={handleRangeChange}>
@@ -132,10 +128,6 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
                 <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.8}/>
                 <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0}/>
               </linearGradient>
-              <linearGradient id="colorServices" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0}/>
-              </linearGradient>
             </defs>
             <XAxis
               dataKey="date"
@@ -148,7 +140,7 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
               }}
             />
             <YAxis
-              tickFormatter={(value) => `${value} $`}
+              tickFormatter={(value) => `${FrancCongolais(value)} `}
               domain={[0, getMaxValue(chartData)]}
               ticks={[0, getMaxValue(chartData) / 4, getMaxValue(chartData) / 2, getMaxValue(chartData) * 3/4, getMaxValue(chartData)]}
             />
@@ -165,13 +157,6 @@ export function ProductServiceChart({ auth }: { auth: Auth }) {
                   }}
                 />
               }
-            />
-            <Area
-              type="monotone"
-              dataKey="services"
-              stroke="var(--chart-2)"
-              fillOpacity={1}
-              fill="url(#colorServices)"
             />
             <Area
               type="monotone"

@@ -1,13 +1,8 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { Auth, flash, SharedData, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
-import { Currency } from '@/types';
+import { Auth, type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
 import { QuickActions } from '@/components/quickActions';
 import RendezVousCount from '@/components/RendezVousCount';
-import LesTaux from '@/components/LesTaux';
-import { SalesChart } from '@/components/saleschart';
 import { ProductServiceChart } from '@/components/product-service-chart';
 import { FluxVentes } from '@/components/flux-ventes';
 import SalesStats from '@/components/SalesStats';
@@ -16,7 +11,7 @@ import StockSuccursales from '@/components/StockSuccursales';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
+        href: '/dashboard', 
     },
 ];
 

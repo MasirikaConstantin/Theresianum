@@ -172,27 +172,12 @@ class ProduitController extends Controller
         ->orderBy('date')
         ->get();
 
-    // Nouvelles stats par succursale
-    $ventesParSuccursale = VenteProduit::where('produit_id', $produit->id)
-        ->whereHas('vente', fn($q) => $q->whereBetween('created_at', [$dateDebut, $dateFin]))
-        ->select(
-            'succursales.id',
-            'succursales.nom',
-            DB::raw('SUM(vente_produits.quantite) as total_quantite'),
-            DB::raw('SUM(vente_produits.quantite * vente_produits.prix_unitaire) as total_ca'),
-            DB::raw('SUM(vente_produits.quantite * (vente_produits.prix_unitaire - '.$produit->prix_achat.')) as marge')
-        )
-        ->join('ventes', 'vente_produits.vente_id', '=', 'ventes.id')
-        ->join('succursales', 'ventes.succursale_id', '=', 'succursales.id')
-        ->groupBy('succursales.id', 'succursales.nom')
-        ->orderBy('total_quantite', 'desc')
-        ->get();
+   
 
     $data = [
         'produit' => $produit,
         'stats' => $stats,
         'ventes_par_periode' => $ventesParPeriode,
-        'ventes_par_succursale' => $ventesParSuccursale,
         'date_debut' => $dateDebut,
         'date_fin' => $dateFin
     ];

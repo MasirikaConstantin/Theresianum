@@ -45,7 +45,7 @@ class MonReportController extends Controller
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->get();
 
-        $vendeurs = User::whereIn('role', ['gerant', 'coiffeur', 'caissier', 'admin'])->get();
+        $vendeurs = User::whereIn('role', ['gerant', 'coiffeur', 'vendeur', 'admin'])->get();
 
         return inertia('Reports/MonReports/Index', [
             'ventes' => $ventes,

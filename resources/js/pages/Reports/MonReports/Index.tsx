@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge'
 import AppLayout from '@/layouts/app-layout'
 import { fr } from 'date-fns/locale'
+import { FrancCongolais } from '@/hooks/Currencies'
 
 interface ReportProps extends PageProps {
   ventes: Array<{
@@ -96,7 +97,7 @@ export default function Reports({ auth, ventes, depenses, filters }: ReportProps
       <div className="space-y-6 p-6">
         <Card>
         <div className="flex items-center justify-between mx-4">
-          <h2 className="text-xl font-semibold leading-tight text-gray-800">Rapports de vente du {formatDate(filters.start_date, 'PPP', { locale: fr })} au  {formatDate(filters.end_date, 'PPP', { locale: fr })}</h2>
+          <h2 className="text-xl font-semibold leading-tight ">Rapports de vente du {formatDate(filters.start_date, 'PPP', { locale: fr })} au  {formatDate(filters.end_date, 'PPP', { locale: fr })}</h2>
           <Button asChild>
             <a href={generatePdfUrl()} target="_blank">
               Exporter en PDF
@@ -199,11 +200,11 @@ export default function Reports({ auth, ventes, depenses, filters }: ReportProps
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total ventes</CardTitle>
               <Badge variant="outline" className="">
-                +{totalVentes.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
+                +{FrancCongolais(totalVentes)}
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalVentes.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}</div>
+              <div className="text-2xl font-bold">{FrancCongolais(totalVentes)}</div>
               <p className="text-xs text-muted-foreground">
                 {ventes.length} vente{ventes.length !== 1 ? 's' : ''}
               </p>
@@ -214,11 +215,11 @@ export default function Reports({ auth, ventes, depenses, filters }: ReportProps
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total dépenses</CardTitle>
               <Badge variant="outline" className="text-red-600">
-                -{totalDepenses.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
+                -{FrancCongolais(totalDepenses)}
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalDepenses.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}</div>
+              <div className="text-2xl font-bold">{FrancCongolais(totalDepenses)}</div>
               <p className="text-xs text-muted-foreground">
                 {depenses.length} dépense{depenses.length !== 1 ? 's' : ''}
               </p>
@@ -230,12 +231,12 @@ export default function Reports({ auth, ventes, depenses, filters }: ReportProps
               <CardTitle className="text-sm font-medium">Bénéfice net</CardTitle>
               <Badge variant="outline" className={beneficeNet >= 0 ? 'text-green-200' : 'text-red-600'}>
                 {beneficeNet >= 0 ? '+' : ''}
-                {beneficeNet.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
+                {FrancCongolais(beneficeNet)}
               </Badge>
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${beneficeNet >= 0 ? 'text-green-200' : 'text-red-600'}`}>
-                {beneficeNet.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}
+                {FrancCongolais(beneficeNet)}
               </div>
               <p className="text-xs text-muted-foreground">
                 {format(new Date(filters.start_date), 'PPP' , { locale: fr })} - {format(new Date(filters.end_date), 'PPP' , { locale: fr })}
@@ -269,9 +270,9 @@ export default function Reports({ auth, ventes, depenses, filters }: ReportProps
                         <TableCell>{format(new Date(vente.created_at), 'dd/MM/yyyy HH:mm')}</TableCell>
                         <TableCell>{item.produit?.name.slice(0,45) || item.service?.name.slice(0,45)}</TableCell>
                         <TableCell>{item.quantite}</TableCell>
-                        <TableCell>{item.prix_unitaire.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}</TableCell>
-                        <TableCell>{item.remise.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}</TableCell>
-                        <TableCell>{item.montant_total.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' }).replace('$US', '$')}</TableCell>
+                        <TableCell>{FrancCongolais(item.prix_unitaire)}</TableCell>
+                        <TableCell>{FrancCongolais(item.remise)}</TableCell>
+                        <TableCell>{FrancCongolais(item.montant_total)}</TableCell>
                       </TableRow>
                     ))
                   )

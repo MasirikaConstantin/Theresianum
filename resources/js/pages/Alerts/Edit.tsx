@@ -14,16 +14,18 @@ const breadcrumbs = [
     { title: 'Modifier alerte', href: '#' },
 ];
 
-export default function AlertEdit({ alert, produits, rendezvous, auth }: { 
+export default function AlertEdit({ alert, produits, chambres,salles, auth }: { 
     alert: any;
     produits: any[];
-    rendezvous: any[];
+    chambres: any[];
+    salles: any[];
     auth: Auth;
 }) {
     const { data, setData, put, processing, errors } = useForm({
         notes: alert.notes,
         produit_id: alert.produit_id,
-        rendezvou_id: alert.rendezvou_id,
+        chambre_id: alert.chambre_id,
+        salle_id: alert.salle_id,
     });
 
     const submit = (e: React.FormEvent) => {
@@ -51,6 +53,7 @@ export default function AlertEdit({ alert, produits, rendezvous, auth }: {
                             <Label htmlFor="notes">Notes (optionnel)</Label>
                             <Textarea
                                 id="notes"
+                                rows={10}
                                 value={data.notes}
                                 onChange={(e) => setData('notes', e.target.value)}
                                 placeholder="Décrivez l'alerte..."
@@ -60,47 +63,67 @@ export default function AlertEdit({ alert, produits, rendezvous, auth }: {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div className="grid gap-2">
-    <Label>Associer à un produit</Label>
-    <Select
-      value={data.produit_id ? data.produit_id.toString() : "null"}
-      onValueChange={(value) => setData('produit_id', value === "null" ? null : value)}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Sélectionner un produit" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="null">Aucun produit</SelectItem>
-        {produits.map((produit) => (
-          <SelectItem key={produit.id} value={produit.id.toString()}>
-            {produit.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid gap-2">
+                            <Label>Associer à un produit</Label>
+                            <Select
+                              value={data.produit_id ? data.produit_id.toString() : "null"}
+                              onValueChange={(value) => setData('produit_id', value === "null" ? null : value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner un produit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="null">Aucun produit</SelectItem>
+                                {produits.map((produit) => (
+                                  <SelectItem key={produit.id} value={produit.id.toString()}>
+                                    {produit.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            </div>
 
-  <div className="grid gap-2">
-    <Label>Associer à un rendez-vous</Label>
-    <Select
-      value={data.rendezvou_id ? data.rendezvou_id.toString() : "null"}
-      onValueChange={(value) => setData('rendezvou_id', value === "null" ? null : value)}
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Sélectionner un rendez-vous" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="null">Aucun rendez-vous</SelectItem>
-        {rendezvous.map((rendezvou) => (
-          <SelectItem key={rendezvou.id} value={rendezvou.id.toString()}>
-            {rendezvou.title} - {new Date(rendezvou.date).toLocaleDateString()}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-</div>
+                            <div className="grid gap-2">
+                              <Label>Associer à une chambre</Label>
+                              <Select
+                                value={data.chambre_id ? data.chambre_id.toString() : "null"}
+                                onValueChange={(value) => setData('chambre_id', value === "null" ? null : value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Sélectionner une chambre" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="null">Aucune chambre</SelectItem>
+                                  {chambres.map((chambre) => (
+                                    <SelectItem key={chambre.id} value={chambre.id.toString()}>
+                                      {chambre.nom}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="grid gap-2">
+                              <Label>Associer à une salle</Label>
+                              <Select
+                                value={data.salle_id ? data.salle_id.toString() : "null"}
+                                onValueChange={(value) => setData('salle_id', value === "null" ? null : value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Sélectionner une salle" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="null">Aucune salle</SelectItem>
+                                  {salles.map((salle) => (
+                                    <SelectItem key={salle.id} value={salle.id.toString()}>
+                                      {salle.nom}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                     </div>
 
                     <div className="flex justify-end gap-2">

@@ -2,18 +2,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Euro, TrendingUp, Package, Percent } from 'lucide-react';
 import { SalesStatss } from '@/types/report';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface SalesStatsProps {
   stats: SalesStatss;
 }
 
 const SalesStats: React.FC<SalesStatsProps> = ({ stats }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount).replace('$US', '$');
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -34,21 +29,12 @@ const SalesStats: React.FC<SalesStatsProps> = ({ stats }) => {
           <Euro className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.montant_total)}</div>
+          <div className="text-2xl font-bold">{FrancCongolais(stats.montant_total)}</div>
           <p className="text-xs text-muted-foreground">Montant total des ventes</p>
         </CardContent>
       </Card>
 
-      {/*<Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Remises</CardTitle>
-          <Percent className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.montant_remise)}</div>
-          <p className="text-xs text-muted-foreground">Total des remises accordées</p>
-        </CardContent>
-      </Card>*/}
+     
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -56,7 +42,7 @@ const SalesStats: React.FC<SalesStatsProps> = ({ stats }) => {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.benefice_net)}</div>
+          <div className="text-2xl font-bold">{FrancCongolais(stats.benefice_net)}</div>
           <p className="text-xs text-muted-foreground">Après déduction des dépenses</p>
         </CardContent>
       </Card>

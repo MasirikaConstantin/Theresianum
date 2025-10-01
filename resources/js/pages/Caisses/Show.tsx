@@ -1,13 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building, Calendar, Wallet, Lock, LockOpen, ArrowLeft, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Auth, auth, BreadcrumbItem, Vente } from '@/types';
+import { FrancCongolais } from '@/hooks/Currencies';
+import AppLayout from '@/layouts/app-layout';
+import { Auth, BreadcrumbItem, Vente } from '@/types';
+import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ArrowLeft, Building, Calendar, Eye, Lock, LockOpen, Wallet } from 'lucide-react';
 
 interface Caisse {
     id: number;
@@ -16,10 +17,7 @@ interface Caisse {
     statut: string;
     date_ouverture: string;
     date_fermeture?: string;
-    succursale?: {
-        id: number;
-        nom: string;
-    };
+        
 }
 
 interface Stats {
@@ -47,19 +45,19 @@ console.log(transactions);
             href: '/caisses',
         },
         {
-            title: `Caisse ${caisse.succursale?.nom}`,
+            title: `Caisse ventes`,
             href: `/caisses/${caisse.ref}`,
         },
     ];
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
-            <Head title={`Caisse ${caisse.succursale?.nom}`} />
+            <Head title={`Caisse ventes`} />
             
             <div className="container py-6 px-4">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold flex items-center gap-2">
                         <Wallet className="h-6 w-6" />
-                        Détails de la caisse {caisse.succursale?.nom}
+                        Détails de la caisse des  ventes
                     </h1>
                     <Button variant="outline" asChild>
                         <Link href={route('caisses.index')}>
@@ -76,10 +74,7 @@ console.log(transactions);
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold">
-                                {new Intl.NumberFormat('fr-FR', {
-                                    style: 'currency',
-                                    currency: 'USD'
-                                }).format(parseFloat(caisse.solde)).replace('$US', '$')}
+                                {FrancCongolais(parseFloat(caisse.solde))}
                             </div>
                             <Badge className="mt-2" variant={caisse.statut === 'ouverte' ? 'default' : 'secondary'}>
                                 {caisse.statut === 'ouverte' ? (
@@ -99,10 +94,7 @@ console.log(transactions);
                         <CardContent>
                             <div className="text-3xl font-bold">{stats.transactions_jour}</div>
                             <div className="text-sm text-muted-foreground mt-2">
-                                Total: {new Intl.NumberFormat('fr-FR', {
-                                    style: 'currency',
-                                    currency: 'USD'
-                                }).format(parseFloat(stats.montant_total_jour)).replace('$US', '$')}
+                                Total: {FrancCongolais(parseFloat(stats.montant_total_jour))}
                             </div>
                         </CardContent>
                     </Card>
@@ -112,10 +104,7 @@ console.log(transactions);
                             <CardTitle className="text-sm font-medium">Moyenne par transaction</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{new Intl.NumberFormat('fr-FR', {
-                                style: 'currency',
-                                currency: 'USD'
-                            }).format(parseFloat(stats.moyenne_transaction)).replace('$US', '$')}</div>
+                            <div className="text-3xl font-bold">{FrancCongolais(parseFloat(stats.moyenne_transaction))}</div>
                             <Progress 
                                 value={(parseFloat(stats.moyenne_transaction) / 1000) * 100} 
                                 className="h-2 mt-2" 
@@ -130,18 +119,12 @@ console.log(transactions);
                             <CardTitle className="text-sm font-medium">Informations générales</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center gap-4">
-                                <Building className="h-5 w-5 text-muted-foreground" />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Branche</p>
-                                    <p>{caisse.succursale?.nom || 'Non attribuée'}</p>
-                                </div>
-                            </div>
+                           
                             <div className="flex items-center gap-4">
                                 <Calendar className="h-5 w-5 text-muted-foreground" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Date d'ouverture</p>
-                                    <p>{format(new Date(caisse.date_ouverture), 'PPP', { locale: fr })}</p>
+                                    <p>{format(new Date(caisse.date_ouverture), 'PPPp', { locale: fr })}</p>
                                 </div>
                             </div>
                             {caisse.date_fermeture && (
@@ -176,7 +159,7 @@ console.log(transactions);
                                             </Button>
                                         </div>
                                         <div className="font-medium">
-                                            +{(transaction.montant_total).toFixed(2)} $
+                                            +{FrancCongolais(transaction.montant_total)} 
                                         </div>
                                     </div>
                                 ))}

@@ -5,11 +5,9 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ChambreController;
 use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\ClientFideliteController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\CongeController;
 use App\Http\Controllers\ContratController;
-use App\Http\Controllers\RendezvouController;
 use App\Http\Controllers\UtilisateurController;
 use App\Http\Controllers\CurrencieController;
 use App\Http\Controllers\DocumentationController;
@@ -27,7 +25,6 @@ use App\Http\Controllers\ReservationChambreController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalleController;
-use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StockSuccursaleController;
 use App\Models\Currencie;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +32,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\VenteController;
-use App\Models\Rendezvou;
 
 Route::get('/', function () {
 
@@ -44,7 +40,7 @@ Route::get('/', function () {
 
 
 
-Route::middleware(['auth', 'verified', 'role:admin,gerant,coiffeur,caissier'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,gerant,coiffeur,vendeur'])->group(function () {
     Route::get('dashboard', function () {
         $user = Auth::user();
         //$pendingTransfersCount =  
@@ -59,7 +55,7 @@ Route::middleware(['auth', 'verified', 'role:admin,gerant,coiffeur,caissier'])->
 });
 
 
-Route::middleware('auth', 'actif', 'role:admin,gerant,caissier')->group(function () {
+Route::middleware('auth', 'actif', 'role:admin,gerant,vendeur')->group(function () {
     Route::resource('utilisateurs', \App\Http\Controllers\UserController::class);
     Route::resource('stocks', \App\Http\Controllers\StockController::class);
     Route::resource('produits', \App\Http\Controllers\ProduitController::class);
@@ -71,10 +67,10 @@ Route::middleware('auth', 'actif', 'role:admin,gerant,caissier')->group(function
 
    
 });
-Route::middleware('auth', 'actif', 'role:admin,gerant,coiffeur,caissier')->group(function () {
+Route::middleware('auth', 'actif', 'role:admin,gerant,coiffeur,vendeur')->group(function () {
     Route::resource('clients', \App\Http\Controllers\ClientController::class);
     Route::resource('stock-succursales', \App\Http\Controllers\StockSuccursaleController::class);
-    Route::resource('ventes', \App\Http\Controllers\VenteController::class)->middleware('role:admin,gerant,coiffeur,caissier');
+    Route::resource('ventes', \App\Http\Controllers\VenteController::class)->middleware('role:admin,gerant,coiffeur,vendeur');
 });
 Route::post('api/clients/quick-create', [ClientController::class, 'quickCreate'])->middleware('auth');
 Route::resource('alerts', AlertController::class)
@@ -92,9 +88,7 @@ Route::middleware(['auth', 'actif', 'role:admin,gerant'])->group(function () {
     Route::post('/currencies/{currency}/set-default', [CurrencieController::class, 'setDefault']);
     Route::patch('/currencies/{currency}/set-active', [CurrencieController::class, 'setActive'])->name('currencies.set-active');
     Route::patch('/currencies/{currency}/set-inactive', [CurrencieController::class, 'setInactive'])->name('currencies.set-inactive');
-    Route::post('/rendezvous/{rendezvou}/update-status', [RendezvouController::class, 'updateStatus'])
-        ->name('rendezvous.update-status')
-        ->middleware(['auth', 'verified']);
+   
 });
 Route::get('/taux', [CurrencieController::class, 'lesTaux'])->name('taux');
 Route::get('/ventes/print/{vente}', [VenteController::class, 'print'])
@@ -107,29 +101,6 @@ require __DIR__ . '/auth.php';
 
 Route::get('/get-recent-vente', [VenteController::class, 'getRecentVente'])->name('get-recent-vente');
 
-Route::get('/rendezvous-count', function () {
-    $count = 0;
-
-    if(Auth::user()->role==="admin" || Auth::user()->role==="gerant"){
-        $count = Rendezvou::where('statut', 'confirmé')
-        ->where('date_rdv', '>=', now())
-        ->count();
-    }elseif(Auth::user()->role ==="caissier" || Auth::user()->role ==="coiffeur") {
-        if(Auth::user()->succursale_id) {
-            $count = Rendezvou::where('succursale_id', Auth::user()->succursale_id)
-                ->where('statut', 'confirmé')
-                ->where('date_rdv', '>=', now())
-                ->count();
-        }else{
-            $count = 0;
-        }
-    }elseif(Auth::user()->role==="admin"){
-        
-    }
-
-    return response()->json(['count' => $count]);
-})->middleware(['auth', 'verified']);
-
 
 Route::resource('caisses', \App\Http\Controllers\CaisseController::class)
     ->only(['index', 'show'])
@@ -137,21 +108,15 @@ Route::resource('caisses', \App\Http\Controllers\CaisseController::class)
 
 Route::resource('depenses', \App\Http\Controllers\DepenseController::class)
     ->except(['edit', 'update'])
-    ->middleware(['auth', 'role:admin,gerant,caissier,coiffeur']);
+    ->middleware(['auth', 'role:admin,gerant,vendeur,coiffeur']);
 
 Route::get('/users/{user}/stats', [UserStatsController::class, 'show'])->middleware(['auth', 'role:admin,gerant'])->name('users.stats');
-Route::get('/statistiques-ventes', [StatistiqueController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('statistiques.index');
-
 Route::get('/statistiques-vendeurs', [VendeurController::class, 'index'])
     ->name('statistiques.vendeurs')
     ->middleware(['auth', 'role:admin,gerant']);
 
 Route::get('/statistiques-produits', [ProduitController::class, 'list'])->name('produits.list');
-Route::get('/statistiques-services', [ServiceController::class, 'list'])->name('services.list');
 Route::get('/statistiques-stats', [ProduitController::class, 'stats'])->name('produits.stats');
-Route::get('/statistiques-services-stats', [ServiceController::class, 'stats'])->name('services.stats');
 Route::get('/api/sales-stats', [SalesController::class, 'index'])->middleware('auth');
 Route::resource('utilitaires', \App\Http\Controllers\UtilitaireController::class)->middleware(['auth']);
 Route::group(['middleware' => ['auth', 'verified']], function () {
@@ -161,8 +126,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
 
 Route::prefix('/reports')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('reports.index')->middleware(['auth', 'verified', 'role:admin,gerant']);
-    Route::get('/pdf', [ReportController::class, 'generatePdf'])->name('reports.pdf')->middleware(['auth', 'verified', 'role:admin,gerant,caissier']);
-    Route::get('/pdf-synthese', [ReportController::class, 'generatePdfsynthese'])->name('reports.pdfsynthese')->middleware(['auth', 'verified', 'role:admin,gerant,caissier']);
+    Route::get('/pdf', [ReportController::class, 'generatePdf'])->name('reports.pdf')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);
+    Route::get('/pdf-synthese', [ReportController::class, 'generatePdfsynthese'])->name('reports.pdfsynthese')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);
 
     Route::get('/sales', [ReportController::class, 'salesReportIndex'])->name('reports.sales')->middleware(['auth', 'verified', 'role:admin,gerant']);
     Route::get('print', [ReportController::class, 'print'])->name('reports.print')->middleware(['auth', 'verified', 'role:admin,gerant']);
@@ -182,12 +147,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('fidelite.config.update');
 });
 
-Route::middleware(['auth', 'verified', 'role:admin,gerant,caissier'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,gerant,vendeur'])->group(function () {
     Route::get('/api/ventes/stats-journalieres', [VenteController::class, 'statsJournalieres']);
 });
 
 Route::resource('personnels', \App\Http\Controllers\AgentController::class)->middleware('role:admin,gerant');
-Route::resource('presences', \App\Http\Controllers\PresenceController::class)->middleware('role:admin,gerant,caissier');
+Route::resource('presences', \App\Http\Controllers\PresenceController::class)->middleware('role:admin,gerant,vendeur');
 Route::post('personnels/{personnel}/update-media', [\App\Http\Controllers\AgentController::class, 'updateMedia'])->name('personnels.update-media');
 
 Route::middleware(['auth', 'verified', 'role:admin,gerant'])->group(function () {
@@ -228,7 +193,7 @@ Route::get('rapport-presence', [PointageController::class, 'agent'])->name('poin
 Route::get('get-agent-pointages',[PointageController::class, 'getAgentPointages'])->name('pointages.get-agent-pointages');
 Route::get('get-pointages',[PointageController::class, 'getPointages'])->name('pointages.get-pointages');
 Route::get('print-grille/{ref}/{date}',[PointageController::class, 'printGrille'])->name('pointages.print-grille');
-Route::resource('categories', CategorieController::class)->middleware(['auth', 'verified', 'role:admin']);
+Route::resource('categories', CategorieController::class)->middleware(['auth', 'verified', 'role:admin,gerant']);
 Route::get('statistiques-categories', [StatistiqueController::class, 'produitsParCategorie'])
     ->name('statistiques.produits-par-categorie');
 
@@ -253,3 +218,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('reservations.update-status');
     Route::resource('chambres-reservations', ReservationChambreController::class);
 });
+
+Route::fallback(function () {
+    return Inertia::render('404')->toResponse(request())->setStatusCode(404);
+});
+

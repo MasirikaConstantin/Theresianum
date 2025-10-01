@@ -505,15 +505,17 @@ interface Reservation {
     chambre_id: number;
     chambre: Chambre;
     client_id: number;
+    vocation: string;
     ref: string;
     client: {
         id: number;
-        nom: string;
-        prenom: string;
+        name: string;
         email: string;
         telephone: string;
     };
     occupations: Occupation[];
+    salle_id: number;
+    salle: Salle;
 }
 interface Salle {
     id: number;

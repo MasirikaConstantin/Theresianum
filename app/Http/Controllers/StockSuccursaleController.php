@@ -22,7 +22,7 @@ class StockSuccursaleController extends Controller
     }
     public function index(Request $request)
 {
-    if ($this->user->role === 'caissier' || $this->user->role === 'coiffeur' || $this->user->role === 'aucun') {
+    if ($this->user->role === 'vendeur' || $this->user->role === 'coiffeur' || $this->user->role === 'aucun') {
         $query = StockSuccursale::with(['produit', 'succursale', 'user'])
             ->where('succursale_id', $this->user->succursale_id)
             ->latest();

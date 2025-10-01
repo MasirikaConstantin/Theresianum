@@ -26,7 +26,7 @@ class CaisseController extends Controller
             $caisses = Caisse::with('succursale')
             ->latest()
             ->paginate(10);
-        }elseif($this->user->role === 'caissier' ){
+        }elseif($this->user->role === 'vendeur' ){
             $caisses = Caisse::with('succursale')
             ->where('succursale_id', $this->user->succursale_id)
             ->latest()

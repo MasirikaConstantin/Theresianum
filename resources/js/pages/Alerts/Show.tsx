@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Calendar, MessageCircle, MessageCircleCode, Package, User } from 'lucide-react';
+import { AlertCircle, Bed, Calendar, Home, MessageCircle, MessageCircleCode, Package, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Auth } from '@/types';
@@ -73,18 +73,30 @@ export default function AlertShow({ alert, auth,flash }: { alert: any, auth: Aut
                             <div className="grid gap-2">
                                 <Label className="text-sm font-medium">Type d'alerte</Label>
                                 <div className="flex gap-2">
-                                    {alert.produit_id && (
-                                        <Badge className="gap-2">
-                                            <Package className="h-4 w-4" />
-                                            Produit: {alert.produit.name}
-                                        </Badge>
-                                    )}
-                                    {alert.rendezvou_id && (
-                                        <Badge className="gap-2">
-                                            <Calendar className="h-4 w-4" />
-                                            Rendez-vous: {alert.rendezvou.title}
-                                        </Badge>
-                                    )}
+                                {alert.produit_id && (
+                                            <Badge variant="secondary">
+                                                <Package className="mr-2 h-4 w-4" />
+                                                Produit
+                                            </Badge>
+                                        )}
+                                        {alert.rendezvou_id && (
+                                            <Badge variant="secondary">
+                                                <Calendar className="mr-2 h-4 w-4" />
+                                                Rendez-vous
+                                            </Badge>
+                                        )}
+                                        {alert.salle_id && (
+                                            <Badge variant="secondary">
+                                                <Home className="mr-2 h-4 w-4" />
+                                                Salle
+                                            </Badge>
+                                        )}
+                                        {alert.chambre_id && (
+                                            <Badge variant="secondary">
+                                                <Bed className="mr-2 h-4 w-4" />
+                                                Chambre
+                                            </Badge>
+                                        )}
                                 </div>
                             </div>
 

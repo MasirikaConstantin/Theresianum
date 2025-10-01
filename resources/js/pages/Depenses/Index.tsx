@@ -7,6 +7,7 @@ import { Auth, BreadcrumbItem } from '@/types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { PaginationComponent } from '@/components/Pagination';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface Depense {
     id: number;
@@ -57,13 +58,12 @@ export default function DepenseIndex({ depenses, auth }: Props) {
 
                 <div className="rounded-lg shadow">
                     <Table>
-                        <TableCaption>Depenses de la branche {auth.user.succursale?.nom}</TableCaption>
+                        <TableCaption>Depenses</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>#</TableHead>
                                 <TableHead>Libellé</TableHead>
                                 <TableHead>Montant</TableHead>
-                                <TableHead>Caisse</TableHead>
                                 <TableHead>Enregistré par</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Actions</TableHead>
@@ -74,8 +74,7 @@ export default function DepenseIndex({ depenses, auth }: Props) {
                                 <TableRow key={depense.id}>
                                     <TableCell>{depenses.from + index }</TableCell>
                                     <TableCell>{depense.libelle.slice(0, 29)}</TableCell>
-                                    <TableCell className="text-red-600">-{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(parseFloat(depense.montant)).replace('$US', '$')}</TableCell>
-                                    <TableCell>{depense.caisse.succursale.nom}</TableCell>
+                                    <TableCell className="text-red-600">-{FrancCongolais(parseFloat(depense.montant))}</TableCell>
                                     <TableCell>{depense.user.name}</TableCell>
                                     <TableCell>{format(new Date(depense.created_at), 'PPP', { locale: fr })}</TableCell>
                                     <TableCell>

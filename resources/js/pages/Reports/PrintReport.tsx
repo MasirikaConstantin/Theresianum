@@ -1,5 +1,6 @@
 "use client"
 
+import { FrancCongolais } from '@/hooks/Currencies';
 import { Depense, Succursale, User } from '@/types';
 import { SalesStats, Vente } from '@/types/report';
 import { Head } from '@inertiajs/react';
@@ -18,13 +19,7 @@ interface PrintReportProps {
 }
 
 const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, vendeur, succursale,entreprise,depenses }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(amount).replace('$US', '$');
-  };
+ 
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'PPP', { locale: fr });
@@ -48,7 +43,7 @@ const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, 
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white">
+    <div className="container mx-auto p-6 bg-white text-black">
         <Head title={`Rapport des Ventes ${format(new Date(), 'PPPpp', { locale: fr })}`} />
       {/* Boutons d'action (non imprimés) */}
       <div className="no-print flex justify-end gap-2 p-4 mb-4 bg-gray-100 rounded-lg">
@@ -67,7 +62,7 @@ const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, 
       </div>
 
       {/* En-tête du rapport */}
-      <div className="text-center mb-6  border-gray-300 pb-4">
+      <div className="text-center mb-6  border-gray-300 pb-4 text-black">
         {/* En-tête de l'entreprise */}
       <div className="text-center mb-2 border-b pb-4">
         {entreprise.logo && (
@@ -104,9 +99,9 @@ const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, 
         <div className="">
           <ul className="list-disc list-inside">
             <li>Total Ventes: <span className="font-bold">{stats.total_ventes}</span></li>
-            <li>Total Montant: <span className="font-bold">{formatCurrency(stats.montant_total)}</span></li>
-            <li>Total Dépenses: <span className="font-bold">{formatCurrency(stats.total_depenses)}</span></li>
-            <li>Benefice Net: <span className="font-bold">{formatCurrency(stats.benefice_net)}</span></li>
+            <li>Total Montant: <span className="font-bold">{FrancCongolais(stats.montant_total)}</span></li>
+            <li>Total Dépenses: <span className="font-bold">{FrancCongolais(stats.total_depenses)}</span></li>
+            <li>Benefice Net: <span className="font-bold">{FrancCongolais(stats.benefice_net)}</span></li>
           </ul>
         </div>
 
@@ -136,7 +131,7 @@ const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, 
                       <td>{format(new Date(vente.created_at), 'PPPp', { locale: fr })}</td>
                       <td>{vente.client?.name || "Aucun"}</td>
                       <td>{vente.mode_paiement}</td>
-                      <td className="text-right font-semibold">{formatCurrency(Number(vente.montant_total))}</td>
+                      <td className="text-right font-semibold">{FrancCongolais(Number(vente.montant_total))}</td>
                     </tr>
               
             ))}
@@ -165,7 +160,7 @@ const PrintSalesReport: React.FC<PrintReportProps> = ({ stats, ventes, filters, 
                     <tr key={depense.id} className='hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors'>
                       <td className="font-medium p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]">{format(new Date(depense.created_at), 'PPPp', { locale: fr })}</td>
                       <td>{depense.libelle || "Aucun"}</td>
-                      <td>{formatCurrency(depense.montant)}</td>
+                      <td>{FrancCongolais(depense.montant)}</td>
                       <td className="font-semibold">{((depense.description))}</td>
                     </tr>
               

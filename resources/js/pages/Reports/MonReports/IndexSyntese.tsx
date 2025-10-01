@@ -4,6 +4,7 @@ import { Auth, PageProps, User } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FrancCongolais } from '@/hooks/Currencies';
 
 interface DailyData {
   date: string;
@@ -50,13 +51,7 @@ interface ReportPageProps extends PageProps {
 
 export default function SalesReport({ auth, stats, start_date, end_date, entreprise,vendeur }: ReportPageProps) {
   const { props } = usePage<ReportPageProps>();
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(amount).replace('$US', '$');
-  };
+
   useEffect(() => {
       const timeout = setTimeout(() => {
         window.print();
@@ -114,9 +109,9 @@ const formatCurrency = (amount: number) => {
               <li className="text-lg">Vendeur : <span className="font-bold">{vendeur.name}</span></li>
             )}
             <li className="text-lg">Nombre de Ventes : <span className="font-bold">{stats.total_ventes}</span></li>
-            <li className="text-lg">Total Vendue : <span className="font-bold">{formatCurrency(stats.montant_total)}</span></li>
-            <li className="text-lg">Total Dépensé : <span className="font-bold">{formatCurrency(stats.total_depenses)}</span></li>
-            <li className="text-lg">Solde : <span className="font-bold">{formatCurrency(stats.benefice_net)}</span></li>
+            <li className="text-lg">Total Vendue : <span className="font-bold">{FrancCongolais(stats.montant_total)}</span></li>
+            <li className="text-lg">Total Dépensé : <span className="font-bold">{FrancCongolais(stats.total_depenses)}</span></li>
+            <li className="text-lg">Solde : <span className="font-bold">{FrancCongolais(stats.benefice_net)}</span></li>
           </ul>
           
 
@@ -166,29 +161,29 @@ const formatCurrency = (amount: number) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right mr-2">
                         <div className="text-sm text-green-600 align-center text-align-center ">
-                          {formatCurrency(day.montant_total)}
+                          {FrancCongolais(day.montant_total)}
                         </div>
                       </td>
                       {/* <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-orange-600">
-                          {formatCurrency(day.montant_remise)}
+                          {FrancCongolais(day.montant_remise)}
                         </div>
                       </td> */}
                       {/* <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-blue-600">
-                          {formatCurrency(day.montant_net)}
+                          {FrancCongolais(day.montant_net)}
                         </div>
                       </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-right mr-2">
                         <div className="text-sm text-red-600">
-                          {formatCurrency(day.depenses)}
+                          {FrancCongolais(day.depenses)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right mr-2">
                         <div className={`text-sm font-medium ${
                           day.benefice_net >= 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {formatCurrency(day.benefice_net)}
+                          {FrancCongolais(day.benefice_net)}
                         </div>
                       </td>
                     </tr>

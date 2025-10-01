@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Auth } from '@/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const breadcrumbs = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -48,6 +49,7 @@ export default function AlertCreate({ produits, rendezvous, auth, salles, chambr
                             <Label htmlFor="notes">Notes (optionnel)</Label>
                             <Textarea
                                 id="notes"
+                                rows={10}
                                 value={data.notes}
                                 onChange={(e) => setData('notes', e.target.value)}
                                 placeholder="Décrivez l'alerte..."
@@ -59,10 +61,10 @@ export default function AlertCreate({ produits, rendezvous, auth, salles, chambr
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="grid gap-2">
-                                <Label>Associer à un produit</Label>
+                                <Label>Associer à un produit (Optionnel)</Label>
                                 <Select
-                                value={data.produit_id || undefined} // Utilisez undefined au lieu de ""
-                                onValueChange={(value) => setData('produit_id', value || null)} // Stockez null si vide
+                                value={data.produit_id || undefined}
+                                onValueChange={(value) => setData('produit_id', value || null)}
                                 >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Sélectionner un produit" />
@@ -78,10 +80,10 @@ export default function AlertCreate({ produits, rendezvous, auth, salles, chambr
                             </div>
 
                             <div className="grid gap-2">
-                                <Label>Associer à une chambre</Label>
+                                <Label>Associer à une chambre (Optionnel)</Label>
                                 <Select
-                                value={data.chambre_id || undefined} // Utilisez undefined au lieu de ""
-                                onValueChange={(value) => setData('chambre_id', value || null)} // Stockez null si vide
+                                value={data.chambre_id || undefined}
+                                onValueChange={(value) => setData('chambre_id', value || null)}
                                 >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Sélectionner une chambre" />
@@ -98,10 +100,10 @@ export default function AlertCreate({ produits, rendezvous, auth, salles, chambr
 
 
                             <div className="grid gap-2">
-                                <Label>Associer à une salle</Label>
+                                <Label>Associer à une salle (Optionnel) </Label>
                                 <Select
-                                value={data.salle_id || undefined} // Utilisez undefined au lieu de ""
-                                onValueChange={(value) => setData('salle_id', value || null)} // Stockez null si vide
+                                value={data.salle_id || undefined}
+                                onValueChange={(value) => setData('salle_id', value || null)}
                                 >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Sélectionner une salle" />
@@ -125,6 +127,15 @@ export default function AlertCreate({ produits, rendezvous, auth, salles, chambr
                         </Button>
                     </div>
                 </form>
+            </div>
+            <div className="py-6 px-16">
+            <Alert>
+                <AlertCircle className="mr-2 h-4 w-4" />
+                <AlertTitle>Alerte</AlertTitle>
+                <AlertDescription>
+                    Minimum une association 
+                </AlertDescription>
+            </Alert>
             </div>
         </AppLayout>
     );

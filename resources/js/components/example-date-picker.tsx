@@ -51,7 +51,7 @@ export function MonDatePicker({
   }, [value])
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-3 w-full", className)}>
       <Label htmlFor="date-picker" className="px-1 mb-0">
         {label}
         {required && <span className="text-destructive"> *</span>}
@@ -61,7 +61,7 @@ export function MonDatePicker({
           <Button
             variant="outline"
             id="date-picker"
-            className={cn("w-48 justify-between font-normal mt-0", buttonClassName)}
+            className={cn("w-full justify-between font-normal mt-0", buttonClassName)}
           >
             {internalDate ? (
               format(internalDate, 'PPP', { locale: fr })

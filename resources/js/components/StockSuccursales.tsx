@@ -81,35 +81,10 @@ const StockSuccursales: React.FC = () => {
           Actualiser
         </Button>
       </div>
-        {/* Alertes globales */}
-      <div className="space-y-4">
-        {data.filter(stock => getStockStatus(stock.quantite, stock.seuil_alerte) === 'rupture').length > 0 && (
-          <Alert variant="default">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Ruptures de stock détectées</AlertTitle>
-            <AlertDescription>
-              {data.filter(stock => getStockStatus(stock.quantite, stock.seuil_alerte) === 'rupture')
-                .map(stock => `${stock.produit?.name} (${stock.succursale?.nom})`)
-                .join(', ')}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {data.filter(stock => getStockStatus(stock.quantite, stock.seuil_alerte) === 'alerte').length > 0 && (
-          <Alert variant="default">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Stocks critiques détectés</AlertTitle>
-            <AlertDescription>
-              {data.filter(stock => getStockStatus(stock.quantite, stock.seuil_alerte) === 'alerte')
-                .map(stock => `${stock.produit?.name} (${stock.succursale?.nom})`)
-                .join(', ')}
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
+      
       <div className="flex flex-col gap-4">
         {data.map((stock) => {
-          const status = getStockStatus(stock.quantite, stock.seuil_alerte);
+          const status = getStockStatus(stock.quantite, stock.quantite_alerte);
           
           return (
             <div 
@@ -155,7 +130,7 @@ const StockSuccursales: React.FC = () => {
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Seuil d'alerte</span>
-                    <span className="text-sm">{stock.seuil_alerte} unités</span>
+                    <span className="text-sm">{stock.quantite_alerte} unités</span>
                   </div>
                   
                   

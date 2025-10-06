@@ -9,7 +9,6 @@ return new class extends Migration {
     {
         Schema::table('agents', function (Blueprint $table) {
             $table->string('role')->nullable()->change();
-            $table->unsignedBigInteger('succursale_id')->nullable()->change();
         });
     }
 
@@ -17,7 +16,6 @@ return new class extends Migration {
     {
         Schema::table('agents', function (Blueprint $table) {
             $table->string('role')->nullable(false)->change();
-            $table->unsignedBigInteger('succursale_id')->nullable(false)->change();
         });
     }
 };

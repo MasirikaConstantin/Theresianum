@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
+import { RecherchePopover } from '@/components/RecherchePopover';
 interface StockFormProps {
     auth: Auth;
     stock?: any;
@@ -42,7 +43,7 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (stock) {
             put(route('stocks.update', stock.ref), {
                 onSuccess: () => toast.success('Stock mis à jour avec succès'),
@@ -68,60 +69,61 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
                         <Button variant="outline">Retour à la liste</Button>
                     </Link>
                 </div>
-                
+
                 <form onSubmit={submit} className="grid gap-6">
                     <div className="grid gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="produit_id">Produit</Label>
-                            <Select
+
+                            <Label htmlFor="client_id">Client *</Label>
+                            <RecherchePopover
+                                options={produits.map(produit => ({
+                                    value: produit.id.toString(),
+                                    label: `${produit.name}`,
+                                    
+                                    originalData: produit
+                                }))}
+                                placeholder="Sélectionner un client"
+                                searchPlaceholder="Rechercher un client..."
+                                emptyMessage="Aucun client trouvé."
                                 value={data.produit_id}
                                 onValueChange={(value) => setData('produit_id', value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un produit" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {produits.map((produit) => (
-                                        <SelectItem key={produit.id} value={produit.id.toString()}>
-                                            {produit.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                className="w-full" 
+                            />
+                            
                             {errors.produit_id && (
                                 <p className="text-sm font-medium text-destructive">{errors.produit_id}</p>
                             )}
                         </div>
                         <div className="grid gap-2 grid-cols-2">
-                        <div className="grid gap-2">
-                            <Label htmlFor="quantite">Quantité en stock</Label>
-                            <Input
-                                id="quantite"
-                                type="number"
-                                min="0"
-                                value={data.quantite}
-                                onChange={(e) => setData('quantite', parseInt(e.target.value))}
-                            />
-                            {errors.quantite && (
-                                <p className="text-sm font-medium text-destructive">{errors.quantite}</p>
-                            )}
+                            <div className="grid gap-2">
+                                <Label htmlFor="quantite">Quantité en stock</Label>
+                                <Input
+                                    id="quantite"
+                                    type="number"
+                                    min="0"
+                                    value={data.quantite}
+                                    onChange={(e) => setData('quantite', parseInt(e.target.value))}
+                                />
+                                {errors.quantite && (
+                                    <p className="text-sm font-medium text-destructive">{errors.quantite}</p>
+                                )}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="quantite">Prix (Vide si inchangé)</Label>
+                                <Input
+                                    id="quantite"
+                                    type="number"
+                                    min="0"
+                                    value={data.prix}
+                                    onChange={(e) => setData('prix', parseInt(e.target.value))}
+                                />
+                                {errors.prix && (
+                                    <p className="text-sm font-medium text-destructive">{errors.prix}</p>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="quantite">Prix (Vide si inchangé)</Label>
-                            <Input
-                                id="quantite"
-                                type="number"
-                                min="0"
-                                value={data.prix}
-                                onChange={(e) => setData('prix', parseInt(e.target.value))}
-                            />
-                            {errors.prix && (
-                                <p className="text-sm font-medium text-destructive">{errors.prix}</p>
-                            )}
-                        </div>
-                        </div>
-                        
                         <div className="grid gap-2">
                             <Label htmlFor="quantite_alerte">Seuil d'alerte</Label>
                             <Input
@@ -147,7 +149,7 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
                                 <p className="text-sm font-medium text-destructive">{errors.description}</p>
                             )}
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                             <Switch
                                 id="actif"
@@ -157,7 +159,7 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
                             <Label htmlFor="actif">Stock actif</Label>
                         </div>
                     </div>
-                    
+
                     <div className="flex justify-end gap-2">
                         <Button type="submit" disabled={processing}>
                             {stock ? 'Mettre à jour' : 'Créer'}

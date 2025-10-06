@@ -58,7 +58,7 @@ export default function ReservationChambreIndex({ auth, reservations, statuts }:
     flash.success && toast.success(flash.success);
 
     const handleDelete = (reservation: Reservation) => {
-        router.delete(route('chambres-reservations.destroy', reservation.id));
+        router.delete(route('chambres-reservations.destroy', reservation.ref));
     };
 
     const handleStatusChange = (reservationId: number, newStatut: string) => {

@@ -52,7 +52,7 @@ class ReservationChambreController extends Controller
         $chambreId = $request->get('chambre_id');
 
         $chambres = Chambre::where('statut', 'disponible')->get();
-        $clients = Client::orderBy('name')->get();
+        $clients = Client::orderBy('name')->select('id','ref','name', 'email', 'telephone')->get();
         $reservations = Reservation::whereNotNull('chambre_id')
         ->where(function ($q) {
             $q->where('date_debut', '>=', now());
@@ -137,7 +137,9 @@ class ReservationChambreController extends Controller
             abort(404);
         }*/
 
-        $reservations_chambre->load(['client', 'chambre']);
+        $reservations_chambre->load(['client', 'salle','chambre','ventes'=>function($query){
+            $query->with('client');
+        }]);
 
         return Inertia::render('ReservationsChambres/Show', [
             'reservation' => $reservations_chambre
@@ -244,22 +246,20 @@ private function verifierDisponibilite(array $data, $excludeReservationId = null
 
     
 
-    public function destroy(Reservation $reservations_chambre)
+    public function destroy(string $ref)
     {
-        if ($reservations_chambre->type_reservation !== 'chambre') {
-            abort(404);
-        }
+        $reservation = Reservation::where('ref', $ref)->first();
 
         DB::beginTransaction();
 
         try {
             // Libérer la chambre
-            if ($reservations_chambre->chambre_id) {
-                $reservations_chambre->chambre->update(['statut' => 'disponible']);
+            if ($reservation->chambre_id) {
+                $reservation->chambre->update(['statut' => 'disponible']);
             }
             
             // Supprimer la réservation
-            $reservations_chambre->delete();
+            $reservation->delete();
 
             DB::commit();
 
@@ -269,15 +269,13 @@ private function verifierDisponibilite(array $data, $excludeReservationId = null
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Erreur lors de la suppression de la réservation');
+                ->with('error', 'Erreur lors de la suppression de la réservation'. $e->getMessage());
         }
     }
 
-    public function updateStatus(Reservation $reservations_chambre, Request $request)
+    public function updateStatus(string $ref, Request $request)
     {
-        if ($reservations_chambre->type_reservation !== 'chambre') {
-            abort(404);
-        }
+        $reservations_chambre = Reservation::where('ref', $ref)->first();
 
         $request->validate([
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'

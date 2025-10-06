@@ -12,6 +12,7 @@ import AppLayout from '@/layouts/app-layout';
 import { DateHeure, Dollar } from '@/hooks/Currencies';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { RecherchePopover } from '@/components/RecherchePopover';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -214,15 +215,7 @@ export default function ReservationChambreCreate({
 
     const timeOptions = generateTimeOptions();
 
-    // Formater la date pour l'affichage
-    const formatDateTime = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-    };
-
+ 
     // Obtenir la couleur du badge selon le statut
     const getStatusBadge = (statut: string) => {
         const statusConfig = {
@@ -235,6 +228,7 @@ export default function ReservationChambreCreate({
         const config = statusConfig[statut as keyof typeof statusConfig] || { label: statut, variant: 'secondary' as const };
         return <Badge variant={config.variant}>{config.label}</Badge>;
     };
+    
 
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
@@ -262,26 +256,24 @@ export default function ReservationChambreCreate({
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="client_id">Client *</Label>
-                                        <Select 
-                                            value={data.client_id} 
-                                            onValueChange={(value) => setData('client_id', value)}
-                                            required
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionner un client" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {clients.map(client => (
-                                                    <SelectItem key={client.id} value={client.id.toString()}>
-                                                        {client.name} - {client.telephone}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.client_id && <p className="text-sm text-red-600">{errors.client_id}</p>}
-                                    </div>
+                                     <div className="space-y-2">
+                                                                        <Label htmlFor="client_id">Client *</Label>
+                                                                        <RecherchePopover
+                                                                            options={clients.map(client => ({
+                                                                            value: client.id.toString(),
+                                                                            label: `${client.name} - ${client.email} - ${client.telephone?client.telephone : ''}`, // ou client.telephone si disponible
+                                                                            // Vous pouvez ajouter d'autres données si nécessaire
+                                                                            originalData: client
+                                                                            }))}
+                                                                            placeholder="Sélectionner un client"
+                                                                            searchPlaceholder="Rechercher un client..."
+                                                                            emptyMessage="Aucun client trouvé."
+                                                                            value={data.client_id}
+                                                                            onValueChange={(value) => setData('client_id', value)}
+                                                                            className="w-full" // Pour prendre toute la largeur
+                                                                        />
+                                                                        {errors.client_id && <p className="text-sm text-red-600">{errors.client_id}</p>}
+                                                                        </div>
                                 </CardContent>
                             </Card>
 

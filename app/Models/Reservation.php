@@ -30,6 +30,10 @@ class Reservation extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    public function ventes()
+    {
+        return $this->hasMany(Vente::class);
+    }
 
     public function chambre()
     {

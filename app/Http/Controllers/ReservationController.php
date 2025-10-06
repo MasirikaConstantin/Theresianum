@@ -13,6 +13,7 @@ use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
+   
     public function index(Request $request)
     {
         $filters = $request->only(['search', 'statut']);
@@ -53,7 +54,7 @@ class ReservationController extends Controller
     $salleId = $request->get('salle_id');
 
     $salles = Salle::where('disponible', true)->get();
-    $clients = Client::orderBy('name')->get();
+    $clients = Client::orderBy('name')->select('id','ref','name', 'email', 'telephone')->get();
     $reservations = Reservation::whereNotNull('salle_id')
         ->where(function ($q) {
             $q->where('date_debut', '>=', now());
@@ -131,12 +132,10 @@ class ReservationController extends Controller
     public function show(string $reservation)
     {
         $reservation = Reservation::where('ref', $reservation)->first();
-        /* S'assurer que c'est une réservation de salle
-        if ($reservation->type_reservation !== 'salle') {
-            abort(404);
-        }*/
-
-        $reservation->load(['client', 'salle']);
+        
+        $reservation->load(['client', 'salle','chambre','ventes'=>function($query){
+            $query->with('client');
+        }]);
 
         return Inertia::render('ReservationsChambres/Show', [
             'reservation' => $reservation
@@ -335,5 +334,44 @@ class ReservationController extends Controller
     // $jours = $dateDebut->diffInDays($dateFin) + 1;
     
     return $jours * $prixParJour;
+}
+public function updateStatusPaiement(Request $request)
+{
+    $validated = $request->validate([
+        'reservation_id' => 'required|exists:reservations,id',
+        'statut_paiement' => 'required|in:paye,non_paye',
+        'type_paiement' => 'required|in:espece,cheque,virement'
+    ]);
+
+    try {
+        $reservation = Reservation::findOrFail($validated['reservation_id']);
+        
+        // Mettre à jour les informations de paiement
+        $reservation->update([
+            'statut_paiement' => $validated['statut_paiement'],
+            'type_paiement' => $validated['type_paiement']
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Statut de paiement mis à jour avec succès');
+
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la mise à jour: ' . $e->getMessage());
+    }
+}
+
+public function print($reservation)
+{
+   
+    $reservation = Reservation::where('ref', $reservation)->first();
+    
+    $reservation->load(['client', 'salle','chambre','ventes'=>function($query){
+        $query->with('client');
+    }]);
+
+    return Inertia::render('ReservationsChambres/print', [
+        'reservation' => $reservation
+    ]);
 }
 }

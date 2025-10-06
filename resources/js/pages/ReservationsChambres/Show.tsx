@@ -1,18 +1,24 @@
-import { Auth, type BreadcrumbItem } from '@/types';
+import { Auth, Vente, type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Clock, User, Bed, Building, DollarSign, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Bed, Building, DollarSign, FileText, ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
 import AppLayout from '@/layouts/app-layout';
-import { DateHeure, Dollar } from '@/hooks/Currencies';
+import { DateHeure, Dollar, FrancCongolais } from '@/hooks/Currencies';
 import { fr } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import UpdatePaiementStatus from '@/components/UpdatePaiementStatus';
+import { string } from 'zod';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Reservation {
     id: number;
     ref: string;
+    type_paiement: 'espece' | 'cheque' | 'virement';
+    statut_paiement: 'paye' | 'non_paye';
+    type_reservation: 'chambre' | 'salle';
     client: {
         id: number;
         name: string;
@@ -35,11 +41,11 @@ interface Reservation {
     } | null;
     date_debut: string;
     date_fin: string;
-    type_reservation: 'salle' | 'chambre';
     statut: string;
     prix_total: number;
     vocation: string | null;
     created_at: string;
+    ventes: Vente[];
 }
 
 interface Props {
@@ -136,7 +142,6 @@ export default function ReservationShow({ auth, reservation }: Props) {
 
     const canUpdate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canDelete = auth.user.role === 'admin';
-
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
             <Head title={`Réservation ${reservation.client.name}`} />
@@ -177,6 +182,11 @@ export default function ReservationShow({ auth, reservation }: Props) {
                                 </Button>
                             </Link>
                         )}
+                        <Link href={route('reservations.print', reservation.ref)}>
+                            <Button variant="outline">
+                                Imprimer
+                            </Button>
+                        </Link>
                         <Badge variant={getStatutBadgeVariant(reservation.statut)} className="text-sm px-3 py-1">
                             {getStatutLabel(reservation.statut)}
                         </Badge>
@@ -298,10 +308,53 @@ export default function ReservationShow({ auth, reservation }: Props) {
                                 </div>
                             </CardContent>
                         </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <ShoppingCart className="h-5 w-5" />
+                                    Ventes effectuées sur cette réservation 
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm font-medium">
+                                    Nombre de ventes : {reservation.ventes?.length || 0} le total est de <span className="font-semibold text-green-500 text-md">{FrancCongolais(reservation.ventes?.reduce((total, vente) => total + parseFloat(vente.montant_total), 0) || 0)}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Code</TableHead>
+                                        <TableHead>Prix total</TableHead>
+                                        <TableHead>Client</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Action</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {reservation.ventes?.map((vente) => (
+                                        <TableRow key={vente.id}>
+                                            <TableCell>{vente.code}</TableCell>
+                                            <TableCell>{FrancCongolais(vente.montant_total)}</TableCell>
+                                            <TableCell>{vente.client?.name}</TableCell>
+                                            <TableCell>{DateHeure(vente.created_at)}</TableCell>
+                                            <TableCell>
+                                                <Button variant="outline" onClick={() => router.visit(`/ventes/${vente.ref}`)}>
+                                                    Voir
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent></Card>
                     </div>
 
                     {/* Colonne latérale */}
                     <div className="space-y-6">
+                    <UpdatePaiementStatus reservation={reservation} />
                         {/* Informations de la salle/chambre */}
                         <Card>
                             <CardHeader>

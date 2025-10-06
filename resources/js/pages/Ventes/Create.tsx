@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Auth, Client, Configuration, SharedData, type BreadcrumbItem } from '@/types';
+import { Auth, Client, Configuration, Reservation, SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { FrancCongolais } from '@/hooks/Currencies';
+import { DateHeure, FrancCongolais } from '@/hooks/Currencies';
+import ReservationVenteManager from '@/components/ReservationVenteManager';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,7 +60,7 @@ type Item = {
 const TVA_RATE = 0.0000000000001;
 
 export default function VenteCreate({ auth, configuration }: { auth: Auth, configuration: Configuration }) {
-    const { clients, produits } = usePage<SharedData>().props;
+    const { clients, produits, reservations } = usePage<SharedData>().props;
     const [utilisablePoints, setUtilisablePoints] = useState(false);
     
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -70,6 +71,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         remise_pourcentage: 0,
         montant_total: 0,
         mode_paiement: 'espèces',
+        reservation_id: '',
         items: [] as Item[],
     });
 
@@ -81,6 +83,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
     };
 
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [clientSearchTerm, setClientSearchTerm] = useState('');
 
@@ -157,22 +160,6 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         calculerMontantTotal();
     }, [data.items, data.remise_pourcentage]);
 
-    // Gérer les changements de remise globale
-    const handleRemiseGlobaleChange = (value: number, type: 'pourcentage' | 'montant') => {
-        if (type === 'pourcentage') {
-            setData(prevData => ({
-                ...prevData,
-                remise_pourcentage: value,
-                remise_montant: 0
-            }));
-        } else {
-            setData(prevData => ({
-                ...prevData,
-                remise_montant: value,
-                remise_pourcentage: 0
-            }));
-        }
-    };
 
     // Trouver le client sélectionné
     useEffect(() => {
@@ -184,6 +171,16 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         }
     }, [data.client_id, clients]);
 
+    // Trouver la reservation sélectionnée
+    useEffect(() => {
+        if (data.reservation_id) {
+            const reservation = reservations?.find((r: any) => r.id.toString() === data.reservation_id);
+            if (reservation) setSelectedReservation(reservation);
+        } else {
+            setSelectedReservation(null);
+        }
+    }, [data.reservation_id, reservations]);
+    
     // Ajouter un item au panier
     const handleAddItem = useCallback((item: any, type: 'produit') => {
         if (type === 'produit') {
@@ -282,11 +279,11 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         setData('items', newItems);
     };
 
-    const debouncedSearch = debounce((value) => {
+    const debouncedSearch = debounce((value: string) => {
         setSearchTerm(value);
     }, 300);
 
-    const debouncedClientSearch = debounce((value) => {
+    const debouncedClientSearch = debounce((value: string) => {
         setClientSearchTerm(value);
     }, 300);
 
@@ -362,7 +359,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         reset();
     };
 
-    const inPromotion = auth.promotion !== 0;
+    const inPromotion =1;// auth.promotion !== undefined && auth.promotion !== null && auth.promotion !== 0;
 
     useEffect(() => {
         if (data.mode_paiement === 'autre') {
@@ -370,7 +367,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                 if (selectedClient?.fidelite?.points && selectedClient?.fidelite?.points < configuration.seuil_utilisation) {
                     setUtilisablePoints(false);
                 } else {
-                    if (data.montant_total > selectedClient?.fidelite?.points * configuration.valeur_point) {
+                    if (data.montant_total > selectedClient?.fidelite?.points! * configuration.valeur_point) {
                         setUtilisablePoints(false);
                         toast.error('Le montant de la vente est supérieur au montant des points disponibles');
                     } else {
@@ -382,7 +379,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
         } else {
             setUtilisablePoints(false);
         }
-    }, [data.mode_paiement, selectedClient, data.montant_total, configuration]);
+    }, [data.mode_paiement, selectedClient, selectedReservation, data.montant_total, configuration]);
 
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
@@ -449,7 +446,7 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                                                     key={produit.id} 
                                                                     className={produit.stock_disponible <= 0 ? 'opacity-60' : ''}
                                                                 >
-                                                                    <TableCell className="font-medium">{produit.name}</TableCell>
+                                                                    <TableCell className="font-medium">{produit.name.slice(0, 45) + '... '}</TableCell>
                                                                     <TableCell>
                                                                         <Badge variant={produit.stock_disponible > 0 ? "default" : "destructive"}>
                                                                             {produit.stock_disponible}
@@ -652,14 +649,22 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                             </span>
                                         </div>
                                     </div>
-                                    <div className='flex'>
+                                    <div className='flex justify-between gap-4'>
                                         <ClientManager 
                                             onClientSelected={(client) => {
-                                                setSelectedClient(client);
+                                                setSelectedClient(client as Client);
                                                 setData('client_id', client.id.toString());
                                             }}
                                             currentClientId={data.client_id}
                                             clients={clients}
+                                        />
+                                        <ReservationVenteManager 
+                                            onReservationSelected={(reservation) => {
+                                                setSelectedReservation(reservation as Reservation);
+                                                setData('reservation_id', reservation.id.toString());
+                                            }}
+                                            currentReservationId={data.reservation_id}
+                                            reservations={reservations}
                                         />
                                     </div>
                                     
@@ -708,6 +713,54 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                             </Badge>
                                             )}
                                         </div>
+                                        )}
+
+                                        {selectedReservation && (
+                                            <div className="w-full space-y-1 py-3 bg-muted/50 p-3 rounded-md mt-2">
+                                                <p className="font-medium">Réservation sélectionnée : </p>
+                                                <p>{selectedReservation.client.name}</p>
+                                                {selectedReservation.client.telephone && <p className="text-sm">{selectedReservation.client.telephone}</p>}
+                                                {selectedReservation.salle_id && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-blue-500"
+                                                    >
+                                                        Salle : {selectedReservation.salle.nom}
+                                                    </Badge>
+                                                )}
+                                                {selectedReservation.chambre_id && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-green-700"
+                                                    >
+                                                        Chambre : {selectedReservation.chambre.nom}
+                                                    </Badge>
+                                                )}
+                                                {selectedReservation.date_debut && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-blue-500"
+                                                    >
+                                                        Date de début : {DateHeure(selectedReservation.date_debut)}
+                                                    </Badge>
+                                                )}
+                                                {selectedReservation.date_fin && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-blue-500"
+                                                    >
+                                                        Date de fin : {DateHeure(selectedReservation.date_fin)}
+                                                    </Badge>
+                                                )}
+                                                {selectedReservation.date_fin && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-blue-500"
+                                                    >
+                                                        Date de fin : {DateHeure(selectedReservation.date_fin)}
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         )}
                                 </CardFooter>
                             )}

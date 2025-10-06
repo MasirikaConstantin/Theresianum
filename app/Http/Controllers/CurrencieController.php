@@ -100,7 +100,7 @@ public function update(Request $request, Currencie $currency)
 
     public function lesTaux()
     {
-        $currencies = Currencie::where('is_active', true)->select('id','name', 'code', 'symbol', 'exchange_rate')->get();
+        $currencies = Currencie::where('is_active', true)->select('id','name', 'code', 'symbol', 'exchange_rate')->first();
         return response()->json($currencies);
     }
     public function setActive(Currencie $currency)

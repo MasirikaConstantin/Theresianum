@@ -157,6 +157,19 @@ export interface Vente {
     succursale?: Succursale;
     vendeur?: User;
     caisse?: Caisse;
+    reservation_id: number;
+    reservation?: Reservation;
+    vente_produits?: VenteProduit;
+}
+export interface VenteProduit {
+    id: number;
+    vente_id: number;
+    produit_id: number;
+    quantite: number;
+    prix_unitaire: number;
+    total: number;
+    vente?: Vente;
+    produit?: Produit;
 }
 
 export interface BreadcrumbItem {
@@ -259,11 +272,13 @@ export interface SharedData {
     };
     succursales?: Succursale[];
     succursale?: Succursale;
-    clients?: Client[];
+    clients: Client[];
     client?: Client;
     services?: Service[];
     service?: Service;
     auth: Auth;
+    reservations?: Reservation[];
+    reservation?: Reservation;
     [key: string]: unknown;
 }
 export type Currency = {
@@ -502,9 +517,14 @@ interface Reservation {
     date_fin: string;
     statut: string;
     prix_total: number;
+    type_reservation: string;
+    created_at: string;
+    updated_at: string;
     chambre_id: number;
     chambre: Chambre;
     client_id: number;
+    type_paiement :string;
+    statut_paiement: string;
     vocation: string;
     ref: string;
     client: {
@@ -516,6 +536,7 @@ interface Reservation {
     occupations: Occupation[];
     salle_id: number;
     salle: Salle;
+    ventes: Vente[];
 }
 interface Salle {
     id: number;

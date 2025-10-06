@@ -19,7 +19,8 @@ class Vente extends Model
         'mode_paiement',
         'code',
         'caisse_id',
-        'has_promotion'
+        'has_promotion',
+        'reservation_id'
     ];
 
     protected $casts = [
@@ -104,4 +105,5 @@ class Vente extends Model
     {
         return $this->hasMany(VenteProduit::class);
     }
+    
 }

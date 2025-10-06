@@ -14,22 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Client::class)->constrained();
-            $table->foreignIdFor(Chambre::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Salle::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->datetime('date_debut');
-            $table->datetime('date_fin');
-            $table->enum('type_reservation', ['chambre', 'salle']);
-            $table->enum('statut', ['confirmee', 'en_attente', 'annulee', 'terminee'])->default('en_attente');
-            $table->decimal('prix_total', 10, 2);
-            $table->enum('type_paiement', ['espece', 'cheque', 'virement'])->default('espece');
-            $table->enum('statut_paiement', ['paye', 'non_paye'])->default('non_paye');
-            $table->enum('vocation', ['journee', 'nuit', 'mixte'])->nullable(); 
-            $table->uuid('ref')->unique();
-            $table->timestamps();
-        });
+        
     }
 
     /**

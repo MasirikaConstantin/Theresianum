@@ -11,18 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('salles', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom');
-            $table->integer('capacite_max');
-            $table->enum('vocation', ['journee', 'nuit', 'mixte']);
-            $table->decimal('prix_journee', 8, 2);
-            $table->decimal('prix_nuit', 8, 2);
-            $table->text('equipements');
-            $table->boolean('disponible')->default(true);
-            $table->uuid('ref')->unique();
-            $table->timestamps();
-        });
+       
     }
 
     /**

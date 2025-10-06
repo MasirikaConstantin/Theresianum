@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Client;
 use App\Models\Configuration;
 use App\Models\Produit;
+use App\Models\Reservation;
 use App\Models\Stock;
 use App\Models\Vente;
 use App\Models\VenteProduit;
@@ -80,7 +81,7 @@ class VenteController extends Controller
             })
             ->with(['stock' ])
             ->get();
-            
+            $reservations = Reservation::where('statut', 'confirmee')->select('id','client_id','salle_id','chambre_id','date_debut','date_fin','type_reservation','statut','prix_total','type_paiement','statut_paiement','vocation','ref')->get();
         return Inertia::render('Ventes/Create', [
             'clients' => Client::with(['fidelite'=>function($query){
                 $query->select("id", 'ref', 'points', 'client_id');
@@ -88,6 +89,13 @@ class VenteController extends Controller
             'produits' => $produits,
             "configuration"=>Configuration::getActiveConfig(),
             'modes_paiement' => ['espèces', 'carte', 'chèque', 'autre'],
+            'reservations' => $reservations->load(['client'=>function($query){
+                $query->select("id", 'ref', 'name', 'telephone', 'email');
+            }, 'salle'=>function($query){
+                $query->select("id", 'ref', 'nom');
+            }, 'chambre'=>function($query){
+                $query->select("id", 'ref', 'nom');
+            }])
         ]);
     }
 
@@ -98,12 +106,14 @@ class VenteController extends Controller
             'remise' => 'nullable|numeric|min:0',
             'montant_total' => 'required|numeric|min:0',
             'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
+            'reservation_id' => 'nullable|exists:reservations,id',
             'items' => 'required|array|min:1',
             'items.*.produit_id' => 'nullable|required_without:items.*.service_id|exists:produits,id',
             'items.*.quantite' => 'required|integer|min:1',
             'items.*.prix_unitaire' => 'required|numeric|min:0',
             'items.*.remise' => 'required|numeric|min:0',
             'items.*.montant_total' => 'required|numeric|min:0',
+
         ]);
     DB::transaction(function () use ($request) {
         // 1. Trouver ou créer la caisse ouverte 
@@ -114,6 +124,7 @@ class VenteController extends Controller
             'remise' => $request->remise,
             'montant_total' => $request->montant_total,
             'mode_paiement' => $request->mode_paiement,
+            'reservation_id' => $request->reservation_id,
         ]+ ['caisse_id' => $caisse->id]);
         
         if ($request->mode_paiement !== 'autre') {
@@ -238,7 +249,7 @@ public function getRecentVente(Request $request)
 
         try{
             // Calcul précis de la hauteur (en points - 1mm = 2.83 points)
-        $baseHeight = 180; // Hauteur de base en mm (sans articles)
+        $baseHeight = 150; // Hauteur de base en mm (sans articles)
         $perItemHeight = 8; // Hauteur par article en mm
         $totalHeight = $baseHeight + (count($vente->items) * $perItemHeight);
         
@@ -264,30 +275,26 @@ public function getRecentVente(Request $request)
         );
         $writer = new Writer($renderer);
 
-        $qrWeb = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString('https://bellahairmakeup.com/'));  
-        $qrFacebook = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString('https://web.facebook.com/Bellawedding1'));  
-        $qrInstagram = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString('https://www.instagram.com/bella__hair_makeup/'));  
         $pdf = PDF::loadView('factures.standard', [
             'vente' => $vente,
             'entreprise' => [
-                'nom' => 'BELLA HAIR MAKEUP',
-                'rccm'=>'23-A-07022',
+                'nom' => 'ASBL Les Pères Carmes Centre Theresianum de Kinshasa  Ordre des Carmes Déchaux',
+                'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
+                'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
                 'id_national'=>'01-G4701-N300623',
-                'adresse' => 'Kinshasa',
-                'telephone' => "+243970054889",
-                'email' => 'info@bellahairmakeup.com',
+                'telephone' => "+243826646260",
+                'telephone_reception' => "+243892247450",
+                'email' => 'cthresianum@gmail.com',
                 
             ],
-            'qrWeb' => $qrWeb,
-            'qrFacebook' => $qrFacebook,
-            'qrInstagram' => $qrInstagram
+            
         ])->setPaper([0, 0, $widthInPoints, $heightInPoints], 'portrait')
                     ->setOption('margin-top', 0)
                     ->setOption('margin-bottom', 0)
                     ->setOption('margin-left', 0)
                     ->setOption('margin-right', 0);
         }catch(\Exception $e){
-            dd($e->getMessage());
+            //dd($e->getMessage());
             Log::error($e->getMessage());
         }
         return $pdf->stream('facture-'.$vente->ref.'.pdf');
@@ -320,6 +327,7 @@ public function update(Request $request, $id)
         'remise' => 'nullable|numeric|min:0',
         'montant_total' => 'required|numeric|min:0',
         'mode_paiement' => 'required|in:espèces,carte,chèque,autre',
+        'reservation_id' => 'nullable|exists:reservations,id',
         'items' => 'required|array|min:1',
         'items.*.id' => 'nullable|exists:vente_produits,id', 
         'items.*.produit_id' => 'nullable|required_without:items.*.service_id|exists:produits,id',
@@ -357,6 +365,7 @@ public function update(Request $request, $id)
             'remise' => $request->remise,
             'montant_total' => $request->montant_total,
             'mode_paiement' => $request->mode_paiement,
+            'reservation_id' => $request->reservation_id,
         ]);
 
         // 5. Mettre à jour le solde de la caisse (différence entre ancien et nouveau montant)

@@ -1,5 +1,5 @@
 "use client";
-/*
+
 import {
   AreaChart as TremorAreaChart,
   BarChart as TremorBarChart,
@@ -87,4 +87,4 @@ export function ScatterChart({ data, index, category, colors, yAxisWidth, valueF
       valueFormatter={valueFormatter}
     />
   );
-}*/
+}

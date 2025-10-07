@@ -187,17 +187,17 @@ class ProduitController extends Controller
         return Inertia::render('Produits/Stats', [
         'data' => $data,
         'entreprise' => [
-            'nom' => 'BELLA HAIR MAKEUP',
-            'rccm' => '23-A-07022',
-            'id_national' => '01-G4701-N300623',
-            'telephone' => "+243970054889",
-            'adresse' => 'Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema',
+            'nom1' => "ASBL Les Pères Carmes",
+            "nom2"=> "Centre Theresianum de Kinshasa",
+            "nom3"=>'Ordre des Carmes Déchaux',
+            'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
+            'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
+            'telephone' => "+243826646260",
+            'telephone_reception' => "+243892247450",
+            'email' => 'cthresianum@gmail.com',
             'logo_url' => asset('images/logo.png'),
-            'email' => 'info@bellahairmakeup.com',
         ],
-        'qrWeb' => $qrWeb ?? '',
-        'qrFacebook' => $qrFacebook ?? '',
-        'qrInstagram' => $qrInstagram ?? ''
+        
     ]);
     }
     return response()->json($data);

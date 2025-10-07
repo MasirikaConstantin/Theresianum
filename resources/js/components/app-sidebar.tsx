@@ -124,12 +124,12 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     roles: ['admin', 'gerant'],
                 },
                
-                {
+                /*{
                     title : 'Points et Fidelités',
                     href : '/points',
                     icon : CoinsIcon,
                     roles : ['admin','gerant']
-                },
+                },*/
                 {
                     title: 'Gestion des devises',
                     href: '/currencies',
@@ -138,6 +138,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                 },
             ],
         },
+        /*
         {
             title : 'Gestion du Personnel',
             icon : PersonStanding,
@@ -180,7 +181,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     roles : ['admin', 'gerant'],
                 },
             ]
-        },
+        },*/
         {
             title: 'Statistiques',
             icon: ScatterChart,
@@ -214,12 +215,12 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             ],
 
         },
-        {
+        /*{
             title : 'Programme de Fidelité',
             icon : Gift,
             href : '/fidelite',
             roles : ['admin', 'gerant','vendeur'],
-        },
+        },*/
         {
             title: 'Alertes',
             icon: AlertCircle,

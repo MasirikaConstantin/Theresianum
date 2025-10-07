@@ -211,7 +211,6 @@ margin: 0px 0px 0px 0px;
 
     <div class="info-vendeur">
         <h5>Vendeur : {{ $data['selectedVendeur']->name }}</h5>
-        <p>Succursale: {{ $data['selectedVendeur']->succursale->nom ?? 'Aucune succursale' }}</p>
     </div>
 
     <ul class="stats-grid">

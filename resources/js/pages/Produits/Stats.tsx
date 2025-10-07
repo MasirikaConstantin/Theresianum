@@ -28,10 +28,12 @@ interface ProduitStatsProps extends PageProps {
         date_fin: string;
     };
     entreprise: {
-        nom: string;
-        rccm: string;
-        id_national: string;
+        nom1: string;
+        nom2: string;
+        nom3: string;
+        Immatriculation: string;
         telephone: string;
+        telephone_reception: string;
         email: string;
         logo_url: string;
         adresse: string;
@@ -49,42 +51,42 @@ export default function ProduitStats({ data, entreprise, qrWeb, qrFacebook, qrIn
 
     
 
-    // Auto-impression au chargement
+    /*/ Auto-impression au chargement
     useEffect(() => {
         const timeout = setTimeout(() => {
             window.print();
         }, 500);
 
         return () => clearTimeout(timeout);
-    }, []);
+    }, []);*/
 
     return (
         <div className="p-4 max-w-4xl mx-auto bg-white text-black">
             <Head title={`Statistiques Produit - ${data.produit.name}`} />
-
-            {/* En-tête de l'entreprise */}
-            <div className="text-center mb-4 border-b pb-4">
-            {entreprise.logo_url && (
-                    <img 
-                        src={entreprise.logo_url} 
-                        alt="Logo entreprise" 
-                        className="h-16 mx-auto mb-2"
-                    />
-                )}
-                <h1 className="text-xl font-bold">{entreprise.nom}</h1>
-                <p className="text-xs font-bold">
-                    {entreprise.rccm}, ID NAT: {entreprise.id_national}
-                </p>
-                <p className="text-xs">
-                    {entreprise.adresse}
-                </p>
-                <p className="text-xs">
-                    Tél: {entreprise.telephone} | E-mail: {entreprise.email}
-                </p>
-                <h2 className="text-xl font-bold mt-2">STATISTIQUES DU PRODUIT</h2>
-                <p className="text-sm">
-                    Période du {format(new Date(data.date_debut), 'PPP', { locale: fr })} au {format(new Date(data.date_fin), 'PPP', { locale: fr })}
-                </p>
+            <div className='grid grid-cols-2 gap-20 mb-6'>
+                <div className=" w-xl items-center justify-center flex pr-16"  >
+                    <div className=''>
+                        <img src={entreprise.logo_url} alt="" className="w-24 h-24" />
+                    </div>
+                    {/* En-tête de l'entreprise */}
+                    <div className="ml-6">
+                        <h1 className="text-xl font-bold ">{entreprise.nom1}</h1>
+                        <h1 className="text-xl font-bold ">{entreprise.nom2}</h1>
+                        <h1 className="text-xl font-bold ">{entreprise.nom3}</h1>
+                        
+                        <p className="text-sm text-gray-600"><span className="font-bold">Téléphone Administration:</span> {entreprise.telephone}</p>
+                        <p className="text-sm text-gray-600"><span className="font-bold">Email:</span> {entreprise.email}</p>
+                        <p className="text-sm text-gray-600"><span className="font-bold">Immatriculation:</span> {entreprise.Immatriculation}</p>
+                        <p className="text-sm text-gray-600"><span className="font-bold">Téléphone de Reception:</span> {entreprise.telephone_reception}</p>
+                    </div>
+                </div>
+                <div className=" ms-36">
+                    <div>
+                        <p className="text-sm textpgray-600">C.Kintambo, Q. Nganda</p>
+                        <p className="text-sm text-gray-600">Av.Chrétienne, n°39 b</p>
+                    </div>
+                    
+                </div>
             </div>
 
             {/* Informations du produit */}

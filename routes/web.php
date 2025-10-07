@@ -114,7 +114,9 @@ Route::get('/users/{user}/stats', [UserStatsController::class, 'show'])->middlew
 Route::get('/statistiques-vendeurs', [VendeurController::class, 'index'])
     ->name('statistiques.vendeurs')
     ->middleware(['auth', 'role:admin,gerant']);
-
+Route::get('/statistiques-ventes', [StatistiqueController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('statistiques.index');
 Route::get('/statistiques-produits', [ProduitController::class, 'list'])->name('produits.list');
 Route::get('/statistiques-stats', [ProduitController::class, 'stats'])->name('produits.stats');
 Route::get('/api/sales-stats', [SalesController::class, 'index'])->middleware('auth');

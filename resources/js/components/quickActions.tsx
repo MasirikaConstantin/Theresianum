@@ -9,14 +9,14 @@ export const QuickActions = () => {
     const userRole = auth.user.role;
     const getItemActions = (userRole: string) => {
     const Allactions = [
-      {
+      /*{
         title: 'Présence',
         description: 'Générer une liste de présence',
         icon: Calendar,
         roles : [ 'admin', 'gerant'],
         color: 'bg-green-500/90 hover:bg-green-600 text-white',
         action: () => router.visit('/pointages')
-      },
+      },*/
       {
         title: 'Entrée de stock',
         description: 'Enregistrer une livraison',

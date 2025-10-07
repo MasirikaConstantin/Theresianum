@@ -78,14 +78,16 @@ class ReportController extends Controller
                     'vendeur' => $vendeur,
                     'filters' => $request->all(),
                     'entreprise' => [
-                        'nom' => 'BELLA HAIR MAKEUP',
-                        'rccm' => '23-A-07022',
-                        'id_national' => '01-G4701-N300623',
-                        'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
-                        'phone' => "+243897456311",
-                        'email' => "info@bellahairmakeup.com",
-                        'logo' => asset('images/logo.png'), 
-                    ]
+                        'nom1' => "ASBL Les Pères Carmes",
+                        "nom2"=> "Centre Theresianum de Kinshasa",
+                        "nom3"=>'Ordre des Carmes Déchaux',
+                        'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
+                        'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
+                        'telephone' => "+243826646260",
+                        'telephone_reception' => "+243892247450",
+                        'email' => 'cthresianum@gmail.com',
+                        'logo_url' => asset('images/logo.png'),
+                    ],
                 ]);
             }
             

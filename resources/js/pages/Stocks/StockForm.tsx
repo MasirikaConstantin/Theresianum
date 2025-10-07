@@ -74,7 +74,7 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
                     <div className="grid gap-4">
                         <div className="grid gap-2">
 
-                            <Label htmlFor="client_id">Client *</Label>
+                            <Label htmlFor="produit_id">Produit *</Label>
                             <RecherchePopover
                                 options={produits.map(produit => ({
                                     value: produit.id.toString(),
@@ -82,9 +82,9 @@ export default function StockForm({ auth, stock, produits }: StockFormProps) {
                                     
                                     originalData: produit
                                 }))}
-                                placeholder="Sélectionner un client"
-                                searchPlaceholder="Rechercher un client..."
-                                emptyMessage="Aucun client trouvé."
+                                placeholder="Sélectionner un Produit"
+                                searchPlaceholder="Rechercher un produit..."
+                                emptyMessage="Aucun Produit trouvé."
                                 value={data.produit_id}
                                 onValueChange={(value) => setData('produit_id', value)}
                                 className="w-full" 

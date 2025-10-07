@@ -226,3 +226,9 @@ Route::fallback(function () {
 Route::post('reservations/update-status-paiement', [ReservationController::class, 'updateStatusPaiement'])->name('reservations.update-status-paiement');
 Route::get('reservations/{reservation}/print', [ReservationController::class, 'print'])->name('reservations.print');
 Route::get('get-taux', [CurrencieController::class, 'lesTaux'])->name('get-taux');
+
+
+
+Route::get('/{any}', function () {
+    return Inertia::render('App'); 
+})->where('any', '.*');

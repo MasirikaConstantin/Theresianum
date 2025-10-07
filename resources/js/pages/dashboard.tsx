@@ -24,7 +24,7 @@ export default function Dashboard({ auth }: { auth: Auth }) {
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border bg-card">
                         <div className='w-full h-full p-2' >
-                        <RendezVousCount />
+                        {/*<RendezVousCount />*/}
                         </div>
 
                     </div>

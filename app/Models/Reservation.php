@@ -5,13 +5,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Auth;
 class Reservation extends Model
 {
     use HasFactory;
     protected $fillable = [
         'client_id', 'chambre_id', 'salle_id', 'date_debut', 'date_fin',
-        'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','vocation','type_paiement','statut_paiement'
+        'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','operateur_id','vocation','type_paiement','statut_paiement','montant_payer'
     ];
 
     protected $casts = [
@@ -23,6 +23,7 @@ class Reservation extends Model
 
         static::creating(function ($model) {
             $model->ref = (string) \Illuminate\Support\Str::uuid();
+            $model->operateur_id = Auth::user()->id;
         });
     }
 
@@ -60,5 +61,21 @@ class Reservation extends Model
             $jours = Carbon::parse($this->date_debut)->diffInDays($this->date_fin);
             return $jours * $this->salle->getPrixParVocation($vocation);
         }
+    }
+
+    public function scopeAcomptes($query)
+    {
+        return $query->where('statut_paiement', 'non_paye')
+            ->orWhereColumn('montant_payer', '!=', 'prix_total')
+            ;
+    
+    }
+    public function operateur()
+    {
+        return $this->belongsTo(User::class, 'operateur_id');
+    }
+    public function historique()
+    {
+        return $this->hasMany(HistoriquePaiement::class);
     }
 }

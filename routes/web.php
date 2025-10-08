@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcompteController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ChambreController;
@@ -228,6 +229,16 @@ Route::fallback(function () {
 Route::post('reservations/update-status-paiement', [ReservationController::class, 'updateStatusPaiement'])->name('reservations.update-status-paiement');
 Route::get('reservations/{reservation}/print', [ReservationController::class, 'print'])->name('reservations.print');
 Route::get('get-taux', [CurrencieController::class, 'lesTaux'])->name('get-taux');
+
+
+Route::resource('acomptes', AcompteController::class)->middleware(['auth', 'verified', 'role:admin,gerant,caissier']);
+Route::get('/historique', [AcompteController::class, 'historique'])->name('acomptes.historique');
+
+
+
+
+Route::get('/acomptes/{acompte}/paiement', [AcompteController::class, 'showPaiement'])->name('acomptes.paiement.show');
+Route::post('/acomptes/{acompte}/paiement', [AcompteController::class, 'processPaiement'])->name('acomptes.paiement.process');
 
 
 

@@ -156,11 +156,21 @@ export default function UpdatePaiementStatus({ reservation } :{reservation : Res
               {getTypePaiementBadge(reservation.type_paiement)}
             </div>
           </div>
-          <div className="col-span-2">
-            <span className="font-medium text-gray-500">Montant:</span>
-            <div className="mt-1 text-lg font-semibold">
-              {Dollar(reservation.prix_total)}
+        </div>
+
+        <div className='grid grid-cols-2 gap-4 text-sm mt-4'>
+            <div className="">
+              <span className="font-medium text-gray-500">Montant:</span>
+              <div className="mt-1 text-lg font-semibold">
+                {Dollar(reservation.prix_total)}
+              </div>
             </div>
+
+            <div className="">
+              <span className="font-medium text-gray-500">Montant restant:</span>
+              <div className="mt-1 text-lg font-semibold text-red-500">
+                -  {Dollar(reservation.prix_total - reservation.montant_payer)}
+              </div>
           </div>
         </div>
       </div>

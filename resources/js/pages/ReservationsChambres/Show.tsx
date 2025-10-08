@@ -1,9 +1,9 @@
-import { Auth, Vente, type BreadcrumbItem } from '@/types';
+import { Auth, HistoriquePaiement, Vente, type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Clock, User, Bed, Building, DollarSign, FileText, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Bed, Building, DollarSign, FileText, ShoppingCart, Eye, Trash2, History, Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import AppLayout from '@/layouts/app-layout';
 import { DateHeure, Dollar, FrancCongolais } from '@/hooks/Currencies';
@@ -11,7 +11,7 @@ import { fr } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import UpdatePaiementStatus from '@/components/UpdatePaiementStatus';
 import { string } from 'zod';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Reservation {
     id: number;
@@ -44,6 +44,7 @@ interface Reservation {
     statut: string;
     prix_total: number;
     vocation: string | null;
+    historique: HistoriquePaiement[];
     created_at: string;
     ventes: Vente[];
 }
@@ -142,6 +143,7 @@ export default function ReservationShow({ auth, reservation }: Props) {
 
     const canUpdate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canDelete = auth.user.role === 'admin';
+    console.log(reservation.historique);
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
             <Head title={`Réservation ${reservation.client.name}`} />
@@ -355,6 +357,62 @@ export default function ReservationShow({ auth, reservation }: Props) {
                     {/* Colonne latérale */}
                     <div className="space-y-6">
                     <UpdatePaiementStatus reservation={reservation} />
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center">
+                                <History className="h-5 w-5 mr-2" />
+                                Historique des Paiements
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {reservation.historique.length > 0 ? (
+                                <div className="space-y-4">
+                                    {reservation.historique.map((paiement) => (
+                                        <div key={paiement.id} className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="font-semibold text-blue-800">
+                                                        {Dollar(paiement.montant)}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {DateHeure(paiement.created_at)}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        Par {paiement.operateur.name}
+                                                    </p>
+                                                </div>
+                                                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                                                    {paiement.mode_paiement.charAt(0).toUpperCase() + paiement.mode_paiement.slice(1)}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    <Receipt className="h-12 w-12 mx-auto mb-4" />
+                                    <p>Aucun paiement enregistré pour cette reservation.</p>
+                                </div>
+                            )}
+
+                            {/* Résumé des paiements */}
+                            <div className="mt-6 pt-4 border-t border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-semibold">Total payé :</span>
+                                    <span className="font-bold text-green-200">
+                                        {Dollar(reservation.montant_payer)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold">Reste à payer :</span>
+                                    <span className="font-bold text-orange-200">
+                                        {Dollar(reservation.prix_total - reservation.montant_payer)}
+                                    </span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                         {/* Informations de la salle/chambre */}
                         <Card>
                             <CardHeader>

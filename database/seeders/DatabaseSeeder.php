@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             //ChambreSeeder::class, 
             //SalleSeeder::class,
             ReservationSeeder::class,
+            //UpdateReservationPrix::class,
             Stock::factory(120)->create(),
         ]);
        /*/ Créer 5 succursales

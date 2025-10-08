@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { PageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlertCircle, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
+import { AlertCircle, Banknote, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const filterItemsByRole = (items: NavItem[], userRole: string): NavItem[] => {
@@ -109,6 +109,18 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     href: '/chambres-reservations',
                     icon: Bed,
                     roles: ['admin', 'gerant', 'vendeur'],
+                },
+                {
+                    title: 'Acompte',
+                    href: '/acomptes',
+                    icon: Banknote,
+                    roles: ['admin', 'gerant', 'caissier'],
+                },
+                {
+                    title: 'Historique des Paiements',
+                    href: '/historique',
+                    icon: Banknote,
+                    roles: ['admin', 'gerant', 'caissier'],
                 },
             ],
         },

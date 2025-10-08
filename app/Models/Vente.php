@@ -105,5 +105,7 @@ class Vente extends Model
     {
         return $this->hasMany(VenteProduit::class);
     }
+
+   
     
 }

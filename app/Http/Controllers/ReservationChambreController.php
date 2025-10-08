@@ -137,7 +137,7 @@ class ReservationChambreController extends Controller
             abort(404);
         }*/
 
-        $reservations_chambre->load(['client', 'salle','chambre','ventes'=>function($query){
+        $reservations_chambre->load(['historique','historique.operateur','client', 'salle','chambre','ventes'=>function($query){
             $query->with('client');
         }]);
 

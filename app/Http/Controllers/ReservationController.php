@@ -133,7 +133,7 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::where('ref', $reservation)->first();
         
-        $reservation->load(['client', 'salle','chambre','ventes'=>function($query){
+        $reservation->load(['historique','historique.operateur','client', 'salle','chambre','ventes'=>function($query){
             $query->with('client');
         }]);
 
@@ -347,10 +347,18 @@ public function updateStatusPaiement(Request $request)
         $reservation = Reservation::findOrFail($validated['reservation_id']);
         
         // Mettre à jour les informations de paiement
-        $reservation->update([
-            'statut_paiement' => $validated['statut_paiement'],
-            'type_paiement' => $validated['type_paiement']
-        ]);
+        if($validated['statut_paiement'] == 'paye') {
+            $reservation->update([
+                'statut_paiement' => $validated['statut_paiement'],
+                'type_paiement' => $validated['type_paiement'],
+                'montant_payer' => $reservation->prix_total
+            ]);
+        }else{
+            $reservation->update([
+                'statut_paiement' => $validated['statut_paiement'],
+                'type_paiement' => $validated['type_paiement'],
+            ]);
+        }
 
         return redirect()->back()
             ->with('success', 'Statut de paiement mis à jour avec succès');
@@ -365,10 +373,16 @@ public function print($reservation)
 {
    
     $reservation = Reservation::where('ref', $reservation)->first();
+    if($reservation?->chambre_id ) {
+        $reservation->load(['client', 'chambre','ventes'=>function($query){
+            $query->with('client');
+        }]);
+    }elseif($reservation?->salle_id){
+        $reservation->load(['client', 'salle','ventes'=>function($query){
+            $query->with('client');
+        }]);
+    }
     
-    $reservation->load(['client', 'salle','chambre','ventes'=>function($query){
-        $query->with('client');
-    }]);
 
     return Inertia::render('ReservationsChambres/print', [
         'reservation' => $reservation

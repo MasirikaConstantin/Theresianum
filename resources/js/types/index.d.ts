@@ -398,16 +398,28 @@ interface RendezVousCountProps {
 }
 
 interface PageProps {
-    auth: {
-        user: {
-            succursale_id: number | null;
-            id: number;
-            name: string;
-            email: string;
-            role : string
-        };
+   
+
+    auth: Auth;
+    historiquePaiements: HistoriquePaiement[];
+    reservation: Reservation;
+    flash: flash;
+    
+
+
+   }
+   export type HistoriquePaiement = {
+        id: number;
+        ref: string;
+        montant: number;
+        mode_paiement: string;
+        created_at: string;
+        vente_id: number;
+        operateur_id: number;
+        operateur: User;
+        reservation_id: number;
+        reservation: Reservation;
     };
-}
 interface flash{
     error : string,
     success : string
@@ -520,6 +532,7 @@ interface Reservation {
     type_reservation: string;
     created_at: string;
     updated_at: string;
+    montant_payer: number;
     chambre_id: number;
     chambre: Chambre;
     client_id: number;

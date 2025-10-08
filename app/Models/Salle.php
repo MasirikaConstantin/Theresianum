@@ -20,6 +20,11 @@ class Salle extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function reservation()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
     public function getPrixParVocation($vocation)
     {
         return $vocation === 'journee' ? $this->prix_journee : $this->prix_nuit;
@@ -42,5 +47,9 @@ class Salle extends Model
         static::creating(function ($model) {
             $model->ref = (string) \Illuminate\Support\Str::uuid();
         });
+    }
+    public function historiquePaiements()
+    {
+        return $this->hasMany(HistoriquePaiement::class);
     }
 }

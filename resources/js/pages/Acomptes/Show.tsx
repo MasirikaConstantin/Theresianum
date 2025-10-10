@@ -49,7 +49,7 @@ export default function VenteShow({ auth, reservation, montant_produits_ttc, tva
                         </Button>
                 </a>
                 )}
-                <a href={route('ventes.print', reservation.id)} target="_blank">
+                <a href={route('ventes.print', reservation.ref)} target="_blank">
                         <Button variant="outline" size="sm" className="flex items-center gap-2">
                             <Printer className="h-4 w-4" /> Imprimer
                         </Button>

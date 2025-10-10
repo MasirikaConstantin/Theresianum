@@ -74,6 +74,7 @@ class ReservationController extends Controller
 
     public function store(Request $request)
     {
+        try{
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'date_debut' => 'required|date',
@@ -82,9 +83,15 @@ class ReservationController extends Controller
             'heure_fin' => 'required|date_format:H:i',
             'salle_id' => 'required|exists:salles,id',
             'vocation' => 'required|in:journee,nuit',
+            'prix_total' => 'required|numeric',
             'statut' => 'required|in:confirmee,en_attente,annulee,terminee'
         ]);
-
+    } catch (\Exception $e) {
+        dd($e->getMessage());
+        DB::rollBack();
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la création de la réservation: ' . $e->getMessage());
+    }
         // Validation manuelle pour les heures sur la même journée
         if ($validated['date_debut'] === $validated['date_fin'] && 
             $validated['heure_debut'] >= $validated['heure_fin']) {
@@ -109,13 +116,11 @@ class ReservationController extends Controller
             }
 
             // Calcul du prix total
-            $prixTotal = $this->calculerPrixTotal($validated);
+
+            $prixTotal = $validated['prix_total'];// $this->calculerPrixTotal($validated);
 
             // Création de la réservation
-            $reservation = Reservation::create(array_merge($validated, [
-                'prix_total' => $prixTotal,
-                'ref' => Str::uuid()
-            ]));
+            $reservation = Reservation::create(($validated));
 
             DB::commit();
 
@@ -314,7 +319,7 @@ class ReservationController extends Controller
         return !$query->exists();
     }
 
-    private function calculerPrixTotal(array $data): float
+    /*private function calculerPrixTotal(array $data): float
 {
     $salle = Salle::find($data['salle_id']);
     $prixParJour = $data['vocation'] === 'journee' ? $salle->prix_journee : $salle->prix_nuit;
@@ -334,7 +339,7 @@ class ReservationController extends Controller
     // $jours = $dateDebut->diffInDays($dateFin) + 1;
     
     return $jours * $prixParJour;
-}
+}*/
 public function updateStatusPaiement(Request $request)
 {
     $validated = $request->validate([

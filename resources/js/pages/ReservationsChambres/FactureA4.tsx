@@ -1,4 +1,4 @@
-import { DateHeure, DateSimple, Dollar, FrancCongolais } from "@/hooks/Currencies"
+import { DateHeure, DateSimple, Dollar, FrancCongolais, HeureSimple } from "@/hooks/Currencies"
 import { Reservation } from "@/types"
 import axios from "axios"
 import { useEffect, useState } from "react"
@@ -29,21 +29,6 @@ export default function FactureA4({ reservation }: FactureA4Props) {
     }
     fetchTauxAchat()
   }, [])
-  const calculerDuree = (debut: string, fin: string) => {
-    const start = new Date(debut)
-    const end = new Date(fin)
-    const diffMs = end.getTime() - start.getTime()
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    const diffDays = Math.floor(diffHours / 24)
-    const remainingHours = diffHours % 24
-
-    if (diffDays > 0) {
-      return `${diffDays} jour${diffDays > 1 ? 's' : ''} ${remainingHours > 0 ? `${remainingHours}h` : ''}`
-    }
-    return `${diffHours}h`
-  }
-
-  const dureeSejour = calculerDuree(reservation.date_debut, reservation.date_fin)
 
  
   const entrepriseInfo = {
@@ -63,6 +48,8 @@ const FormatCurrency = (amount: number, currency: string) => {
     maximumFractionDigits: 2,
   }).format(amount)
 }
+const isChambre = reservation.chambre_id !== null;
+const isSalle = reservation.salle_id !== null;
   return (
     <div className="bg-white text-gray-900 p-8 max-w-[210mm] min-h-[297mm] mx-auto shadow-lg print:shadow-none print:p-0 print:max-w-none">
       {/* En-tête de la facture */}
@@ -104,15 +91,15 @@ const FormatCurrency = (amount: number, currency: string) => {
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-3">RÉSERVATION</h3>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="font-medium">{reservation.chambre.nom}</p>
-            <p className="text-sm text-gray-600">Type: {reservation.chambre.type}</p>
+            <p className="font-medium">{reservation.chambre?.nom || reservation.salle?.nom}</p>
+            <p className="text-sm text-gray-600">Type: {reservation.chambre?.type || reservation.salle?.vocation}</p>
             <p className="text-sm text-gray-600">
-              Arrivée: {DateSimple(reservation.date_debut)}
+              Début: {HeureSimple(reservation.date_debut)}
             </p>
             <p className="text-sm text-gray-600">
-              Départ: {DateSimple(reservation.date_fin)}
+              Fin: {HeureSimple(reservation.date_fin)}
             </p>
-            <p className="text-sm text-gray-600">Durée: {dureeSejour}</p>
+            
           </div>
         </div>
       </div>
@@ -127,24 +114,33 @@ const FormatCurrency = (amount: number, currency: string) => {
             <thead className="bg-gray-100">
               <tr>
                 <th className="text-left p-3 font-semibold">Description</th>
-                <th className="text-left p-3 font-semibold">Durée</th>
-                <th className="text-right p-3 font-semibold">Prix unitaire</th>
-                <th className="text-right p-3 font-semibold">Total</th>
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-right p-3 font-semibold">Prix</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b border-gray-200">
                 <td className="p-3">
                   <div>
-                    <p className="font-medium">{reservation.chambre.nom} - {reservation.chambre.numero}</p>
-                    <p className="text-sm text-gray-600">{reservation.chambre.equipements}</p>
+                    {isChambre && (
+                    <p className="font-medium">{reservation.chambre?.nom || reservation.salle?.nom} - {reservation.chambre?.numero }</p>
+                    )}
+                    {isSalle && (
+                    <p className="font-medium">{reservation.chambre?.nom || reservation.salle?.nom} - {reservation.chambre?.numero }</p>
+                    )}
+                    <p className="text-xs text-gray-600">{reservation.chambre?.equipements || reservation.salle?.equipements}</p>
                   </div>
                 </td>
-                <td className="p-3">{dureeSejour}</td>
-                <td className="p-3 text-right">{Dollar(parseFloat(reservation.chambre.prix.toString()))}</td>
-                <td className="p-3 text-right font-semibold">
-                  {Dollar(parseFloat(reservation.prix_total.toString()))}
-                </td>
+                <td className="p-3"><ul className="list-disc text-sm" >
+                  <li>{DateHeure(reservation.date_debut)}</li>
+                  <li>{DateHeure(reservation.date_fin)}</li>
+                </ul></td>
+                {isChambre && (
+                <td className="p-3 text-right">{Dollar(parseFloat(reservation.chambre?.prix.toString()))}</td>
+                )}
+                {isSalle && (
+                <td className="p-3 text-right">{Dollar(parseFloat(reservation.vocation==="nuit" ? reservation.salle?.prix_nuit.toString() : reservation.salle?.prix_journee.toString()))}</td>
+                )}
               </tr>
             </tbody>
           </table>
@@ -207,6 +203,35 @@ const FormatCurrency = (amount: number, currency: string) => {
                 </>
                 ) : ''}
               </div>
+
+
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">Montant Payé:</span>
+                <span>{Dollar(parseFloat(reservation.montant_payer.toString()))}</span>
+                {taux_achat?.exchange_rate ? (
+                <>
+                <span className="font-medium">Vaut</span><br />
+
+                  <p>
+                    {FormatCurrency(reservation.montant_payer * taux_achat.exchange_rate, taux_achat.code).replace('CDF', 'FC')}
+                  </p>
+                </>
+                ) : ''}
+              </div>
+
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">Montant Restant :</span>
+                <span>{Dollar(parseFloat((reservation.prix_total -reservation.montant_payer).toString()))}</span>
+                {taux_achat?.exchange_rate ? (
+                <>
+                <span className="font-medium">Vaut</span><br />
+
+                  <p>
+                    {FormatCurrency((reservation.prix_total -reservation.montant_payer) * taux_achat.exchange_rate, taux_achat.code).replace('CDF', 'FC')}
+                  </p>
+                </>
+                ) : ''}
+              </div>
               
               {reservation.ventes && reservation.ventes.length > 0 && (
                 <>
@@ -253,7 +278,7 @@ const FormatCurrency = (amount: number, currency: string) => {
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span>TOTAL:</span>
                     <span className="text-blue-800">
-                      {FrancCongolais(parseFloat(reservation.prix_total.toString()))}
+                      {Dollar(parseFloat(reservation.prix_total.toString()))}
                     </span>
                   </div>
                 </div>
@@ -286,11 +311,11 @@ const FormatCurrency = (amount: number, currency: string) => {
             </div>
           </div>
 
-      {/* Pied de page */}
+      {/* Pied de page 
       <div className="mt-12 pt-6 border-t border-gray-300 text-center text-xs text-gray-500">
         <p>Facture établie électroniquement - Valable sans signature</p>
         <p className="mt-1">En cas de question, contactez-nous au {entrepriseInfo.telephone}</p>
-      </div>
+      </div>*/}
     </div>
   )
 }

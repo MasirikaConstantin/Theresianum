@@ -86,22 +86,22 @@ export default function ReservationCreate({
 
     // Filtrer les salles disponibles basé sur les réservations existantes avec précision horaire
     useEffect(() => {
-        console.log('Salles reçues:', salles);
-        console.log('Réservations reçues:', reservations);
-        console.log('Dates sélectionnées:', data.date_debut, data.date_fin);
-        console.log('Heures sélectionnées:', data.heure_debut, data.heure_fin);
+       // console.log('Salles reçues:', salles);
+        //console.log('Réservations reçues:', reservations);
+        //console.log('Dates sélectionnées:', data.date_debut, data.date_fin);
+       // console.log('Heures sélectionnées:', data.heure_debut, data.heure_fin);
 
         if (!data.date_debut || !data.date_fin || !data.heure_debut || !data.heure_fin) {
             // Si pas de dates sélectionnées, montrer toutes les salles disponibles
             const sallesDispo = salles.filter(s => s.disponible);
-            console.log('Pas de dates - Salles disponibles:', sallesDispo);
+           // console.log('Pas de dates - Salles disponibles:', sallesDispo);
             setSallesDisponibles(sallesDispo);
             return;
         }
 
         // Validation : heure de fin doit être après heure de début pour la même date
         if (data.date_debut === data.date_fin && data.heure_debut >= data.heure_fin) {
-            console.log('Heures invalides - heure_fin doit être après heure_debut');
+           // console.log('Heures invalides - heure_fin doit être après heure_debut');
             setSallesDisponibles([]);
             return;
         }
@@ -113,12 +113,12 @@ export default function ReservationCreate({
         const debut = new Date(dateDebutComplete);
         const fin = new Date(dateFinComplete);
 
-        console.log('Période sélectionnée:', debut, 'à', fin);
+        //console.log('Période sélectionnée:', debut, 'à', fin);
 
         // Si aucune réservation n'existe, toutes les salles disponibles sont... disponibles !
         if (reservations.length === 0) {
             const sallesDispo = salles.filter(salle => salle.disponible);
-            console.log('Aucune réservation - Toutes les salles disponibles:', sallesDispo);
+            //console.log('Aucune réservation - Toutes les salles disponibles:', sallesDispo);
             setSallesDisponibles(sallesDispo);
             return;
         }
@@ -127,7 +127,7 @@ export default function ReservationCreate({
         const sallesDispo = salles.filter(salle => {
             // Vérifier si la salle est disponible
             if (!salle.disponible) {
-                console.log(`Salle ${salle.nom} non disponible`);
+                //console.log(`Salle ${salle.nom} non disponible`);
                 return false;
             }
 
@@ -137,11 +137,11 @@ export default function ReservationCreate({
                 res.statut !== 'annulee'
             );
 
-            console.log(`Réservations pour salle ${salle.nom}:`, reservationsSalle);
+            //console.log(`Réservations pour salle ${salle.nom}:`, reservationsSalle);
 
             // Si aucune réservation pour cette salle, elle est disponible
             if (reservationsSalle.length === 0) {
-                console.log(`Salle ${salle.nom} disponible - aucune réservation`);
+                //console.log(`Salle ${salle.nom} disponible - aucune réservation`);
                 return true;
             }
 
@@ -149,16 +149,16 @@ export default function ReservationCreate({
             const hasConflict = reservationsSalle.some(reservation => {
                 const conflict = hasTimeConflict(reservation, debut, fin);
                 if (conflict) {
-                    console.log(`Conflit détecté pour salle ${salle.nom} avec réservation:`, reservation);
+                   // console.log(`Conflit détecté pour salle ${salle.nom} avec réservation:`, reservation);
                 }
                 return conflict;
             });
 
-            console.log(`Salle ${salle.nom} - Conflit:`, hasConflict);
+            //console.log(`Salle ${salle.nom} - Conflit:`, hasConflict);
             return !hasConflict;
         });
 
-        console.log('Salles disponibles finales:', sallesDispo);
+        //console.log('Salles disponibles finales:', sallesDispo);
         setSallesDisponibles(sallesDispo);
     }, [data.date_debut, data.date_fin, data.heure_debut, data.heure_fin, salles, reservations]);
 
@@ -256,7 +256,7 @@ export default function ReservationCreate({
         const config = statusConfig[statut as keyof typeof statusConfig] || { label: statut, variant: 'secondary' as const };
         return <Badge variant={config.variant}>{config.label}</Badge>;
     };
-
+//console.log(data)
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
             <Head title="Nouvelle réservation de salle" />

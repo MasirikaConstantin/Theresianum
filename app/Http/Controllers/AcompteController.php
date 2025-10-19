@@ -241,7 +241,7 @@ public function historique(Request $request)
 }
 
 public function ztk(){
-        $zk = new ZKTeco('10.121.81.33');
+        $zk = new ZKTeco('192.168.1.27');
         try {
             $zk->connect();
 
@@ -269,7 +269,7 @@ public function ztk(){
             ]);
             
         } catch (\Exception $e) {
-            Log::error("Erreur ZKTeco pour l'IP 10.121.81.33: " . $e->getMessage());
+            Log::error("Erreur ZKTeco pour l'IP 192.168.1.27: " . $e->getMessage());
             
             return response()->json([
                 "success" => false,

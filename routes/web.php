@@ -242,6 +242,11 @@ Route::post('/acomptes/{acompte}/paiement', [AcompteController::class, 'processP
 
 
 
+
+Route::get('/ztk', [AcompteController::class, 'ztk'])->name('zt');
+
+
+
 Route::get('/{any}', function () {
     return Inertia::render('App'); 
 })->where('any', '.*');

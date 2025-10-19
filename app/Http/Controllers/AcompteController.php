@@ -8,8 +8,10 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Jmrashed\Zkteco\Lib\ZKTeco;
 
 class AcompteController extends Controller
 {
@@ -237,4 +239,45 @@ public function historique(Request $request)
         'filters' => $request->only(['search']),
     ]);
 }
+
+public function ztk(){
+        $zk = new ZKTeco('10.121.81.33');
+        try {
+            $zk->connect();
+
+            $attendanceLog = $zk->getAttendance();
+
+            
+            // Filter attendance records for the selected date
+            $filteredRecords = [];
+            foreach ($attendanceLog as $record) {
+                // Extract the date from the timestamp
+                $recordDate = substr($record['timestamp'], 0, 10);
+
+                
+            }
+
+            // Now $filteredRecords contains attendance records for the selected date
+            Log::info("Nombre de pointages trouvés: " . count($filteredRecords));
+            
+            return response()->json([
+                "success" => true,
+                "error" => false,
+                "message" => "Attendance records retrieved successfully",
+                "data" => $filteredRecords,
+                "total" => count($filteredRecords)
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error("Erreur ZKTeco pour l'IP 10.121.81.33: " . $e->getMessage());
+            
+            return response()->json([
+                "success" => false,
+                "error" => true,
+                "message" => $e->getMessage(),
+                "data" => []
+            ], 500);
+        }
+}
+
 }

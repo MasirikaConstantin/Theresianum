@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { PageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlertCircle, Banknote, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
+import { AlertCircle, Banknote, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, CakeIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PaperclipIcon, PartyPopper, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const filterItemsByRole = (items: NavItem[], userRole: string): NavItem[] => {
@@ -63,7 +63,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     title: 'Stock',
                     href: '/stocks',
                     icon: Warehouse,
-                    roles: ['admin', 'gerant', "vendeur"],
+                    roles: ['admin', 'gerant'],
                 },
                 
             ],
@@ -110,6 +110,13 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     icon: Bed,
                     roles: ['admin', 'gerant', 'vendeur'],
                 },
+
+                {
+                    title: 'Réserv. Espace',
+                    href: '/espaces-reservations',
+                    icon: CakeIcon,
+                    roles: ['admin', 'gerant', 'vendeur'],
+                },
                 {
                     title: 'Acompte',
                     href: '/acomptes',
@@ -125,6 +132,14 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             ],
         },
         {
+            title : 'Pro Format',
+            icon :PaperclipIcon ,
+            roles : ['admin', "gerant", 'vendeur'],
+            items : [],
+            href: '/proforma-invoices',
+
+        },
+        {
             title: 'Administration',
             icon: UserCheck2,
             roles: ['admin', 'gerant'],
@@ -135,7 +150,12 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     icon: UserCog,
                     roles: ['admin', 'gerant'],
                 },
-               
+                {
+                    title : 'Espaces',
+                    href : '/espaces',
+                    icon : PartyPopper,
+                    roles : ['admin','gerant']
+                },
                 /*{
                     title : 'Points et Fidelités',
                     href : '/points',

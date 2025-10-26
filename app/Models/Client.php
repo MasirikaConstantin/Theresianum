@@ -18,6 +18,7 @@ class Client extends Model
         'notes',
         'succursale_id',
         'enregistrer_par_id',
+        'adresse',
         'date_naissance',
     ];
 

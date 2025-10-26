@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Models\Client;
 use App\Models\Configuration;
+use App\Models\Currencie;
 use App\Models\Produit;
 use App\Models\Reservation;
 use App\Models\Stock;
@@ -77,25 +78,28 @@ class VenteController extends Controller
         $produits = Produit::where('actif', true)
             ->whereHas('stock', function ($query) {
                 $query->where('actif', true)
-                    ->where('quantite', '>', 0); // Seulement si le stock est > 0
+                    ->where('quantite', '>', 0); 
             })
             ->with(['stock' ])
             ->get();
             $reservations = Reservation::where('statut', 'confirmee')->select('id','client_id','salle_id','chambre_id','date_debut','date_fin','type_reservation','statut','prix_total','type_paiement','statut_paiement','vocation','ref')->get();
+            $currencies = Currencie::where('is_active', true)->select('id','name','code','symbol', 'exchange_rate')->get();
         return Inertia::render('Ventes/Create', [
             'clients' => Client::with(['fidelite'=>function($query){
-                $query->select("id", 'ref', 'points', 'client_id');
-            }])->select('id','name','telephone','email','ref')->get(),
+                            $query->select("id", 'ref', 'points', 'client_id');
+                        }])->select('id','name','telephone','email','ref')->get(),
             'produits' => $produits,
             "configuration"=>Configuration::getActiveConfig(),
             'modes_paiement' => ['espèces', 'carte', 'chèque', 'autre'],
             'reservations' => $reservations->load(['client'=>function($query){
-                $query->select("id", 'ref', 'name', 'telephone', 'email');
-            }, 'salle'=>function($query){
-                $query->select("id", 'ref', 'nom');
-            }, 'chambre'=>function($query){
-                $query->select("id", 'ref', 'nom');
-            }])
+                                    $query->select("id", 'ref', 'name', 'telephone', 'email');
+                                }, 'salle'=>function($query){
+                                    $query->select("id", 'ref', 'nom');
+                                }, 'chambre'=>function($query){
+                                    $query->select("id", 'ref', 'nom');
+                                }]),
+            'currencies' => $currencies->toArray(),
+            
         ]);
     }
 

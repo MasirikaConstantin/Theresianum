@@ -12,6 +12,7 @@ use App\Http\Controllers\ContratController;
 use App\Http\Controllers\UtilisateurController;
 use App\Http\Controllers\CurrencieController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\EspaceController;
 use App\Http\Controllers\MonReportController;
 use App\Http\Controllers\PaieController;
 use App\Http\Controllers\PointageController;
@@ -20,10 +21,12 @@ use App\Http\Controllers\TransfertControllerStock;
 use App\Http\Controllers\UserStatsController;
 use App\Http\Controllers\VendeurController;
 use App\Http\Controllers\ProduitController;
+use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationChambreController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ReservationEspacesController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalleController;
 use App\Http\Controllers\StockSuccursaleController;
@@ -245,7 +248,12 @@ Route::post('/acomptes/{acompte}/paiement', [AcompteController::class, 'processP
 
 Route::get('/ztk', [AcompteController::class, 'ztk'])->name('zt');
 
+Route::resource('proforma-invoices', ProformaInvoiceController::class)->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);
+Route::get('/proforma-invoices/{proforma_invoice}/print', [ProformaInvoiceController::class, 'print'])
+    ->name('proforma-invoices.print');
 
+Route::resource('espaces', EspaceController::class)->middleware(['auth', 'verified', 'role:admin,gerant']);
+Route::resource('espaces-reservations', ReservationEspacesController::class)->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
 
 Route::get('/{any}', function () {
     return Inertia::render('App'); 

@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             HotelSeeder::class,
         ]);
         \App\Models\Client::factory()->count(50)->create();
-        //App\Models\Client::factory()->count(50)->create();
+        /*/*App\Models\Client::factory()->count(50)->create();
         $this->call([
             //ClientSeeder::class,
             //ChambreSeeder::class, 
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             ReservationSeeder::class,
             //UpdateReservationPrix::class,
             Stock::factory(120)->create(),
-        ]);
+        ]);*/
        /*/ Créer 5 succursales
 \App\Models\Succursale::factory()->count(3)->create();
 

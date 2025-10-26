@@ -11,6 +11,19 @@ export interface Auth {
 export interface Promotion{
     is_actif: boolean;
 }
+export interface Currencie {
+   id: number;
+   name: string;
+   code: string;
+   symbol: string;
+   exchange_rate: number;
+   is_active: boolean;
+   is_default: boolean;
+   ref: string;
+   created_at: string;
+   updated_at: string;
+   deleted_at: string | null;
+}
 export interface Categorie {
     id: number;
     ref: string;
@@ -297,6 +310,7 @@ export type Currency = {
 export type Client = {
     id: number;
     name: string;
+    adresse: string | null;
     telephone: string | null;
     email: string | null;
     notes: string | null;
@@ -375,6 +389,7 @@ export interface User {
 export type Produit = {
     id: number;
     name: string;
+    prix_vente: number;
     stock_succursales: Array<{
         succursale_id: number;
         quantite: number;
@@ -532,6 +547,7 @@ interface Reservation {
     type_reservation: string;
     created_at: string;
     updated_at: string;
+espace_id:number;
     montant_payer: number;
     chambre_id: number;
     chambre: Chambre;
@@ -549,7 +565,23 @@ interface Reservation {
     occupations: Occupation[];
     salle_id: number;
     salle: Salle;
+    espace: Espace;
     ventes: Vente[];
+
+
+}
+interface Espace {
+    id: number;
+    ref: string;
+    nom: string;
+    capacite_max: number;
+    vocation: string;
+    prix_journee: number;
+    prix_nuit: number;
+    equipements: string;
+    disponible: boolean;
+    created_at: string;
+    updated_at: string;
 }
 interface Salle {
     id: number;
@@ -582,4 +614,52 @@ interface Chambre {
         to: number;
         total: number;
     }
+}
+
+export interface ProformaInvoice {
+    data: ProformaInvoice[];
+    id: number;
+    numero_facture: string;
+    client_id?: number;
+    client?: Client;
+    date_facture: string;
+    date_echeance?: string;
+    notes?: string;
+    montant_total: number;
+    statut: 'brouillon' | 'envoyee' | 'payee';
+    ref: string;
+    created_by?: User;
+    updated_by?: User;
+    created_at: string;
+    updated_at: string;
+    items: ProformaInvoiceItem[];
+}
+
+
+export interface ProformaInvoiceFormData {
+    client_nom: string;
+    client_email: string;
+    client_telephone: string;
+    client_adresse: string;
+    date_facture: string;
+    date_echeance: string;
+    notes: string;
+    items: ProformaInvoiceItem[];
+}
+export interface ProformaInvoiceItem {
+    id?: number;
+    type: 'chambre' | 'salle' | 'produit';
+    item_id: number;
+    designation: string;
+    quantite: number;
+    prix_unitaire: number;
+    montant_total: number;
+    date_item: string;
+    created_at?: string;
+    updated_at?: string;
+}
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
 }

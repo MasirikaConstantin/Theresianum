@@ -10,7 +10,7 @@ class Reservation extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'client_id', 'chambre_id', 'salle_id', 'date_debut', 'date_fin',
+        'client_id', 'chambre_id', 'salle_id','espace_id', 'date_debut', 'date_fin',
         'type_reservation', 'statut', 'prix_total', 'specifications', 'ref','operateur_id','vocation','type_paiement','statut_paiement','montant_payer'
     ];
 
@@ -61,6 +61,10 @@ class Reservation extends Model
             $jours = Carbon::parse($this->date_debut)->diffInDays($this->date_fin);
             return $jours * $this->salle->getPrixParVocation($vocation);
         }
+    }
+    public function espace()
+    {
+        return $this->belongsTo(Espace::class);
     }
 
     public function scopeAcomptes($query)

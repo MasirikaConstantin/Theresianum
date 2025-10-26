@@ -26,4 +26,11 @@ export const DateSimple = (date: string) => {
 export const HeureSimple = (heure: string) => {
     return format(new Date(heure), 'p', { locale: fr });
 };
+
+export const getCurrency = (symbol: string, montant: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: symbol
+    }).format(montant);
+}
     

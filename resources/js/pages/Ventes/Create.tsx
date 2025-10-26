@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Auth, Client, Configuration, Reservation, SharedData, type BreadcrumbItem } from '@/types';
+import { Auth, Client, Configuration, Currencie, Reservation, SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import debounce from 'lodash.debounce';
@@ -26,7 +26,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { DateHeure, FrancCongolais } from '@/hooks/Currencies';
+import { DateHeure, Dollar, FrancCongolais, getCurrency } from '@/hooks/Currencies';
 import ReservationVenteManager from '@/components/ReservationVenteManager';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -59,7 +59,7 @@ type Item = {
 
 const TVA_RATE = 0.0000000000001;
 
-export default function VenteCreate({ auth, configuration }: { auth: Auth, configuration: Configuration }) {
+export default function VenteCreate({ auth, configuration, currencies }: { auth: Auth, configuration: Configuration, currencies: Currencie[] }) {
     const { clients, produits, reservations } = usePage<SharedData>().props;
     const [utilisablePoints, setUtilisablePoints] = useState(false);
     
@@ -119,10 +119,9 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
 
     // Filtrer les produits en fonction de la recherche
     const filteredProduits = produits?.filter((produit: any) =>
-        produit.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ).map((produit: any) => ({
-        ...produit,
-        stock_disponible: getStockDisponible(produit),
+        produit.name.toLowerCase().includes(searchTerm.toLowerCase())).map((produit: any) => ({
+                ...produit,
+            stock_disponible: getStockDisponible(produit),
     }));
 
     // Filtrer les clients en fonction de la recherche
@@ -420,67 +419,60 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                 </div>
                             </CardHeader>
                             <CardContent className="p-0">
-                                <Tabs defaultValue="produits" className="w-full">
-                                    <div className="px-6">
-                                        <TabsList className="w-full">
-                                            <TabsTrigger value="produits" className="flex-1">Produits</TabsTrigger>
-                                        </TabsList>
-                                    </div>
-
-                                    <TabsContent value="produits" className="m-0">
-                                        <ScrollArea className="h-[500px] px-6 py-4">
-                                            {filteredProduits && filteredProduits.length > 0 ? (
-                                                <div className="border rounded-lg">
-                                                    <Table>
-                                                        <TableHeader>
-                                                            <TableRow>
-                                                                <TableHead className="w-[200px]">Produit</TableHead>
-                                                                <TableHead>Stock</TableHead>
-                                                                <TableHead>Prix</TableHead>
-                                                                <TableHead className="text-right">Actions</TableHead>
+                                <ScrollArea className="h-[500px] px-6 py-4">
+                                    {filteredProduits && filteredProduits.length > 0 ? (
+                                        <div className="border rounded-lg">
+                                            <div style={{ minWidth: '600px' }}>
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead className="w-[100px]">Produit</TableHead>
+                                                            <TableHead className="w-[10px]">Stock</TableHead>
+                                                            <TableHead className="w-[10px]">Prix</TableHead>
+                                                            <TableHead className="text-right w-[10px]">Actions</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {filteredProduits.map((produit: any) => (
+                                                            <TableRow 
+                                                                key={produit.id} 
+                                                                className={produit.stock_disponible <= 0 ? 'opacity-60' : ''}
+                                                            >
+                                                                <TableCell className="font-medium">{produit.name.slice(0, 35) + '... '}</TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant={produit.stock_disponible > 0 ? "default" : "destructive"}>
+                                                                        {produit.stock_disponible}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {FrancCongolais(produit.prix_vente)}
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="secondary"
+                                                                        onClick={() => handleAddItem(produit, 'produit')}
+                                                                        disabled={produit.stock_disponible <= 0}
+                                                                    >
+                                                                        <Plus className="h-4 w-4 mr-2" />
+                                                                        Ajouter
+                                                                    </Button>
+                                                                </TableCell>
                                                             </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            {filteredProduits.map((produit: any) => (
-                                                                <TableRow 
-                                                                    key={produit.id} 
-                                                                    className={produit.stock_disponible <= 0 ? 'opacity-60' : ''}
-                                                                >
-                                                                    <TableCell className="font-medium">{produit.name.slice(0, 45) + '... '}</TableCell>
-                                                                    <TableCell>
-                                                                        <Badge variant={produit.stock_disponible > 0 ? "default" : "destructive"}>
-                                                                            {produit.stock_disponible}
-                                                                        </Badge>
-                                                                    </TableCell>
-                                                                    <TableCell>
-                                                                        {FrancCongolais(produit.prix_vente)}
-                                                                    </TableCell>
-                                                                    <TableCell className="text-right">
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="secondary"
-                                                                            onClick={() => handleAddItem(produit, 'produit')}
-                                                                            disabled={produit.stock_disponible <= 0}
-                                                                        >
-                                                                            <Plus className="h-4 w-4 mr-2" />
-                                                                            Ajouter
-                                                                        </Button>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                </div>
-                                            ) : (
-                                                <div className="text-center py-8">
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Aucun produit trouvé
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </ScrollArea>
-                                    </TabsContent>
-                                </Tabs>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <p className="text-sm text-muted-foreground">
+                                                Aucun produit trouvé
+                                            </p>
+                                        </div>
+                                    )}
+                                    <ScrollBar orientation="horizontal" />
+                                </ScrollArea>
                             </CardContent>
                         </Card>
                     </div>
@@ -762,9 +754,41 @@ export default function VenteCreate({ auth, configuration }: { auth: Auth, confi
                                                 )}
                                             </div>
                                         )}
+
+                                        
                                 </CardFooter>
                             )}
+
                         </Card>
+                        {data.items.length > 0 ? (
+                            <Card className='px-0'>
+                            <CardHeader>
+                                <CardTitle>Conversion</CardTitle>
+                            </CardHeader>
+                            <CardContent className='px-2'>
+                                <ScrollArea className="h-[300px] pr-4 -mr-4">
+                                    <div className="space-y-4">
+                                        {currencies?.length > 0 && (
+                                            <>
+                                            {currencies?.map((currency: Currencie) => (
+                                                <div key={currency.id} className=' space-x-2 items-center justify-center bg-emerald-900 p-2 rounded-md mt-2'>
+                                                    <p><span className='font-bold'>{currency.name}</span> Le Taux est de {getCurrency(currency.code, currency.exchange_rate).replace(currency.code,currency.symbol)}</p>
+                                                    <ul className='flex space-x-2'>
+                                                    <li className='font-bold font-stretch-150% italic'>{getCurrency(currency.code,data.montant_total).replace(currency.code,currency.symbol)} </li>
+                                                    <li>Vaut</li>
+                                                    <li className='font-bold italic '>{Dollar(data.montant_total / currency.exchange_rate)}</li>
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                            </>
+                                        )}
+                                    </div>
+                                </ScrollArea>
+                            </CardContent>
+                        </Card>
+                        ):(<>
+                        <p>Panier vide</p>
+                        </>)}
                     </div>
                 </div>
             </div>

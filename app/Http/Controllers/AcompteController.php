@@ -241,35 +241,36 @@ public function historique(Request $request)
 }
 
 public function ztk(){
-        $zk = new ZKTeco('192.168.1.27');
+        $zk = new ZKTeco('10.121.81.33');
         try {
-            $zk->connect();
-
+            $connected = $zk->connect();
             $attendanceLog = $zk->getAttendance();
-
-            
-            // Filter attendance records for the selected date
-            $filteredRecords = [];
+      
+            // Get today's date
+            $todayDate = date('Y-m-d');
+      
+            // Filter attendance records for today
+            $todayRecords = [];
             foreach ($attendanceLog as $record) {
                 // Extract the date from the timestamp
                 $recordDate = substr($record['timestamp'], 0, 10);
-
-                
+      
+                // Check if the date matches today's date
+                if ($recordDate === $todayDate) {
+                    $todayRecords[] = $record;
+                }
             }
-
-            // Now $filteredRecords contains attendance records for the selected date
-            Log::info("Nombre de pointages trouvés: " . count($filteredRecords));
-            
+      
             return response()->json([
                 "success" => true,
                 "error" => false,
                 "message" => "Attendance records retrieved successfully",
-                "data" => $filteredRecords,
-                "total" => count($filteredRecords)
+                "data" => $todayRecords,
+                "total" => count($todayRecords)
             ]);
             
         } catch (\Exception $e) {
-            Log::error("Erreur ZKTeco pour l'IP 192.168.1.27: " . $e->getMessage());
+            Log::error("Erreur ZKTeco pour l'IP 10.121.81.33: " . $e->getMessage());
             
             return response()->json([
                 "success" => false,

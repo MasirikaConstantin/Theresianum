@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Auth, type BreadcrumbItem } from '@/types';
+import { Auth, NumeroProps, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { RecherchePopover } from '@/components/RecherchePopover';
+import { getNumeroChambre } from '@/hooks/dataNumero';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -33,6 +35,7 @@ export default function ChambreCreate({ auth, types, flash }: { auth: Auth; type
 
     flash.error && toast.error(flash.error);
     flash.success && toast.success(flash.success);
+    const getNumeroChambreData =getNumeroChambre
 
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
@@ -62,16 +65,24 @@ export default function ChambreCreate({ auth, types, flash }: { auth: Auth; type
                                 {errors.nom && <p className="text-sm text-red-600">{errors.nom}</p>}
                             </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="numero">Numéro de chambre *</Label>
-                                <Input
-                                    id="numero"
+                            <div className="grid gap-2">
+                                <Label htmlFor="produit_id">Numéro de la chambre *</Label>
+                                <RecherchePopover
+                                    options={getNumeroChambreData.map(numero => ({
+                                        value: numero.value.toString(),
+                                        label: `${numero.label}`,
+                                        originalData: numero
+                                    }))}
+                                    placeholder="Sélectionner un numéro"
+                                    searchPlaceholder="Rechercher un numéro..."
+                                    emptyMessage="Aucun numéro trouvé."
                                     value={data.numero}
-                                    onChange={(e) => setData('numero', e.target.value)}
-                                    placeholder="Ex: 101"
-                                    required
+                                    onValueChange={(value) => setData('numero', value)}
+                                    className="w-full" 
                                 />
-                                {errors.numero && <p className="text-sm text-red-600">{errors.numero}</p>}
+                                {errors.numero && (
+                                    <p className="text-sm font-medium text-destructive">{errors.numero}</p>
+                                )}
                             </div>
 
                             <div className="space-y-2">

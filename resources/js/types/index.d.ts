@@ -570,6 +570,10 @@ espace_id:number;
 
 
 }
+interface NumeroProps{
+    label :string,
+    value:string
+}
 interface Espace {
     id: number;
     ref: string;

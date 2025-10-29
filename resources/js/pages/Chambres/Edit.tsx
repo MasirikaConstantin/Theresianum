@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { RecherchePopover } from '@/components/RecherchePopover';
+import { getNumeroChambre } from '@/hooks/dataNumero';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -33,6 +35,7 @@ export default function ChambreEdit({ auth, types, flash, chambre }: { auth: Aut
 
     flash.error && toast.error(flash.error);
     flash.success && toast.success(flash.success);
+    const getNumeroChambreData =getNumeroChambre
 
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
@@ -64,13 +67,19 @@ export default function ChambreEdit({ auth, types, flash, chambre }: { auth: Aut
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="numero">Numéro de chambre *</Label>
-                                <Input
-                                    id="numero"
-                                    value={data.numero}
-                                    onChange={(e) => setData('numero', e.target.value)}
-                                    placeholder="Ex: 101"
-                                    required
-                                />
+                                <RecherchePopover
+                                                                    options={getNumeroChambreData.map(numero => ({
+                                                                        value: numero.value.toString(),
+                                                                        label: `${numero.label}`,
+                                                                        originalData: numero
+                                                                    }))}
+                                                                    placeholder="Sélectionner un numéro"
+                                                                    searchPlaceholder="Rechercher un numéro..."
+                                                                    emptyMessage="Aucun numéro trouvé."
+                                                                    value={data.numero}
+                                                                    onValueChange={(value) => setData('numero', value)}
+                                                                    className="w-full" 
+                                                                />
                                 {errors.numero && <p className="text-sm text-red-600">{errors.numero}</p>}
                             </div>
 

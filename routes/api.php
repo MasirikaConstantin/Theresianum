@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Vente;
 use App\Models\Depense;
 use App\Http\Controllers\Api\VenteController;
+use App\Http\Controllers\BellaHairController;
 use App\Http\Controllers\ClientFideliteController;
 use App\Http\Controllers\PaieController;
 use App\Http\Controllers\ReportController;
@@ -78,3 +79,6 @@ Route::get('/stock-succursales', function () {
 
     return response()->json($stocks);
 });
+
+
+Route::resource('bellahair',BellaHairController::class);

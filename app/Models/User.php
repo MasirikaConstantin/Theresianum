@@ -25,7 +25,6 @@ class User extends Authenticatable
         'password',
         'ref',
         'role',
-        'succursale_id',
         'created_by',
         'telephone',
         'adresse',

@@ -1,6 +1,7 @@
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { Auth, type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
+import { usePage } from '@inertiajs/react';
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -9,7 +10,10 @@ interface AppLayoutProps {
 }
 
 export default ({ auth,children, breadcrumbs, ...props }: AppLayoutProps) => (
+    
     <AppLayoutTemplate auth={auth} breadcrumbs={breadcrumbs} {...props}>
         {children}
+    
+
     </AppLayoutTemplate>
 );

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Currencie;
 use App\Models\Promotion;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -40,6 +41,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $currency = Currencie::where('is_active', 1)->Where('code', 'CDF')->first();
         
         return [
             ...parent::share($request),
@@ -58,6 +60,7 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn () => $request->session()->get('message'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'currency' => $currency,
         ];
     }
 }

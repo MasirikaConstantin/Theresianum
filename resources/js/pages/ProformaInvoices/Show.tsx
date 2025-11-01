@@ -119,12 +119,10 @@ const Show: React.FC<Props> = ({ invoice, auth }) => {
                                     <div className=" bg-background p-4 rounded-lg">
                                         <h3 className="font-semibold  mb-2">Client</h3>
                                         <div className="text-sm ">
-                                            <p className="font-medium">{invoice.client?.name || 'Non spécifié'}</p>
-                                            {invoice.client?.email && <p>{invoice.client.email}</p>}
-                                            {invoice.client?.telephone && <p>{invoice.client.telephone}</p>}
-                                            {invoice.client?.adresse && (
-                                                <p className="whitespace-pre-line">{invoice.client.adresse}</p>
-                                            )}
+                                            <p className="font-medium">
+                                            {invoice.client?.telephone}
+                                            </p>
+                                            
                                         </div>
                                     </div>
                                 </div>

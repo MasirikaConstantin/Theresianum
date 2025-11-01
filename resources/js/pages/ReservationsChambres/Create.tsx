@@ -261,7 +261,7 @@ export default function ReservationChambreCreate({
                                                                         <RecherchePopover
                                                                             options={clients.map(client => ({
                                                                             value: client.id.toString(),
-                                                                            label: `${client.name} - ${client.email} - ${client.telephone?client.telephone : ''}`, // ou client.telephone si disponible
+                                                                            label: `${client.telephone?client.telephone : ''}`, // ou client.telephone si disponible
                                                                             // Vous pouvez ajouter d'autres données si nécessaire
                                                                             originalData: client
                                                                             }))}

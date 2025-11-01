@@ -92,9 +92,7 @@ export default function ClientIndex({ auth }: { auth: Auth }) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-12">#</TableHead>
-                                <TableHead>Nom</TableHead>
                                 <TableHead>Téléphone</TableHead>
-                                <TableHead>Email</TableHead>
                                 <TableHead>Enregistré par</TableHead>
                                 <TableHead>Date de naissance</TableHead>
                                 <TableHead>Actions</TableHead>
@@ -106,9 +104,7 @@ export default function ClientIndex({ auth }: { auth: Auth }) {
                                     <TableCell className="font-medium">
                                         {clients.from + index}
                                     </TableCell>
-                                    <TableCell className="font-medium">{client.name}</TableCell>
                                     <TableCell>{client.telephone?.slice(0, 15) || '-'}</TableCell>
-                                    <TableCell>{client.email && client.email?.slice(0, 15) + '...' || '-'}</TableCell>
                                    
                                     <TableCell>
                                         {client.enregistre_par ? (

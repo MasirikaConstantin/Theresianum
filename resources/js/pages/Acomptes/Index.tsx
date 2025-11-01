@@ -98,7 +98,7 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                                     <TableCell className="font-medium">
                                         {reservations.from + index}
                                     </TableCell>
-                                    <TableCell>{reservation.client?.name || '-'}</TableCell>
+                                    <TableCell>{reservation.client?.telephone || '-'}</TableCell>
                                     <TableCell>
                                         {new Intl.NumberFormat('fr-FR', {
                                             style: 'currency',

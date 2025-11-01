@@ -343,7 +343,7 @@
         <p style="margin: 2px;">Facture : <span style="font-weight: bold;">#{{ $vente->code }}</span></p>
         <p style="margin: 2px;">Date : <span style="font-weight: bold;">{{ $vente->created_at->format('Y-m-d H:i')
                 }}</span></p>
-        <p style="margin: 2px;">Client : <span style="font-weight: bold;">{{ $vente->client->name }}</span></p>
+        <p style="margin: 2px;">Client : <span style="font-weight: bold;">{{ $vente->client->telephone }}</span></p>
     </div>
 
     <div class="donnee">

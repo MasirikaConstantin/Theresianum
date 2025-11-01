@@ -13,8 +13,6 @@ import { MonDatePicker } from '@/components/example-date-picker';
 
 type Client = {
     id: string;
-    name: string;
-    email?: string;
     telephone?: string;
     date_naissance?: Date | undefined;
 };
@@ -29,27 +27,22 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [newClient, setNewClient] = useState({
-        name: '',
-        email: '',
         telephone: '',
         date_naissance: undefined,
     });
     const [isCreating, setIsCreating] = useState(false);
 
     const handleCreateClient = async () => {
-        if (!newClient.name.trim()) {
-            toast.error('Le nom du client est requis');
-            return;
-        }
+       
 
         setIsCreating(true);
         try {
             const response = await axios.post('/api/clients/quick-create', newClient);
             const createdClient = response.data.client;
             
-            toast.success(`Client ${createdClient.name} créé avec succès`);
+            toast.success(`Client ${createdClient.telephone} créé avec succès`);
             onClientSelected(createdClient);
-            setNewClient({ name: '', email: '', telephone: '', date_naissance: undefined });
+            setNewClient({  telephone: '', date_naissance: undefined });
             setIsOpen(false);
         } catch (error) {
             toast.error('Erreur lors de la création du client');
@@ -60,8 +53,6 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
     };
 
     const filteredClients = clients.filter(client =>
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (client.telephone && client.telephone.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
@@ -112,7 +103,6 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
                                         <CardContent className="p-2">
                                             <div className="flex justify-between items-center">
                                                 <div>
-                                                    <p className="font-medium">{client.name}</p>
                                                     {client.telephone && (
                                                         <p className="text-sm text-muted-foreground">
                                                             {client.telephone}
@@ -138,35 +128,10 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
                     <div className="space-y-4 pt-4 border-t">
                         <h3 className="font-medium">Créer un nouveau client</h3>
                         
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="client-name">Nom complet *</Label>
-                                <Input
-                                    id="client-name"
-                                    value={newClient.name}
-                                    onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <MonDatePicker
-                                    label="Date de naissance (optionnel)"
-                                    value={newClient.date_naissance}
-                                    onChange={(dateString) => setNewClient({...newClient, date_naissance: dateString})}
-                                />
-                            </div>
-                        </div>
+                       
                         
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="client-email">Email</Label>
-                                <Input
-                                    id="client-email"
-                                    type="email"
-                                    value={newClient.email}
-                                    onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                                />
-                            </div>
+                            
                             <div className="grid gap-2">
                                 <Label htmlFor="client-telephone">Téléphone</Label>
                                 <Input
@@ -186,7 +151,7 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
                             </Button>
                             <Button 
                                 onClick={handleCreateClient}
-                                disabled={isCreating || !newClient.name.trim()}
+                                disabled={isCreating || !newClient.telephone.trim()}
                             >
                                 {isCreating ? 'Création...' : 'Créer et sélectionner'}
                             </Button>

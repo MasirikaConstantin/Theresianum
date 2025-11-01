@@ -63,10 +63,9 @@ const Print: React.FC<Props> = ({ invoice, company }) => {
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-bold text-gray-900 mb-3">CLIENT</h2>
                 <div className="text-gray-700">
-                    <strong className="text-lg">{invoice.client?.name || 'Non spécifié'}</strong><br />
-                    {invoice.client?.email && <>{invoice.client.email}<br /></>}
-                    {invoice.client?.telephone && <>{invoice.client.telephone}<br /></>}
-                    {invoice.client?.adresse && <>{invoice.client.adresse}</>}
+                    <strong className="text-lg">
+                    {invoice.client?.telephone}
+                    </strong>
                 </div>
             </div>
 

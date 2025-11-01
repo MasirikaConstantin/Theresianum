@@ -83,9 +83,7 @@ export default function FactureA4({ reservation }: FactureA4Props) {
         <div>
           <h3 className="text-md font-semibold text-gray-800 mb-2">CLIENT</h3>
           <div className="bg-gray-50 p-3 rounded border border-gray-200">
-            <p className="font-medium text-sm">{reservation.client.name}</p>
             <p className="text-xs text-gray-600">Tél: {reservation.client.telephone}</p>
-            <p className="text-xs text-gray-600">Email: {reservation.client.email}</p>
           </div>
         </div>
 

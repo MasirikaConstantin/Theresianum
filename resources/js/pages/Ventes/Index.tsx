@@ -106,7 +106,7 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                                     <TableCell className="font-medium">
                                         {ventes.from + index}
                                     </TableCell>
-                                    <TableCell>{vente.client?.name || '-'}</TableCell>
+                                    <TableCell>{vente.client?.telephone || '-'}</TableCell>
                                     <TableCell>
                                         {FrancCongolais(vente.montant_total)}
                                     </TableCell>

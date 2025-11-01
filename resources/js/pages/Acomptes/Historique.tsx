@@ -97,7 +97,11 @@ export default function HistoriquePaiementIndex({ auth }: { auth: Auth }) {
                                     <TableCell className="font-medium">
                                         {historiquePaiements.from + index}
                                     </TableCell>
-                                    <TableCell>{historiquePaiement.reservation?.salle?.nom || historiquePaiement.reservation?.chambre?.nom}</TableCell>
+                                    <TableCell>
+                                        {historiquePaiement.reservation?.salle?.nom ||
+                                            historiquePaiement.reservation?.chambre?.nom ||
+                                            historiquePaiement.reservation?.espace?.nom}
+                                    </TableCell>
                                     <TableCell>
                                         {new Intl.NumberFormat('fr-FR', {
                                             style: 'currency',

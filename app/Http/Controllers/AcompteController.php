@@ -205,11 +205,14 @@ public function historique(Request $request)
     $query = HistoriquePaiement::with(['operateur'=>function($query){
         $query->select('id','name','ref');
     }, 'reservation'=>function($query){
-        $query->select('id','ref','client_id','chambre_id','salle_id');
+        $query->select('id','ref','client_id','chambre_id','salle_id','espace_id');
     },'reservation.chambre'=>function($query){
         $query->select('id','nom','ref');
     },
     'reservation.salle'=>function($query){
+        $query->select('id','nom','ref');
+    },
+     'reservation.espace'=>function($query){
         $query->select('id','nom','ref');
     }])->orderBy('created_at', 'desc');
 

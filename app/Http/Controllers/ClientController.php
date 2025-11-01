@@ -45,8 +45,8 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:50',
-            'telephone' => 'nullable|string|max:20',
+            'name' => 'nullable|string|max:50',
+            'telephone' => 'required|string|max:20',
             'email' => 'nullable|email|max:100',
             'notes' => 'nullable|string',
             'date_naissance' => 'nullable|date',
@@ -71,8 +71,8 @@ class ClientController extends Controller
     {
         $client = Client::where('ref', $ref)->first();
         $validated = $request->validate([
-            'name' => 'required|string|max:50',
-            'telephone' => 'nullable|string|max:20',
+            'name' => 'nullable|string|max:50',
+            'telephone' => 'required|string|max:20',
             'email' => 'nullable|email|max:100',
             'notes' => 'nullable|string',
             'date_naissance' => 'nullable|date',
@@ -94,9 +94,9 @@ class ClientController extends Controller
     public function quickCreate(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:clients,email',
-            'telephone' => 'nullable|string|max:20',
+            'telephone' => 'required|string|max:20',
             'date_naissance' => 'nullable|date',
         ]);
 

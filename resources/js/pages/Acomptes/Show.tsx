@@ -29,8 +29,8 @@ export default function VenteShow({ auth, reservation, montant_produits_ttc, tva
     const paiementFait = reservation.montant_payer === reservation.montant_total;
 
     return (
-        <AppLayout auth={auth} breadcrumbs={breadcrumbs(reservation.code)}>
-            <Head title={`Détails de la reservation ${reservation.code}`} />
+        <AppLayout auth={auth} breadcrumbs={breadcrumbs(reservation.client.telephone)}>
+            <Head title={`Détails de la reservation ${reservation.client.telephone}`} />
             <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
                 <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -67,7 +67,7 @@ export default function VenteShow({ auth, reservation, montant_produits_ttc, tva
                                     <p className="text-sm font-medium text-muted-foreground">Client</p>
                                     <Link href={route('clients.show', reservation.client.ref)}>   
                                     <Button variant="outline" size="sm" className="flex items-center gap-2">
-                                        <Eye className="h-4 w-4" /> {reservation.client?.name || 'Aucun client'}
+                                        <Eye className="h-4 w-4" /> {reservation.client?.telephone || 'Aucun client'}
                                     </Button>
                                     </Link>
                                     

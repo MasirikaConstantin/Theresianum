@@ -27,10 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ClientCreate({ auth }: { auth: Auth }) {
     const { data, setData, post, processing, errors } = useForm({
-        name: '',
         telephone: '',
-        email: '',
-        notes: '',
         date_naissance: '',
     });
 
@@ -57,19 +54,9 @@ export default function ClientCreate({ auth }: { auth: Auth }) {
                 </div>
                 <form onSubmit={handleSubmit} className="grid gap-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                       
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Nom complet</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Nom du client"
-                                required
-                            />
-                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="telephone">Téléphone (optionnel)</Label>
+                            <Label htmlFor="telephone">Téléphone*</Label>
                             <Input
                                 id="telephone"
                                 value={data.telephone}
@@ -80,20 +67,7 @@ export default function ClientCreate({ auth }: { auth: Auth }) {
                         </div>
                         
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email (optionnel)</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                placeholder="Email du client"
-                            />
-                            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-                        </div>
-                        
-                    </div>
+                   
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
                                                                 <MonDatePicker
@@ -104,17 +78,7 @@ export default function ClientCreate({ auth }: { auth: Auth }) {
                                                                 {errors.date_naissance && <p className="text-sm text-red-600">{errors.date_naissance}</p>}
                                                             </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="notes">Notes (optionnel)</Label>
-                        <Textarea
-                            id="notes"
-                            value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Notes sur le client"
-                            rows={4}
-                        />
-                        {errors.notes && <p className="text-sm text-red-500">{errors.notes}</p>}
-                    </div>
+                    
                     <div className="flex justify-end gap-2">
                         <Link href={route('clients.index')}>
                             <Button variant="outline">Annuler</Button>

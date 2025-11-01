@@ -1,4 +1,4 @@
-import { Auth, HistoriquePaiement, Vente, type BreadcrumbItem } from '@/types';
+import { Auth, HistoriquePaiement, Reservation, Vente, type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,41 +13,6 @@ import UpdatePaiementStatus from '@/components/UpdatePaiementStatus';
 import { string, uppercase } from 'zod';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-interface Reservation {
-    id: number;
-    ref: string;
-    type_paiement: 'espece' | 'cheque' | 'virement';
-    statut_paiement: 'paye' | 'non_paye';
-    type_reservation: 'chambre' | 'salle';
-    client: {
-        id: number;
-        name: string;
-        telephone: string;
-        email: string;
-    };
-    salle: {
-        id: number;
-        nom: string;
-        capacite_max: number;
-        vocation: string;
-        prix_journee: number;
-        prix_nuit: number;
-    } | null;
-    chambre: {
-        id: number;
-        numero: string;
-        type: string;
-        prix: number;
-    } | null;
-    date_debut: string;
-    date_fin: string;
-    statut: string;
-    prix_total: number;
-    vocation: string | null;
-    historique: HistoriquePaiement[];
-    created_at: string;
-    ventes: Vente[];
-}
 
 interface Props {
     auth: Auth;
@@ -58,10 +23,10 @@ export default function ReservationShow({ auth, reservation }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
         { 
-            title: reservation.type_reservation === 'salle' ? 'Réservations Salles' : 'Réservations Chambres', 
-            href: reservation.type_reservation === 'salle' ? '/reservations' : '/chambres-reservations' 
+            title: reservation.type_reservation === 'salle' ? 'Réservations Salles' : reservation.type_reservation === 'espace' ? 'Réservations Espaces' : 'Réservations Chambres', 
+            href: reservation.type_reservation === 'salle' ? '/reservations' : reservation.type_reservation === 'espace' ? '/espaces-reservations' : '/chambres-reservations' 
         },
-        { title: `Réservation ${reservation.client.name}`, href: '#' },
+        { title: `Réservation ${reservation.client.telephone}`, href: '#' },
     ];
 
     const getStatutBadgeVariant = (statut: string) => {
@@ -143,10 +108,9 @@ export default function ReservationShow({ auth, reservation }: Props) {
 
     const canUpdate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canDelete = auth.user.role === 'admin';
-    console.log(reservation.historique);
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
-            <Head title={`Réservation ${reservation.client.name}`} />
+            <Head title={`Réservation ${reservation.client.telephone}`} />
             <div className="flex flex-1 flex-col gap-6 p-4 md:gap-8 md:p-6">
                 {/* En-tête */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -163,7 +127,7 @@ export default function ReservationShow({ auth, reservation }: Props) {
                         </Link>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">
-                                Réservation {reservation.client.name}
+                                Réservation {reservation.client.telephone}
                             </h1>
                             <p className="text-muted-foreground">
                                 {reservation.type_reservation.toUpperCase()} • 
@@ -289,24 +253,10 @@ export default function ReservationShow({ auth, reservation }: Props) {
                                         <label className="text-sm font-medium text-muted-foreground">
                                             Client
                                         </label>
-                                        <p className="font-medium">{reservation.client.name}</p>
+                                        <p className="font-medium">{reservation.client.telephone}</p>
                                     </div>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-muted-foreground">
-                                                Téléphone
-                                            </label>
-                                            <p className="font-medium">{reservation.client.telephone}</p>
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="text-sm font-medium text-muted-foreground">
-                                                Email
-                                            </label>
-                                            <p className="font-medium">{reservation.client.email}</p>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </CardContent>
                         </Card>
@@ -321,7 +271,7 @@ export default function ReservationShow({ auth, reservation }: Props) {
                             <div className="space-y-3">
                                 <div>
                                     <label className="text-sm font-medium">
-                                    Nombre de ventes : {reservation.ventes?.length || 0} le total est de <span className="font-semibold text-green-500 text-md">{FrancCongolais(reservation.ventes?.reduce((total, vente) => total + parseFloat(vente.montant_total), 0) || 0)}</span>
+                                    Nombre de ventes : {reservation.ventes?.length || 0} le total est de <span className="font-semibold text-green-500 text-md">{FrancCongolais(reservation.ventes?.reduce((total, vente) => total + parseFloat(vente.montant_total.toString()), 0) || 0)}</span>
                                     </label>
                                 </div>
                             </div>
@@ -340,7 +290,7 @@ export default function ReservationShow({ auth, reservation }: Props) {
                                         <TableRow key={vente.id}>
                                             <TableCell>{vente.code}</TableCell>
                                             <TableCell>{FrancCongolais(vente.montant_total)}</TableCell>
-                                            <TableCell>{vente.client?.name}</TableCell>
+                                            <TableCell>{vente.client?.telephone}</TableCell>
                                             <TableCell>{DateHeure(vente.created_at)}</TableCell>
                                             <TableCell>
                                                 <Button variant="outline" onClick={() => router.visit(`/ventes/${vente.ref}`)}>

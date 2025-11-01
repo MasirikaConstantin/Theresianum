@@ -1,4 +1,4 @@
-import { Auth, SharedData, type BreadcrumbItem } from '@/types';
+import { Auth, Reservation, SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,7 +7,6 @@ import { Pencil, Plus, Trash2, Eye, Search, Calendar } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
@@ -27,26 +26,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Reservation {
-    id: number;
-    ref: string;
-    client: {
-        id: number;
-        nom: string;
-        prenom: string;
-        telephone: string;
-    };
-    salle: {
-        id: number;
-        nom: string;
-    };
-    date_debut: string;
-    date_fin: string;
-    statut: string;
-    prix_total: number;
-    vocation: string;
-    created_at: string;
-}
+
 
 export default function ReservationIndex({ auth, reservations, statuts }: { 
     auth: Auth;
@@ -204,9 +184,7 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
                                         </TableCell>
                                         <TableCell>
                                             <div>
-                                                <p className="font-medium">
-                                                    {reservation.client?.prenom} {reservation.client?.nom}
-                                                </p>
+                                                
                                                 <p className="text-sm text-muted-foreground">
                                                     {reservation.client?.telephone}
                                                 </p>

@@ -26,11 +26,7 @@ const breadcrumbs = (clientName: string): BreadcrumbItem[] => [
 
 export default function ClientEdit({ auth, client }: { auth: Auth; client: any }) {
     const { data, setData, put, processing, errors } = useForm({
-        name: client.name,
         telephone: client.telephone,
-        email: client.email,
-        notes: client.notes,
-        succursale_id: client.succursale_id,
         date_naissance: client.date_naissance,
     });
 
@@ -44,8 +40,8 @@ export default function ClientEdit({ auth, client }: { auth: Auth; client: any }
     };
 
     return (
-        <AppLayout auth={auth} breadcrumbs={breadcrumbs(client.name)}>
-            <Head title={`Modifier ${client.name}`} />
+        <AppLayout auth={auth} breadcrumbs={breadcrumbs(client.telephone)}>
+            <Head title={`Modifier ${client.telephone}`} />
             <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
                 <div className="flex items-center gap-4">
                     <Link href={route('clients.index')}>
@@ -57,19 +53,9 @@ export default function ClientEdit({ auth, client }: { auth: Auth; client: any }
                 </div>
                 <form onSubmit={handleSubmit} className="grid gap-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Nom complet</Label>
-                            <Input
-                                id="name"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                placeholder="Nom du client"
-                                required
-                            />
-                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="telephone">Téléphone (optionnel)</Label>
+                            <Label htmlFor="telephone">Téléphone (*)</Label>
                             <Input
                                 id="telephone"
                                 value={data.telephone || ''}
@@ -79,38 +65,7 @@ export default function ClientEdit({ auth, client }: { auth: Auth; client: any }
                             {errors.telephone && <p className="text-sm text-red-500">{errors.telephone}</p>}
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email (optionnel)</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                value={data.email || ''}
-                                onChange={(e) => setData('email', e.target.value)}
-                                placeholder="Email du client"
-                            />
-                            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="succursale_id">Branche (optionnel)</Label>
-                            <Select
-                                value={data.succursale_id?.toString() || ''}
-                                onValueChange={(value) => setData('succursale_id', value ? parseInt(value) : null)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionnez une branche" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {usePage<SharedData>().props?.succursales?.map((succursale) => (
-                                        <SelectItem key={succursale.id} value={succursale.id.toString()}>
-                                            {succursale.nom}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.succursale_id && <p className="text-sm text-red-500">{errors.succursale_id}</p>}
-                        </div>
-                    </div>
+                    
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
                             <Label htmlFor="date_naissance">Date de naissance (optionnel)</Label>
@@ -124,17 +79,7 @@ export default function ClientEdit({ auth, client }: { auth: Auth; client: any }
                             {errors.date_naissance && <p className="text-sm text-red-500">{errors.date_naissance}</p>}
                         </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="notes">Notes (optionnel)</Label>
-                        <Textarea
-                            id="notes"
-                            value={data.notes || ''}
-                            onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Notes sur le client"
-                            rows={4}
-                        />
-                        {errors.notes && <p className="text-sm text-red-500">{errors.notes}</p>}
-                    </div>
+                    
                     <div className="flex justify-end gap-2">
                         <Link href={route('clients.index')}>
                             <Button variant="outline">Annuler</Button>

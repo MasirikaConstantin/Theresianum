@@ -123,10 +123,10 @@ const PrintProformaInvoice: React.FC<PrintProformaInvoiceProps> = ({ invoice, co
         <div className="mb-6 p-4 border rounded-lg">
           <h3 className="font-bold text-lg mb-2">CLIENT</h3>
           <div>
-            <p className="font-semibold">{invoice.client.name || 'Non spécifié'}</p>
-            {invoice.client.email && <p>Email: {invoice.client.email}</p>}
-            {invoice.client.telephone && <p>Téléphone: {invoice.client.telephone}</p>}
-            {invoice.client.adresse && <p>Adresse: {invoice.client.adresse}</p>}
+            <p className="font-semibold">
+            {invoice.client.telephone}
+            </p>
+          
           </div>
         </div>
       )}

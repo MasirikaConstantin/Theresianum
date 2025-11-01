@@ -192,10 +192,7 @@ const Create: React.FC<Props> = ({ chambres, salles, produits, auth, clients, cu
         setData({
             ...data,
             client_id: client.id.toString(),
-            client_nom: client.name,
-            client_email: client.email || '',
             client_telephone: client.telephone || '',
-            client_adresse: client.adresse || '',
         });
     };
 
@@ -335,10 +332,7 @@ const Create: React.FC<Props> = ({ chambres, salles, produits, auth, clients, cu
                             {/* Informations client */}
                             <div className="mb-6 bg-emerald-900 p-2 rounded-2xl">
                                 <h4 className="font-semibold mb-2">Client:</h4>
-                                <p>{data.client_nom || 'Nom du client'}</p>
-                                {data.client_email && <p>{data.client_email}</p>}
                                 {data.client_telephone && <p>{data.client_telephone}</p>}
-                                {data.client_adresse && <p className="whitespace-pre-line">{data.client_adresse}</p>}
                             </div>
 
                             {/* Tableau des articles */}

@@ -58,7 +58,7 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                     <p className="text-sm font-medium text-muted-foreground">Client</p>
                                     <Link href={route('clients.show', vente.client.ref)}>   
                                     <Button variant="outline" size="sm" className="flex items-center gap-2">
-                                        <Eye className="h-4 w-4" /> {vente.client?.name || 'Aucun client'}
+                                        <Eye className="h-4 w-4" /> {vente.client?.telephone || 'Aucun client'}
                                     </Button>
                                     </Link>
                                     
@@ -97,7 +97,6 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Type</TableHead>
                                         <TableHead>Nom</TableHead>
                                         <TableHead>Quantité</TableHead>
                                         <TableHead>Prix unitaire</TableHead>
@@ -107,13 +106,9 @@ export default function VenteShow({ auth, vente, montant_produits_ttc, tva }: { 
                                 <TableBody>
                                     {vente.items.map((item: any) => (
                                         <TableRow key={item.id}>
+                                            
                                             <TableCell>
-                                                <Badge variant={item.produit_id ? 'default' : 'secondary'}>
-                                                    {item.produit_id ? 'Produit' : 'Service'}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                {item.produit?.name || item.service?.name}
+                                                {item.produit?.name }
                                             </TableCell>
                                             <TableCell>{item.quantite}</TableCell>
                                             <TableCell>

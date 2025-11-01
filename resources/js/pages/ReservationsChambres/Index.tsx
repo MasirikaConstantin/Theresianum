@@ -174,9 +174,7 @@ export default function ReservationChambreIndex({ auth, reservations, statuts }:
                                         </TableCell>
                                         <TableCell>
                                             <div>
-                                                <p className="font-medium">
-                                                    {reservation.client.name} 
-                                                </p>
+                                                
                                                 <p className="text-sm text-muted-foreground">
                                                     {reservation.client.telephone}
                                                 </p>

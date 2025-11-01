@@ -178,7 +178,7 @@ export default function VentePaiement({ auth, reservation, historiquePaiements, 
                             </div>
                             <div>
                                 <span className="font-semibold">Client :</span>
-                                <span className="ml-2">{reservation.client?.name || 'Non spécifié'}</span>
+                                <span className="ml-2">{reservation.client?.telephone || 'Non spécifié'}</span>
                             </div>
                         </div>
                     </CardContent>

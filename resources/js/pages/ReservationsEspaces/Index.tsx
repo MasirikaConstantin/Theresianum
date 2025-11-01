@@ -1,4 +1,4 @@
-import { Auth, SharedData, type BreadcrumbItem } from '@/types';
+import { Auth, Reservation, SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -22,30 +22,12 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
     {
-        title: 'Réservations Salles',
+        title: 'Réservations Espaces',
         href: '/espaces-reservations',
     },
 ];
 
-interface Reservation {
-    id: number;
-    ref: string;
-    client: {
-        id: number;
-        name: string;
-        telephone: string;
-    };
-    salle: {
-        id: number;
-        nom: string;
-    };
-    date_debut: string;
-    date_fin: string;
-    statut: string;
-    prix_total: number;
-    vocation: string;
-    created_at: string;
-}
+
 
 export default function ReservationIndex({ auth, reservations, statuts }: { 
     auth: Auth;
@@ -120,10 +102,9 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
     const canUpdate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canDelete = auth.user.role === 'admin';
     const canUpdateStatus = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
-    console.log(reservations)
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
-            <Head title="Réservations des Salles" />
+            <Head title="Réservations des Espaces" />
             <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-2">
@@ -183,7 +164,7 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
                             <TableRow>
                                 <TableHead className="w-12">#</TableHead>
                                 <TableHead>Client</TableHead>
-                                <TableHead>Salle</TableHead>
+                                <TableHead>Espace</TableHead>
                                 <TableHead>Période</TableHead>
                                 <TableHead>Vocation</TableHead>
                                 <TableHead>Montant</TableHead>
@@ -204,16 +185,13 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
                                         </TableCell>
                                         <TableCell>
                                             <div>
-                                                <p className="font-medium">
-                                                    {reservation.client?.name}
-                                                </p>
                                                 <p className="text-sm text-muted-foreground">
                                                     {reservation.client?.telephone}
                                                 </p>
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {reservation.salle?.nom ? reservation.salle.nom : "Non assignée"}
+                                            {reservation.espace?.nom ? reservation.espace.nom : "Non assignée"}
                                         </TableCell>
                                         <TableCell>
                                             <div className="space-y-1">

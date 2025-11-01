@@ -310,6 +310,7 @@ export type Currency = {
 export type Client = {
     id: number;
     name: string;
+    client_id: string;
     adresse: string | null;
     telephone: string | null;
     email: string | null;
@@ -556,6 +557,7 @@ espace_id:number;
     statut_paiement: string;
     vocation: string;
     ref: string;
+    historique: Paiement[];
     client: {
         id: number;
         name: string;
@@ -567,8 +569,22 @@ espace_id:number;
     salle: Salle;
     espace: Espace;
     ventes: Vente[];
-
-
+}
+interface Paiement{
+    id:number;
+    montant:number;
+        mode_paiement:string;
+        code:string;
+        created_at:string;
+        statut_paiement:string;
+        montant_payer:string;
+        caisse_id:string;
+        reservation_id:string;
+        operateur_id:string;
+        operateur:User
+}
+interface Historique{
+    id:number;
 }
 interface NumeroProps{
     label :string,

@@ -137,6 +137,7 @@ export default function ClientManager({ onClientSelected, currentClientId, clien
                                 <Input
                                     id="client-telephone"
                                     value={newClient.telephone}
+                                    required
                                     onChange={(e) => setNewClient({...newClient, telephone: e.target.value})}
                                 />
                             </div>

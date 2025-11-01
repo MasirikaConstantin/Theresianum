@@ -62,6 +62,7 @@ export default function ClientCreate({ auth }: { auth: Auth }) {
                                 value={data.telephone}
                                 onChange={(e) => setData('telephone', e.target.value)}
                                 placeholder="Numéro de téléphone"
+                                required
                             />
                             {errors.telephone && <p className="text-sm text-red-500">{errors.telephone}</p>}
                         </div>

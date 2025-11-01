@@ -406,7 +406,12 @@
         --}}
         <div class="tva-row border-top">
             <span class="text-bold">Total à payer:</span>
-            <span class="text-right text-bold">{{ number_format($vente->montant_total, 2) }} FC</span>
+            <span class="text-right text-bold">{{ number_format($vente->montant_total, 2) }} FC</span><br>
+            @if ($currency)
+            @if (number_format($vente->montant_total / $currency->exchange_rate, 2) >10)
+            Soit : <span class="text-right text-bold">{{ number_format($vente->montant_total / $currency->exchange_rate, 2) }} $</span>
+            @endif
+            @endif
         </div>
     </div>
 

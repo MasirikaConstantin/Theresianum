@@ -29,7 +29,7 @@ createInertiaApp({
     root.render(
       <QueryClientProvider client={queryClient}>
         <App {...props} />
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="top-center" closeButton />
       </QueryClientProvider>
     );
   },

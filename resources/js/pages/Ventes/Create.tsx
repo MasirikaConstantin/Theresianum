@@ -126,8 +126,6 @@ export default function VenteCreate({ auth, configuration, currencies }: { auth:
 
     // Filtrer les clients en fonction de la recherche
     const filteredClients = clients?.filter((client: any) => 
-        client.name.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-        (client.email && client.email.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
         (client.telephone && client.telephone.toLowerCase().includes(clientSearchTerm.toLowerCase()))
     );
 
@@ -684,7 +682,6 @@ export default function VenteCreate({ auth, configuration, currencies }: { auth:
                                     {selectedClient && (
                                         <div className="w-full space-y-1 py-3 bg-muted/50 p-3 rounded-md mt-2">
                                             <p className="font-medium">Client sélectionné : </p>
-                                            <p>{selectedClient.name}</p>
                                             {selectedClient.telephone && <p className="text-sm">{selectedClient.telephone}</p>}
 
                                             {selectedClient.fidelite && configuration && (
@@ -760,7 +757,7 @@ export default function VenteCreate({ auth, configuration, currencies }: { auth:
                             )}
 
                         </Card>
-                        {data.items.length > 0 ? (
+                        {data.items.length > 0 && currencies?.length > 0 ? (
                             <Card className='px-0'>
                             <CardHeader>
                                 <CardTitle>Conversion</CardTitle>
@@ -787,7 +784,7 @@ export default function VenteCreate({ auth, configuration, currencies }: { auth:
                             </CardContent>
                         </Card>
                         ):(<>
-                        <p>Panier vide</p>
+                        <p></p>
                         </>)}
                     </div>
                 </div>

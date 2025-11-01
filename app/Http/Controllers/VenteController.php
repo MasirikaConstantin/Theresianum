@@ -249,8 +249,8 @@ public function getRecentVente(Request $request)
 
 
     public function print(Vente $vente)
-    { ini_set('memory_limit', '256M');
-
+    { 
+        $currency = Currencie::where('is_active', true)->where('code', 'CDF')->first();
         try{
             // Calcul précis de la hauteur (en points - 1mm = 2.83 points)
         $baseHeight = 150; // Hauteur de base en mm (sans articles)
@@ -273,14 +273,11 @@ public function getRecentVente(Request $request)
         }, 'items.produit', 'VenduePar'=>function($query){
             $query->select('id', 'name');
         }]);
-        $renderer = new ImageRenderer(
-            new RendererStyle(100),
-            new SvgImageBackEnd()
-        );
-        $writer = new Writer($renderer);
+        
 
         $pdf = PDF::loadView('factures.standard', [
             'vente' => $vente,
+            'currency' => $currency,
             'entreprise' => [
                 'nom' => 'ASBL Les Pères Carmes Centre Theresianum de Kinshasa  Ordre des Carmes Déchaux',
                 'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
@@ -303,6 +300,8 @@ public function getRecentVente(Request $request)
         }
         return $pdf->stream('facture-'.$vente->ref.'.pdf');
     }
+
+    
 public function edit(string $vente){
     $vente = Vente::where('ref', $vente)->firstOrFail();
 

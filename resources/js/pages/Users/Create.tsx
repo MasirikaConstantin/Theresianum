@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { ChevronLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { MonDatePicker } from '@/components/example-date-picker';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -153,11 +154,9 @@ export default function UserCreate({ auth }: { auth: Auth }) {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
                             <Label htmlFor="date_embauche">Date d'embauche (optionnel)</Label>
-                            <Input
-                                id="date_embauche"
-                                type="date"
-                                value={data.date_embauche}
-                                onChange={(e) => setData('date_embauche', e.target.value)}
+                            <MonDatePicker
+                            value={data.date_embauche}
+                            onChange={(e) => setData('date_embauche', e)}
                             />
                             {errors.date_embauche && <p className="text-sm text-red-500">{errors.date_embauche}</p>}
                         </div>
@@ -172,7 +171,7 @@ export default function UserCreate({ auth }: { auth: Auth }) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="gerant">D.R.H</SelectItem>
+                                    <SelectItem value="gerant">Réceptioniste</SelectItem>
                                     <SelectItem value="vendeur">Vendeur</SelectItem>
                                     <SelectItem value="aucun">Aucun</SelectItem>
                                 </SelectContent>

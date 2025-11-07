@@ -94,7 +94,7 @@ export default function UserStats({
               <h1 className="text-2xl font-bold">{user.name}</h1>
               <p className="text-muted-foreground">{user.email}</p>
               <div className="flex items-center mt-1 space-x-2">
-                <Badge variant="outline">{user.role ==="admin" ? "Admin" : user.role === "gerant" ? "D.R.H" : user.role === "coiffeur" ? "Coiffeur" : user.role === "caissier" ? "Caissier" : "Aucun"}</Badge>
+                <Badge variant="outline">{user.role ==="admin" ? "Admin" : user.role === "gerant" ? "Réceptioniste" : user.role === "coiffeur" ? "Coiffeur" : user.role === "caissier" ? "Caissier" : "Aucun"}</Badge>
                 {user.succursale && (
                   <Badge variant="secondary">{user.succursale.nom}</Badge>
                 )}

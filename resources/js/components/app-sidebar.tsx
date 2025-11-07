@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { PageProps, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlertCircle, Banknote, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, CakeIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, LayoutGrid, Package, PaperclipIcon, PartyPopper, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
+import { AlertCircle, Banknote, BanknoteIcon, Bed, BookOpen, BookOpenCheck, BoxIcon, CakeIcon, Calendar, Coins, CoinsIcon, Currency, FileOutput, FileText, Folder, Gift, GiftIcon, HomeIcon, HousePlug, LayoutGrid, Package, PaperclipIcon, PartyPopper, PersonStanding, PersonStandingIcon, Plane, ScatterChart, Scissors, ScissorsIcon, ScissorsLineDashed, ShoppingBasket, StarHalfIcon, Truck, UserCheck2, UserCog, Users, UserSquare, Wallet, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const filterItemsByRole = (items: NavItem[], userRole: string): NavItem[] => {
@@ -45,116 +45,116 @@ const getMainNavItems = (userRole: string): NavItem[] => {
         {
             title: 'Les Produits',
             icon: Package,
-            roles: ['admin', 'gerant', "vendeur"],
+            roles: ['admin', "vendeur"],
             items: [
                 {
                     title: 'Produits',
                     href: '/produits',
                     icon: ShoppingBasket,
-                    roles: ['admin', 'gerant', "vendeur"],
+                    roles: ['admin',  "vendeur"],
                 },
                 {
                     title: 'Categories',
                     href: '/categories',
                     icon: BoxIcon,
-                    roles: ['admin',"gerant"],
+                    roles: ['admin'],
                 },
                 {
                     title: 'Stock',
                     href: '/stocks',
                     icon: Warehouse,
-                    roles: ['admin', 'gerant'],
+                    roles: ['admin'],
                 },
-                
+
             ],
         },
         {
-            title : 'Chambres et Salles',
-            icon : HomeIcon,
-            roles : ['admin', 'gerant'],
-            items : [
+            title: 'Chambres et Salles',
+            icon: HomeIcon,
+            roles: ['admin', 'gerant'],
+            items: [
                 {
-                    title : 'Chambres',
-                    href : '/chambres',
-                    icon : HomeIcon,
-                    roles : ['admin', 'gerant'],
+                    title: 'Chambres',
+                    href: '/chambres',
+                    icon: HomeIcon,
+                    roles: ['admin', 'gerant'],
                 },
                 {
-                    title : 'Salles',
-                    href : '/salles',
-                    icon : HomeIcon,
-                    roles : ['admin', 'gerant'],
+                    title: 'Salles',
+                    href: '/salles',
+                    icon: HomeIcon,
+                    roles: ['admin', 'gerant'],
                 },
             ]
         },
         {
-            title: 'Ventes et Réservations',
-            icon: ShoppingBasket,
+            title: userRole==='vendeur'?'Ventes':'Réservations',
+            icon: userRole==='vendeur'?ShoppingBasket:HousePlug,
             roles: ['admin', 'gerant', 'vendeur'],
             items: [
                 {
                     title: 'Ventes',
                     href: '/ventes',
                     icon: ShoppingBasket,
-                    roles: ['admin', 'gerant', 'vendeur'],
+                    roles: ['admin',  'vendeur'],
                 },
                 {
                     title: 'Réserv. Salles',
                     href: '/reservations',
                     icon: HomeIcon,
-                    roles: ['admin', 'gerant', 'vendeur'],
+                    roles: ['admin', 'gerant'],
                 },
                 {
                     title: 'Réserv. Chambres',
                     href: '/chambres-reservations',
                     icon: Bed,
-                    roles: ['admin', 'gerant', 'vendeur'],
+                    roles: ['admin', 'gerant'],
                 },
 
                 {
                     title: 'Réserv. Espace',
                     href: '/espaces-reservations',
                     icon: CakeIcon,
-                    roles: ['admin', 'gerant', 'vendeur'],
+                    roles: ['admin', 'gerant'],
                 },
                 {
                     title: 'Acompte',
                     href: '/acomptes',
                     icon: Banknote,
-                    roles: ['admin', 'gerant', 'caissier'],
+                    roles: ['admin', 'gerant'],
                 },
                 {
                     title: 'Historique des Paiements',
                     href: '/historique',
                     icon: Banknote,
-                    roles: ['admin', 'gerant', 'caissier'],
+                    roles: ['admin', 'gerant'],
                 },
             ],
         },
         {
-            title : 'Pro Format',
-            icon :PaperclipIcon ,
-            roles : ['admin', "gerant", 'vendeur'],
-            items : [],
+            title: 'Pro Format',
+            icon: PaperclipIcon,
+            roles: ['admin', "gerant"],
+            items: [],
             href: '/proforma-invoices',
 
         },
         {
             title: 'Administration',
             icon: UserCheck2,
-            roles: ['admin', 'gerant'],
+            roles: ['admin'],
             items: [
                 {
                     title: 'Utilisateurs',
                     href: '/utilisateurs',
                     icon: UserCog,
-                    roles: ['admin', 'gerant'],
+                    roles: ['admin'],
                 },
                 {
-                    title : 'Espaces',
-                    href : '/espaces',
-                    icon : PartyPopper,
-                    roles : ['admin','gerant']
+                    title: 'Espaces',
+                    href: '/espaces',
+                    icon: PartyPopper,
+                    roles: ['admin']
                 },
                 /*{
                     title : 'Points et Fidelités',
@@ -166,83 +166,84 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     title: 'Gestion des devises',
                     href: '/currencies',
                     icon: Currency,
-                    roles: ['admin','gerant'],
+                    roles: ['admin'],
                 },
             ],
         },
         /*
-        {
-            title : 'Gestion du Personnel',
-            icon : PersonStanding,
-            roles : ['admin', 'gerant'],
-            items : [
-                {
-                    title : 'Personnel',
-                    href : '/personnels',
-                    icon : PersonStandingIcon,
-                    roles : ['admin', 'gerant'],
-                },
-                {
-                    title : 'Contrats',
-                    href : '/contrats',
-                    icon : BookOpenCheck,
-                    roles : ['admin', 'gerant'],
-                },
-                {
-                    title : 'Gestion de Paie',
-                    href : '/paies',
-                    icon : BanknoteIcon,
-                    roles : ['admin', 'gerant'],
-                },
-                {
-                    title : 'Congés',
-                    href : '/conges',
-                    icon : Plane,
-                    roles : ['admin', 'gerant'],
-                },
-                {
-                    title : 'Presences',
-                    href : '/pointages',
-                    icon : Calendar,
-                    roles : ['admin', 'gerant'],
-                },
-                {
-                    title : 'Rapport de Présence',
-                    href : '/rapport-presence',
-                    icon : Calendar,
-                    roles : ['admin', 'gerant'],
-                },
-            ]
-        },*/
+            {
+                title : 'Gestion du Personnel',
+                icon : PersonStanding,
+                roles : ['admin', 'gerant'],
+                items : [
+                    {
+                        title : 'Personnel',
+                        href : '/personnels',
+                        icon : PersonStandingIcon,
+                        roles : ['admin', 'gerant'],
+                    },
+                    {
+                        title : 'Contrats',
+                        href : '/contrats',
+                        icon : BookOpenCheck,
+                        roles : ['admin', 'gerant'],
+                    },
+                    {
+                        title : 'Gestion de Paie',
+                        href : '/paies',
+                        icon : BanknoteIcon,
+                        roles : ['admin', 'gerant'],
+                    },
+                    {
+                        title : 'Congés',
+                        href : '/conges',
+                        icon : Plane,
+                        roles : ['admin', 'gerant'],
+                    },
+                    {
+                        title : 'Presences',
+                        href : '/pointages',
+                        icon : Calendar,
+                        roles : ['admin', 'gerant'],
+                    },
+                    {
+                        title : 'Rapport de Présence',
+                        href : '/rapport-presence',
+                        icon : Calendar,
+                        roles : ['admin', 'gerant'],
+                    },
+                ]
+            },
+        */
         {
             title: 'Statistiques',
             icon: ScatterChart,
-            roles: ['admin', 'gerant'],
+            roles: ['admin'],
             items: [
                 {
                     title: 'Rapport de Vente',
                     href: '/reports/sales',
                     icon: FileText,
-                    roles: ['admin','gerant'],
+                    roles: ['admin' ],
                 },
                 {
                     title: 'Par Categories',
                     href: '/statistiques-categories',
                     icon: Package,
-                    roles: ['admin' ],
+                    roles: ['admin'],
                 },
                 {
                     title: 'Vendeurs',
                     href: '/statistiques-vendeurs',
                     icon: UserCog,
-                    roles: ['admin','gerant'],
+                    roles: ['admin'],
                 },
-               
+
                 {
                     title: 'Produits',
                     href: '/statistiques-produits',
                     icon: Package,
-                    roles: ['admin' ],
+                    roles: ['admin'],
                 }
             ],
 
@@ -269,15 +270,15 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             title: 'Depenses',
             icon: FileOutput,
             href: '/depenses',
-            roles: ['admin', 'gerant', 'vendeur', 'coiffeur'],
+            roles: ['admin', 'gerant', 'vendeur'],
         },
         {
             title: 'Rapport de Vente',
             icon: FileText,
             href: '/mon-reports',
-            roles: ['vendeur'],
+            roles: ['gerant','vendeur'],
         },
-       
+
     ];
 
     return filterItemsByRole(allItems, userRole);
@@ -293,7 +294,7 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const userRole = auth.user.role;
     const filteredNavItems = getMainNavItems(userRole);
-    
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -313,7 +314,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-            {/*<NavFooter items={footerNavItems} className="mt-auto" />*/}
+                {/*<NavFooter items={footerNavItems} className="mt-auto" />*/}
 
                 <NavUser />
             </SidebarFooter>

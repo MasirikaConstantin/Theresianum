@@ -199,26 +199,26 @@ Route::get('rapport-presence', [PointageController::class, 'agent'])->name('poin
 Route::get('get-agent-pointages',[PointageController::class, 'getAgentPointages'])->name('pointages.get-agent-pointages');
 Route::get('get-pointages',[PointageController::class, 'getPointages'])->name('pointages.get-pointages');
 Route::get('print-grille/{ref}/{date}',[PointageController::class, 'printGrille'])->name('pointages.print-grille');
-Route::resource('categories', CategorieController::class)->middleware(['auth', 'verified', 'role:admin,gerant']);
+Route::resource('categories', CategorieController::class)->middleware(['auth', 'verified', 'role:admin']);
 Route::get('statistiques-categories', [StatistiqueController::class, 'produitsParCategorie'])
-    ->name('statistiques.produits-par-categorie');
+    ->name('statistiques.produits-par-categorie')->middleware(['auth', 'verified', 'role:admin']);;
 
 
     // routes/web.php
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,gerant'])->group(function () {
     Route::resource('chambres', ChambreController::class);
     Route::patch('/chambres/{chambre}/status', [ChambreController::class, 'updateStatus'])
         ->name('chambres.update-status');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,gerant'])->group(function () {
     Route::resource('salles', SalleController::class);
     Route::patch('/salles/{salle}/status', [SalleController::class, 'updateStatus'])
         ->name('salles.update-status');
 });
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,gerant'])->group(function () {
     Route::resource('reservations', ReservationController::class);
     Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])
         ->name('reservations.update-status');
@@ -229,28 +229,28 @@ Route::fallback(function () {
     return Inertia::render('404')->toResponse(request())->setStatusCode(404);
 });
 
-Route::post('reservations/update-status-paiement', [ReservationController::class, 'updateStatusPaiement'])->name('reservations.update-status-paiement');
-Route::get('reservations/{reservation}/print', [ReservationController::class, 'print'])->name('reservations.print');
-Route::get('get-taux', [CurrencieController::class, 'lesTaux'])->name('get-taux');
+Route::post('reservations/update-status-paiement', [ReservationController::class, 'updateStatusPaiement'])->name('reservations.update-status-paiement')->middleware(['auth', 'verified', 'role:admin,gerant']);;
+Route::get('reservations/{reservation}/print', [ReservationController::class, 'print'])->name('reservations.print')->middleware(['auth', 'verified', 'role:admin,gerant']);;
+Route::get('get-taux', [CurrencieController::class, 'lesTaux'])->name('get-taux')->middleware(['auth', 'verified']);;
 
 
-Route::resource('acomptes', AcompteController::class)->middleware(['auth', 'verified', 'role:admin,gerant,caissier']);
-Route::get('/historique', [AcompteController::class, 'historique'])->name('acomptes.historique');
-
-
-
-
-Route::get('/acomptes/{acompte}/paiement', [AcompteController::class, 'showPaiement'])->name('acomptes.paiement.show');
-Route::post('/acomptes/{acompte}/paiement', [AcompteController::class, 'processPaiement'])->name('acomptes.paiement.process');
+Route::resource('acomptes', AcompteController::class)->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);
+Route::get('/historique', [AcompteController::class, 'historique'])->name('acomptes.historique')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
 
 
 
 
-Route::get('/ztk', [AcompteController::class, 'ztk'])->name('zt');
+Route::get('/acomptes/{acompte}/paiement', [AcompteController::class, 'showPaiement'])->name('acomptes.paiement.show')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
+Route::post('/acomptes/{acompte}/paiement', [AcompteController::class, 'processPaiement'])->name('acomptes.paiement.process')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
+
+
+
+
+Route::get('/ztk', [AcompteController::class, 'ztk'])->name('zt')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
 
 Route::resource('proforma-invoices', ProformaInvoiceController::class)->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);
 Route::get('/proforma-invoices/{proforma_invoice}/print', [ProformaInvoiceController::class, 'print'])
-    ->name('proforma-invoices.print');
+    ->name('proforma-invoices.print')->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;
 
 Route::resource('espaces', EspaceController::class)->middleware(['auth', 'verified', 'role:admin,gerant']);
 Route::resource('espaces-reservations', ReservationEspacesController::class)->middleware(['auth', 'verified', 'role:admin,gerant,vendeur']);;

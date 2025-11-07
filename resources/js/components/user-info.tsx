@@ -8,15 +8,16 @@ export function UserInfo({ user, showEmail = false, showRole = false }: { user: 
         if (role==="admin") {
             return "Administrateur"
         }else if (role==="gerant") {
-            return "Directrice des R.H"
-        }else if (role==="coiffeur") {
-            return "Coiffeur"
+            return "Receptioniste"
+        }else if (role==="vendeur") {
+            return "Vendeur"
         }else if (role==="caissier") {
             return "Caissier"
         }else {
             return "Utilisateur"
         }
     }
+
     return (
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full ">

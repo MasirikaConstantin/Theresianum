@@ -21,7 +21,7 @@ export const QuickActions = () => {
         title: 'Entrée de stock',
         description: 'Enregistrer une livraison',
         icon: Plus,
-        roles : ["admin", "gerant"],
+        roles : ["admin", "vendeur"],
 
         color: 'bg-green-500/90 hover:bg-green-600 text-white',
         action: () => router.visit('/stocks/create')
@@ -29,18 +29,18 @@ export const QuickActions = () => {
       {
         title: 'Nouvelle vente',
         description: 'Nouvelle vente',
-        roles : [ 'admin', 'gerant', 'vendeur'],
+        roles : [ 'admin', 'vendeur'],
         icon: ShoppingBasket,
         color: 'bg-red-500/90 hover:bg-red-600 text-white',
         action: () => router.visit('/ventes/create')
       },
       {
         title: 'Stock',
-        roles : [ 'admin', 'gerant', 'vendeur'],
+        roles : [ 'admin', 'vendeur'],
         description: 'Compter les stocks',
         icon: Package,
         color: 'bg-blue-500/90 hover:bg-blue-600 text-white',
-        action: () => auth.user.role === 'admin' || auth.user.role === 'gerant' ? router.visit('/stocks') : router.visit('/stock-succursales')
+        action: () => router.visit('/stocks') 
       },
       {
         title: 'Rapport',
@@ -54,7 +54,7 @@ export const QuickActions = () => {
         title: 'Alertes',
         description: 'Gérer les alertes',
         icon: AlertTriangle,
-        roles : [ 'admin', 'gerant', 'coiffeur', "vendeur"],
+        roles : [ 'admin', 'gerant', "vendeur"],
         color: 'bg-orange-500/90 hover:bg-orange-600 text-white',
         action: () => router.visit('/alerts/')
       }

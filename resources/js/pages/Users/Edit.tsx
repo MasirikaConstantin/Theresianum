@@ -10,6 +10,7 @@ import { ChevronLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MonDatePicker } from '@/components/example-date-picker';
 
 const breadcrumbs = (userName: string): BreadcrumbItem[] => [
     {
@@ -116,12 +117,10 @@ export default function UserEdit({ auth, user,is_admin }: { auth: Auth; user: an
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="date_embauche">Date d'embauche (optionnel)</Label>
-                            <Input
-                                id="date_embauche"
-                                type="date"
-                                disabled={!canUpdateRole}
-                                value={data.date_embauche || ''}
-                                onChange={(e) => setData('date_embauche', e.target.value)}
+                            
+                            <MonDatePicker
+                            value={data.date_embauche || ''}
+                            onChange={(e) => setData('date_embauche', e)}
                             />
                             {errors.date_embauche && <p className="text-sm text-red-500">{errors.date_embauche}</p>}
                         </div>
@@ -150,7 +149,7 @@ export default function UserEdit({ auth, user,is_admin }: { auth: Auth; user: an
                                     {canUpdateRole && (
                                         <SelectItem value="admin">Admin</SelectItem>
                                     )}
-                                    <SelectItem value="gerant">D.R.H</SelectItem>
+                                    <SelectItem value="gerant">Réceptioniste</SelectItem>
                                     <SelectItem value="coiffeur">Coiffeur</SelectItem>
                                     <SelectItem value="caissier">Caissier</SelectItem>
                                     <SelectItem value="aucun">Aucun</SelectItem>

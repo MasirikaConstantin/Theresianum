@@ -72,17 +72,13 @@ export default function ClientShow({
     const canUpdate = auth.user.role === "admin" || auth.user.role === "gerant";
     
     return (
-        <AppLayout auth={auth} breadcrumbs={breadcrumbs(client.name)}>
-            <Head title={`Détails de ${client.name}`} />
+        <AppLayout auth={auth} breadcrumbs={breadcrumbs(client.telephone)}>
+            <Head title={`Détails de ${client.telephone}`} />
             <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 overflow-auto">
                 <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <Link href={route('clients.index')}>
-                        <Button variant="outline" size="icon">
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                    </Link>
-                    <h1 className="text-2xl font-bold tracking-tight">Détails de {client.name}</h1>
+                    
+                    <h1 className="text-2xl font-bold tracking-tight">Détails de {client.telephone}</h1>
                 </div>
                 <div className="flex justify-end gap-2">
                         <Link href={route('clients.index')}>

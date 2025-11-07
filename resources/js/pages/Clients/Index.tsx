@@ -52,7 +52,7 @@ export default function ClientIndex({ auth }: { auth: Auth }) {
     };
     const canUpdate = auth.user.role === "admin" || auth.user.role === "gerant";
     const canDelete = auth.user.role === "admin" ;
-    const canCreate = auth.user.role === "admin" || auth.user.role === "gerant" || auth.user.role === "caissier";
+    const canCreate = auth.user.role === "admin" || auth.user.role === "gerant" || auth.user.role === "vendeur";
     return (
         <AppLayout auth={auth} breadcrumbs={breadcrumbs}>
             <Head title="Clients" />

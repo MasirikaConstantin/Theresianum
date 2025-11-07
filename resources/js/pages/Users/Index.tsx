@@ -108,7 +108,7 @@ export default function UserIndex({ auth,is_admin,is_gerant }: { auth: Auth,is_a
                                                 {canUpdateRole && (
                                                 <SelectItem value="admin">Admin</SelectItem>
                                                 )}
-                                                <SelectItem value="gerant">D.R.H</SelectItem>
+                                                <SelectItem value="gerant">Réceptioniste</SelectItem>
                                                 <SelectItem value="vendeur">Vendeur</SelectItem>
                                                 <SelectItem value="aucun">Aucun</SelectItem>
                                             </SelectContent>
@@ -137,13 +137,9 @@ export default function UserIndex({ auth,is_admin,is_gerant }: { auth: Auth,is_a
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
                                         </Link>
-                                        {canUpdateSuccursale && (
+                                        {user.id !==auth.user.id && (
                                             <>
-                                            {/*<Link href={route('users.stats', user.ref)}>
-                                                <Button variant="outline" size="sm">
-                                                    <ChartBar className="h-4 w-4" />
-                                                </Button>
-                                            </Link>*/}
+                                            
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="destructive" size="sm">

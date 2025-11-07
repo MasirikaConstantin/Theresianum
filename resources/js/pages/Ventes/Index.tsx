@@ -52,7 +52,7 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
     };
     const canDelete = auth.user?.role === 'admin';
     const canEdit = auth.user?.role === 'admin' || auth.user?.role === 'gerant';
-    const canCreate = auth.user.role === 'admin' || auth.user.role === 'caissier';
+    const canCreate = auth.user.role === 'admin' || auth.user.role === 'vendeur';
 
 
     return (

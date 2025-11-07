@@ -63,7 +63,7 @@ export default function Dashboard({ auth }: { auth: Auth }) {
                             <SalesStats />
                             </div>
                             <div className="flex-1">
-                                {auth.user?.role === 'admin' || auth.user?.role === 'gerant' ? (
+                                {auth.user?.role === 'admin' || auth.user?.role === 'vendeur' ? (
                                     <StockSuccursales />
                                 ) : null}
                             </div>

@@ -54,7 +54,7 @@ export default function UserShow({ auth, user, stats }: { auth: Auth; user: any;
                                     <Badge variant={user.is_active ? 'default' : 'secondary'}>
                                         {user.is_active ? 'Actif' : 'Inactif'}
                                     </Badge>
-                                    <Badge variant="outline">{user.role ==="admin" ? "Admin" : user.role === "gerant" ? "D.R.H" : user.role === "vendeur" ? "Vendeur" : "Aucun"}</Badge>
+                                    <Badge variant="outline">{user.role ==="admin" ? "Admin" : user.role === "gerant" ? "Réceptioniste" : user.role === "vendeur" ? "Vendeur" : "Aucun"}</Badge>
                                 </div>
                             </div>
                         </CardHeader>

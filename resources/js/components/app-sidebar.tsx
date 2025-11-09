@@ -88,7 +88,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             ]
         },
         {
-            title: userRole==='vendeur'?'Ventes':'Réservations',
+            title: userRole==='vendeur'?'Ventes':userRole==='gerant'?'Réservations':'Ventes et Réservations',
             icon: userRole==='vendeur'?ShoppingBasket:HousePlug,
             roles: ['admin', 'gerant', 'vendeur'],
             items: [

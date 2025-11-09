@@ -71,14 +71,12 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        {canCreate && (
                             <Link href={route('ventes.create')}>
                                 <Button>
                                     <Plus className="mr-2 h-4 w-4" />
                                     Nouvelle vente
                                 </Button>
                             </Link>
-                        )}
                     </div>
                 </div>
                 <div className="rounded-lg border shadow-sm">
@@ -120,14 +118,11 @@ export default function VenteIndex({ auth }: { auth: Auth }) {
                                                 <Eye className="h-4 w-4" />
                                             </Button>
                                         </Link>
-                                        {canEdit && (
-                                                <Link href={route('ventes.edit', vente.ref)}>
-                                                    <Button variant="outline" size="sm">
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-                                            )
-                                        }
+                                        <Link href={route('ventes.edit', vente.ref)}>
+                                            <Button variant="outline" size="sm">
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                        </Link>
                                         <a href={route('ventes.print', vente.id)} target="_blank" rel="noopener noreferrer">
                                             <Button variant="default" size="sm">
                                                 <Printer className="h-4 w-4" />

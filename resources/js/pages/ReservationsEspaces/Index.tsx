@@ -98,7 +98,6 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
         };
     };
 
-    const canCreate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canUpdate = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
     const canDelete = auth.user.role === 'admin';
     const canUpdateStatus = auth.user.role === 'admin' || auth.user.role === 'receptionniste';
@@ -140,14 +139,12 @@ export default function ReservationIndex({ auth, reservations, statuts }: {
                             />
                         </div>
                         
-                        {canCreate && (
                             <Link href={route('espaces-reservations.create')}>
                                 <Button>
                                     <Plus className="mr-2 h-4 w-4" />
                                     Nouvelle réservation
                                 </Button>
                             </Link>
-                        )}
                     </div>
                 </div>
 

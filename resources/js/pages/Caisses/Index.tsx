@@ -58,7 +58,6 @@ export default function CaisseIndex({ caisses, auth }: Props) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Référence</TableHead>
-                                <TableHead>Branche</TableHead>
                                 <TableHead>Solde</TableHead>
                                 <TableHead>Statut</TableHead>
                                 <TableHead>Date ouverture</TableHead>

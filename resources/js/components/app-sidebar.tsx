@@ -51,7 +51,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     title: 'Produits',
                     href: '/produits',
                     icon: ShoppingBasket,
-                    roles: ['admin',  "vendeur"],
+                    roles: ['admin', "vendeur"],
                 },
                 {
                     title: 'Categories',
@@ -88,15 +88,15 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             ]
         },
         {
-            title: userRole==='vendeur'?'Ventes':userRole==='gerant'?'Réservations':'Ventes et Réservations',
-            icon: userRole==='vendeur'?ShoppingBasket:HousePlug,
+            title: userRole === 'vendeur' ? 'Ventes' : userRole === 'gerant' ? 'Réservations' : 'Ventes et Réservations',
+            icon: userRole === 'vendeur' ? ShoppingBasket : HousePlug,
             roles: ['admin', 'gerant', 'vendeur'],
             items: [
                 {
                     title: 'Ventes',
                     href: '/ventes',
                     icon: ShoppingBasket,
-                    roles: ['admin',  'vendeur'],
+                    roles: ['admin', 'vendeur'],
                 },
                 {
                     title: 'Réserv. Salles',
@@ -224,7 +224,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
                     title: 'Rapport de Vente',
                     href: '/reports/sales',
                     icon: FileText,
-                    roles: ['admin' ],
+                    roles: ['admin'],
                 },
                 {
                     title: 'Par Categories',
@@ -276,7 +276,7 @@ const getMainNavItems = (userRole: string): NavItem[] => {
             title: 'Rapport de Vente',
             icon: FileText,
             href: '/mon-reports',
-            roles: ['gerant','vendeur'],
+            roles: ['gerant', 'vendeur'],
         },
 
     ];

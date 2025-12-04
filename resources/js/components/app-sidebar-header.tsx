@@ -56,13 +56,13 @@ export function AppSidebarHeader({ auth, breadcrumbs = [] }: { auth: SharedData[
                         size="sm"
                         className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent/40 transition-colors"
                     >
-                        <a
+                        <Link
                             href={route('profile.edit')}
                             rel="noopener noreferrer"
                             className="flex items-center text-foreground"
                         >
                             <span className="font-medium">{auth.user.name}</span>
-                        </a>
+                        </Link>
                     </Button>
                 </div>
 

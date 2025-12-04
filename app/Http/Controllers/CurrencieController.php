@@ -29,7 +29,6 @@ class CurrencieController extends Controller
             ]);
             Currencie::create($request->all());
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return redirect()->back()->withErrors($e->getMessage());
         }
 

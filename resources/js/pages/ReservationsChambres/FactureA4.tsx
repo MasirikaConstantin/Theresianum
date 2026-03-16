@@ -29,7 +29,7 @@ export default function FactureA4({ reservation }: FactureA4Props) {
   }, [])
 
   const entrepriseInfo = {
-    nom: 'ASBL Les Pères Carmes Centre Espace Dedicace Arena de Kinshasa  Ordre des Carmes Déchaux',
+    nom: 'ASBL Les Pères Carmes Centre Dedicace Arena de Kinshasa  Ordre des Carmes Déchaux',
     adresse: "C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
     Immatriculation: 'ASBL : 376/CAB/MIN/J',
     id_national: '01-G4701-N300623',

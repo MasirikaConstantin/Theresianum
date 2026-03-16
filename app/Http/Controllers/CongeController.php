@@ -151,7 +151,7 @@ class CongeController extends Controller
             'address' => $conge->agent->succursale->adresse,
             'phone' => $conge->agent->succursale->telephone,
             'email' => $conge->agent->succursale->email ? $conge->agent->succursale->email :"" ,
-            'logo' => asset('images/logo.png'), // Chemin vers votre logo
+            'logo' => asset('images/logo-espace.png'), // Chemin vers votre logo
         ]
     ]);
 }

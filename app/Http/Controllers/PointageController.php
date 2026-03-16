@@ -245,7 +245,7 @@ class PointageController extends Controller
                 'address' => $data->agent->succursale->adresse,
                 'phone' => $data->agent->succursale->telephone,
                 'email' => $data->agent->succursale->email ? $data->agent->succursale->email :"" ,
-                'logo' => asset('images/logo.png'), 
+                'logo' => asset('images/logo-espace.png'), 
             ]
         ]);
     }
@@ -363,7 +363,7 @@ public function printGrille(string $ref, string $date)
             'address' => $agent->succursale? $agent->succursale->adresse :$succursale->adresse,
             'phone' => $agent->succursale? $agent->succursale->telephone : $succursale->adresse,
             'email' => $agent->succursale? $agent->succursale->email : $succursale->email  ,
-            'logo' => asset('images/logo.png'), 
+            'logo' => asset('images/logo-espace.png'), 
         ],
         'Mois' => $validated['date'],
         'statistiques' => [

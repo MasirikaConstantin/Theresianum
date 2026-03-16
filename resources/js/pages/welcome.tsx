@@ -1,4 +1,3 @@
-import TextLink from '@/components/text-link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { type SharedData } from '@/types';
@@ -81,7 +80,7 @@ export default function Welcome() {
                             
                             <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />
                             <img 
-                                src="/images/logo.png" 
+                                src="/images/logo-espace.png" 
                                 className="relative object-cover -mt-[4.9rem] -ml-8 w-[500px] h-[500px] max-w-none lg:-mt-[6.6rem] lg:ml-0"
                                 />                       
                             </div>

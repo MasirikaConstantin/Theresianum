@@ -188,14 +188,14 @@ class ProduitController extends Controller
         'data' => $data,
         'entreprise' => [
             'nom1' => "ASBL Les Pères Carmes",
-            "nom2"=> "Centre Theresianum de Kinshasa",
+            "nom2"=> "Centre Espace Dedicace Arena de Kinshasa",
             "nom3"=>'Ordre des Carmes Déchaux',
             'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
             'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
             'telephone' => "+243826646260",
             'telephone_reception' => "+243892247450",
             'email' => 'cthresianum@gmail.com',
-            'logo_url' => asset('images/logo.png'),
+            'logo_url' => asset('images/logo-espace.png'),
         ],
         
     ]);

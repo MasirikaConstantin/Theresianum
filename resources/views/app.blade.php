@@ -37,7 +37,7 @@
                 background-color: oklch(0.21 0.034 264.665);
             }
         </style>
-        <title inertia>{{ config('app.name', 'Dedicace Arena') }}</title>
+        <title inertia>{{ config('app.name', 'DIDACE ARENA') }}</title>
 
         <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
         <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/svg+xml">

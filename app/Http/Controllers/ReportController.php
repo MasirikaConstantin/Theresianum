@@ -79,14 +79,14 @@ class ReportController extends Controller
                     'filters' => $request->all(),
                     'entreprise' => [
                         'nom1' => "ASBL Les Pères Carmes",
-                        "nom2"=> "Centre Dedicace Arena de Kinshasa",
+                        "nom2"=> "Centre DIDACE ARENA de Kinshasa",
                         "nom3"=>'Ordre des Carmes Déchaux',
                         'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
                         'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
                         'telephone' => "+243826646260",
                         'telephone_reception' => "+243892247450",
                         'email' => 'cthresianum@gmail.com',
-                        'logo_url' => asset('images/logo-espace.png'),
+                        'logo_url' => asset('images/logo-espace.jpeg'),
                     ],
                 ]);
             }
@@ -267,7 +267,7 @@ public function print(Request $request)
             'end_date' => $endDate,
             'vendeur' => $vendeur,
         ];
-        $logo = file_get_contents(public_path('images/logo-espace.png'));
+        $logo = file_get_contents(public_path('images/logo-espace.jpeg'));
         $logoBase64 = base64_encode($logo);
         $data['logo'] = $logoBase64;
         $entreprise = [
@@ -334,7 +334,7 @@ public function print(Request $request)
         'id_national' => '01-G4701-N300623',
         'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
         'phone' => "+243970054889",
-        'logo' => asset('images/logo-espace.png'),
+        'logo' => asset('images/logo-espace.jpeg'),
         'email' => 'info@bellahairmakeup.com',
     ];
 
@@ -416,7 +416,7 @@ public function generatePdfsynthese(Request $request)
                         'address' => "Galerie Saint Pierre Avenue Colonel Mondjiba, 374 Kinshasa Ngaliema",
                         'phone' => "+243897456311",
                         'email' => "info@bellahairmakeup.com",
-                        'logo' => asset('images/logo-espace.png'), 
+                        'logo' => asset('images/logo-espace.jpeg'), 
                     ]
     ]);
 }

@@ -210,7 +210,7 @@ class PaieController extends Controller
                 'address' => $agent->succursale->adresse,
                 'phone' => $agent->succursale->telephone,
                 'email' => $agent->succursale->email,
-                'logo' => asset("images/logo-espace.png"),
+                'logo' => asset("images/logo-espace.jpeg"),
             ]
         ]);
     }
@@ -312,7 +312,7 @@ class PaieController extends Controller
                     'id_nat' => '01-G4701-H300625',
                     'telephone' => '+243970054889',
                     'email' => 'info@entreprise.cd',
-                    'logo_url' => asset('images/logo-espace.png'),
+                    'logo_url' => asset('images/logo-espace.jpeg'),
                     'image_sexe'=>$agent->sexe === 'M' ? asset('images/icons/male.png') : asset('images/icons/female.png'),
                 ]
             ]);

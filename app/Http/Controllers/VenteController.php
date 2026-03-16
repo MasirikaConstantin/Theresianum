@@ -279,7 +279,7 @@ public function getRecentVente(Request $request)
             'vente' => $vente,
             'currency' => $currency,
             'entreprise' => [
-                'nom' => 'ASBL Les Pères Carmes Centre Dedicace Arena de Kinshasa  Ordre des Carmes Déchaux',
+                'nom' => 'ASBL Les Pères Carmes Centre DIDACE ARENA de Kinshasa  Ordre des Carmes Déchaux',
                 'adresse'=>"C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
                 'Immatriculation'=>'ASBL : 376/CAB/MIN/J',
                 'id_national'=>'01-G4701-N300623',

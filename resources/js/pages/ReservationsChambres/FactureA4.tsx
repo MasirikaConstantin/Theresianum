@@ -29,7 +29,7 @@ export default function FactureA4({ reservation }: FactureA4Props) {
   }, [])
 
   const entrepriseInfo = {
-    nom: 'ASBL Les Pères Carmes Centre Dedicace Arena de Kinshasa  Ordre des Carmes Déchaux',
+    nom: 'ASBL Les Pères Carmes Centre DIDACE ARENA de Kinshasa  Ordre des Carmes Déchaux',
     adresse: "C.Kintambo, Q. Nganda, AV. Chrétienne 39b",
     Immatriculation: 'ASBL : 376/CAB/MIN/J',
     id_national: '01-G4701-N300623',
@@ -55,7 +55,7 @@ export default function FactureA4({ reservation }: FactureA4Props) {
       {/* En-tête de la facture */}
       <div className="border-b-2 border-gray-300 pb-4 mb-4">
         <div className="flex justify-between items-start">
-          <img src="/images/logo-espace.png" alt="" className="w-20 h-20" />
+          <img src="/images/logo-espace.jpeg" alt="" className="w-20 h-20" />
 
           <div className="ml-4 flex-1">
             <h1 className="text-lg font-bold text-blue-800">{entrepriseInfo.nom}</h1>
